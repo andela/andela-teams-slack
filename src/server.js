@@ -11,6 +11,11 @@ app.get('/', async (req, res) => {
   res.status(200).send("Hello World!");
 });
 
+app.post('/slash/teams', async (req, res) => {
+  console.log(req.body);
+  res.status(200).send(':wave: Welcome to Andela Teams :celebrate:');
+})
+
 /** 
  * The endpoint is POSTed to when certain events (like a user posted a message)
  * occur.
