@@ -2,18 +2,22 @@ import 'babel-polyfill' // eslint-disable-line
 import express from 'express';
 import bodyParser from 'body-parser';
 
-const app = new express();
+import Messenger from './workers/Messenger';
 
+const app = new express();
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
+
+const messenger = new Messenger();
 
 app.get('/', async (req, res) => {
   res.status(200).send("Hello World!");
 });
 
 app.post('/slash/teams', async (req, res) => {
-  console.log(req.body);
-  res.status(200).send(':wave: Welcome to Andela Teams :celebrate:');
+  // console.log(req.body);
+  messenger.postWelcomeMessage(req, res);
+  messenger.postLandingPage(req, res);
 })
 
 /** 
