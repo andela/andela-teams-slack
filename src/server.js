@@ -1,24 +1,30 @@
 import 'babel-polyfill' // eslint-disable-line
+import dotenv from 'dotenv';
 import express from 'express';
 import bodyParser from 'body-parser';
 
 import Messenger from './workers/Messenger';
+import SlackObjectResolver from './middleware/SlackObjectResolver';
+import Utility from './middleware/Utility';
+
+
+if (process.env.NODE_ENV !== 'production') {
+  dotenv.config();
+}
 
 const app = new express();
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 
 const messenger = new Messenger();
+const resolver = new SlackObjectResolver();
+const utils = new Utility();
 
 app.get('/', async (req, res) => {
   res.status(200).send("Hello World!");
 });
 
-app.post('/slash/teams', async (req, res) => {
-  // console.log(req.body);
-  messenger.postWelcomeMessage(req, res);
-  messenger.postLandingPage(req, res);
-})
+app.post('/slash/teams', utils.postWelcomeMessage, resolver.getUserObjectFromReqBodyUserId, messenger.postLandingPage)
 
 /** 
  * The endpoint is POSTed to when certain events (like a user posted a message)
