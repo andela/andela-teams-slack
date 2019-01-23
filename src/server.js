@@ -24,6 +24,11 @@ app.get('/', async (req, res) => {
   res.status(200).send("Hello World!");
 });
 
+app.post('/interactions', async (req, res) => {
+  res.header('Content-Type', 'application/x-www-form-urlencoded');
+  return res.status(200).send();
+})
+
 app.post('/slash/teams', utils.postWelcomeMessage, resolver.getUserObjectFromReqBodyUserId, messenger.postLandingPage)
 
 /** 
