@@ -1,5 +1,9 @@
 import request from 'request-promise-native';
 
+import Helpers from './Helpers';
+
+const helpers = new Helpers();
+
 async function _openDialogForCreateTeam(req, res) {
   let url = 'https://slack.com/api/dialog.open';
   const response = await request({
@@ -15,7 +19,7 @@ async function _openDialogForCreateTeam(req, res) {
         callback_id: 'create_team_dialog',
         title: 'Create Team',
         submit_label: 'Create',
-        state: 'Limo',
+        state: 'create_team_dialog',
         elements: [
           {
             type: 'text',
@@ -54,24 +58,166 @@ async function _openDialogForCreateTeam(req, res) {
   return response;
 }
 
+async function _postCreateGithubReposPage(req, res) {
+  let submission = req.payload.submission;
+  var teamName = submission.team_name;
+  teamName = helpers.formatWord(teamName);
+  var teamProject = submission.team_project || 'Authors Haven';
+  teamProject = helpers.getInitials(teamProject);
+  let suggeestedNames = helpers.githubConventions(teamName, teamProject);
+
+  var actions = [];
+  var i = 0;
+  for (i = 0; i <= suggeestedNames.length; i++) {
+    actions.push({
+      name: 'create_github_repo',
+      text: suggeestedNames[i],
+      type: 'button',
+      value: `create_github_repo:${suggeestedNames[i]}`
+    });
+  }
+  actions.push({
+    name: 'create_github_repo',
+    text: 'Custom...',
+    style: 'primary',
+    type: 'button',
+    value: 'create_github_repo:??'
+  });
+
+  // since slack allows a max of 5 action buttons, I'll split them
+  await request({
+    url: req.payload.response_url,
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: {
+      text: 'Click buttons to create Github repos',
+      attachments: [{
+        callback_id: 'create_github_repo',
+        color: 'good',
+        fallback: 'Could not perform operation.',
+        // text: '',
+        // title: '',
+        // title_link: '',
+        actions: actions.slice(0, 3)
+      }]
+    },
+    json: true,
+    resolveWithFullResponse: true
+  });
+  await request({
+    url: req.payload.response_url,
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: {
+      // text: 'Click buttons to create Github repos',
+      attachments: [{
+        callback_id: 'create_github_repo',
+        color: 'good',
+        fallback: 'Could not perform operation.',
+        // text: '',
+        // title: '',
+        // title_link: '',
+        actions: actions.slice(3, 6)
+      }]
+    },
+    json: true,
+    resolveWithFullResponse: true
+  });
+  await request({
+    url: req.payload.response_url,
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: {
+      // text: 'Click buttons to create Github repos',
+      attachments: [{
+        callback_id: 'create_github_repo',
+        color: 'good',
+        fallback: 'Could not perform operation.',
+        // text: '',
+        // title: '',
+        // title_link: '',
+        actions: actions.slice(6)
+      }]
+    },
+    json: true,
+    resolveWithFullResponse: true
+  });
+}
+
+async function _postCreatePtBoardPage(req, res) {
+  let submission = req.payload.submission;
+  var teamName = submission.team_name;
+  teamName = helpers.formatWord(teamName);
+  var teamProject = submission.team_project || 'Authors Haven';
+  teamProject = helpers.getInitials(teamProject);
+  let suggeestedNames = helpers.ptConventions(teamName, teamProject);
+
+  var actions = [];
+  var i = 0;
+  for (i = 0; i <= suggeestedNames.length; i++) {
+    actions.push({
+      name: 'create_pt_project',
+      text: suggeestedNames[i],
+      type: 'button',
+      value: `create_pt_project:${suggeestedNames[i]}`
+    });
+  }
+  actions.push({
+    name: 'create_pt_project',
+    text: 'Custom...',
+    style: 'primary',
+    type: 'button',
+    value: 'create_pt_project:??'
+  });
+
+  await request({
+    url: req.payload.response_url,
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: {
+      text: 'Click buttons to create Pivotal Tracker projects',
+      attachments: [{
+        callback_id: 'create_pt_project',
+        color: 'good',
+        fallback: 'Could not perform operation.',
+        // text: '',
+        // title: '',
+        // title_link: '',
+        actions: actions
+      }]
+    },
+    json: true,
+    resolveWithFullResponse: true
+  });
+}
+
 export default class Messenger {
   async openDialog(req, res){
     const payload = JSON.parse(req.body.payload);
     req.payload = payload;
     if (payload.type === 'interactive_message') {
       const value = payload.actions[0].value;
-      if (payload.type === 'interactive_message' && value === 'create_team') {
+      if (value === 'create_team') {
         _openDialogForCreateTeam(req, res);
       }
     } else if (payload.type === 'dialog_submission') {
-      const submission = payload.submission;
-    //   { team_name: 'Alpha',
-    //  team_desc: 'First team',
-    //  team_project: 'ah',
-    //  team_visibility: 'public' }
       // make API call here
-      // ask for github repos
-      // ask for PT boards
+
+      if (payload.callback_id === 'create_team_dialog') {
+        // ask for github repos
+        await _postCreateGithubReposPage(req, res);
+
+        // ask for PT boards
+        _postCreatePtBoardPage(req, res);
+      }
     }
   }
 
