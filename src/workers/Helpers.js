@@ -11,8 +11,8 @@ export default class Helpers {
 
   githubConventions(teamName, projectName = 'ah') {
     return [
-      `${teamName}-${projectName}`, `${teamName}-${projectName}-backend`, `${teamName}-${projectName}-frontend`,
-      `${projectName}-${teamName}`, `${projectName}-${teamName}-backend`, `${projectName}-${teamName}-frontend`
+      `${teamName}-${projectName}`, `${teamName}-${projectName}-backend`, `${projectName}-${teamName}-backend`,
+      `${projectName}-${teamName}`, `${projectName}-${teamName}-frontend`, `${teamName}-${projectName}-frontend`,
     ];
   }
 

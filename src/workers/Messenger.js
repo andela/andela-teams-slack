@@ -81,7 +81,7 @@ async function _postCreateGithubReposPage(req, res) {
     text: 'Custom...',
     style: 'primary',
     type: 'button',
-    value: 'create_github_repo:??'
+    value: 'create_github_repo:?'
   });
 
   // since slack allows a max of 5 action buttons, I'll split them
@@ -173,7 +173,7 @@ async function _postCreatePtBoardPage(req, res) {
     text: 'Custom...',
     style: 'primary',
     type: 'button',
-    value: 'create_pt_project:??'
+    value: 'create_pt_project:?'
   });
 
   await request({
@@ -199,6 +199,30 @@ async function _postCreatePtBoardPage(req, res) {
   });
 }
 
+async function _postGithubRepoLink(req, res) {
+  // call github API with user's github username (add middleware resolver.getUserObjectFromReqPayloadUser)
+
+  await request({
+    url: req.payload.response_url,
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: {
+      text: 'Github repo created',
+      attachments: [{
+        // callback_id: 'create_pt_project',
+        color: 'good',
+        text: `http://github.com/andela/${req.repoName}`, // TODO: replace with returned link
+        // title: '',
+        // title_link: ''
+      }]
+    },
+    json: true,
+    resolveWithFullResponse: true
+  });
+}
+
 export default class Messenger {
   async openDialog(req, res){
     const payload = JSON.parse(req.body.payload);
@@ -207,6 +231,14 @@ export default class Messenger {
       const value = payload.actions[0].value;
       if (value === 'create_team') {
         _openDialogForCreateTeam(req, res);
+      } else if (value.startsWith('create_github_repo:')) {
+        let repoName = value.substring(19);console.log(repoName)
+        if (repoName === '?') {
+          // TODO: show create github repo dialog
+        } else {
+          req.repoName = repoName;
+          _postGithubRepoLink(req, res);
+        }
       }
     } else if (payload.type === 'dialog_submission') {
       // make API call here

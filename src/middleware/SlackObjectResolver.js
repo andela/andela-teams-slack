@@ -1,6 +1,26 @@
 import request from 'request-promise-native';
 
 export default class SlackObjectResolver {
+  async getMessageFromChannel(ts, channelId) {
+    let url = 'https://slack.com/api/conversations.history';
+    url += '?channel=' + channelId;
+    url += '&latest=' + ts;
+    url += '&token=' + process.env.SLACK_USER_TOKEN;
+    url += '&inclusive=true&limit=1';
+    let response = await request({
+      url: url,
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      resolveWithFullResponse: true
+    });
+    let data = JSON.parse(response.body);
+    if (data.ok && data.messages.length > 0) {
+      return data.messages[0].text;
+    }
+    return data; // TODO: what to return otherwise
+  }
   async getUserObjectFromReqBodyUserId(req, res, next) {
     var user = {};
 
