@@ -20,6 +20,10 @@ const messenger = new Messenger();
 const resolver = new SlackObjectResolver();
 const utils = new Utility();
 
+app.get('/', async (req, res) => {
+  res.status(200).send("Hello World!");
+});
+
 app.post('/events', async (req, res) => {
   res.header('Content-Type', 'application/x-www-form-urlencoded');
   // if Slack is "challenging" our URL in order to verify it
