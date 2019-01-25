@@ -3,8 +3,8 @@ import dotenv from 'dotenv';
 import express from 'express';
 import bodyParser from 'body-parser';
 
-import Messenger from './workers/Messenger';
-import SlackObjectResolver from './middleware/SlackObjectResolver';
+import SlackMessenger from './workers/SlackMessenger';
+import SlackObjectResolver from './workers/SlackObjectResolver';
 import Utility from './middleware/Utility';
 
 
@@ -16,7 +16,7 @@ const app = new express();
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 
-const messenger = new Messenger();
+const messenger = new SlackMessenger();
 const resolver = new SlackObjectResolver();
 const utils = new Utility();
 
@@ -31,15 +31,13 @@ app.post('/events', async (req, res) => {
     return res.status(200).json({ challenge: req.body.challenge });
   } else {
     let event = req.body.event;
-    // the user id is event.user
     if (event.type === 'reaction_added' && event.reaction === 'add_me') {
       console.log('Add me to this:')
       if (event.item.type === 'message') {
-        // get the message (which should be a URL)
         let messageText = await resolver.getMessageFromChannel(event.item.ts, event.item.channel);
         console.log(messageText);
         // TODO: check if messageText is a link <...>
-        // TODO: make API call
+        // TODO: make API call (the user id is event.user)
       }
     } else if (event.type === 'reaction_removed' && event.reaction === 'add_me') {
       console.log('Remove me from this:')
@@ -50,9 +48,9 @@ app.post('/events', async (req, res) => {
   }
 })
 
-app.post('/interactions', utils.postEmptyMessage, messenger.openDialog)
+app.post('/interactions', utils.postEmptyMessage, utils.getUserObjectFromReqPayloadUser, messenger.handleInteractions)
 
-app.post('/slash/teams', utils.postWelcomeMessage, resolver.getUserObjectFromReqBodyUserId, messenger.postLandingPage)
+app.post('/slash/teams', utils.postWelcomeMessage, utils.getUserObjectFromReqBodyUserId, messenger.postLandingPage)
 
 let server = app.listen(process.env.PORT || 5000, () => {
   let port = server.address().port;
