@@ -18,6 +18,7 @@ export default class Helpers {
 
   ptConventions(teamName, projectName = 'ah') {
     return [
+      `${teamName}`,
       `${teamName}-${projectName}`,
       `${projectName}-${teamName}`
     ];
