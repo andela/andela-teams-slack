@@ -218,7 +218,7 @@ async function _postNoGithubUsernameError(req, res) {
         'Content-Type': 'application/json'
       },
       body: {
-        text: 'You Github profile cannot be found on Slack',
+        text: 'Your Github profile cannot be found on Slack',
         attachments: [{
           color: 'danger',
           text: `Ensure there is a value for the field *Github* on your Slack profile`,
