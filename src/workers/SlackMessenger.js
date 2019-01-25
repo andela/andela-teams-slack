@@ -1,12 +1,14 @@
 import request from 'request-promise-native';
 
+import Github from '../integrations/Github';
 import Helpers from './Helpers';
 
+const github = new Github();
 const helpers = new Helpers();
 
 async function _openDialogForCreateTeam(req, res) {
   let url = 'https://slack.com/api/dialog.open';
-  const response = await request({
+  await request({
     url: url,
     method: 'POST',
     headers: {
@@ -55,7 +57,6 @@ async function _openDialogForCreateTeam(req, res) {
     },
     resolveWithFullResponse: true
   });
-  return response;
 }
 
 async function _postCreateGithubReposPage(req, res) {
@@ -183,7 +184,22 @@ async function _postCreatePtBoardPage(req, res) {
 
 async function _createAndPostGithubRepoLink(req, res) {
   try {
-    // call github API with user's github username (add middleware resolver.getUserObjectFromReqPayloadUser)
+    let result = await github.repo.create(req.repoName, {
+      description: req.repoDescription || '',
+      organization: process.env.GITHUB_ORGANIZATION,
+      private: false,
+      type: 'org',
+      user: {
+        githubUsername: req.user.github_user_name
+      }
+    });
+
+    let text = result.ok ? 'Github repo created' : 'Could not create Github repo';
+    let linkOrError = result.ok
+      ? (result.invitedUser.ok
+          ? result.html_url
+          : result.html_url + '\n\nAlthough the repo was created you were not added. This could be because you\'ve already been added to the repo before now.')
+      : result.error;
   
     await request({
       url: req.payload.response_url,
@@ -192,13 +208,10 @@ async function _createAndPostGithubRepoLink(req, res) {
         'Content-Type': 'application/json'
       },
       body: {
-        text: 'Github repo created',
+        text: text,
         attachments: [{
-          // callback_id: 'create_pt_project',
           color: 'good',
-          text: `http://github.com/andela/${req.repoName}`, // TODO: replace with returned link
-          // title: '',
-          // title_link: ''
+          text: linkOrError
         }]
       },
       json: true,
@@ -218,7 +231,7 @@ async function _postNoGithubUsernameError(req, res) {
         'Content-Type': 'application/json'
       },
       body: {
-        text: 'You Github profile cannot be found on Slack',
+        text: 'Your Github profile cannot be found on Slack',
         attachments: [{
           color: 'danger',
           text: `Ensure there is a value for the field *Github* on your Slack profile`,
