@@ -51,14 +51,12 @@ class Repo {
       };
       result = await request.put(requestOptions);
 
-      if (typeof result === 'undefined') { 
-        throw new
-        Error(`Failed to add user '${username}' to Github repo.`);
-      }
+      // if (typeof result === 'undefined') { 
+      //   throw new
+      //   Error(`Failed to add user '${username}' to Github repo.`);
+      // }
 
-      // for uniformity with the slack API (and easy error detection)
-      // add the 'ok' field
-      result.ok = true;
+      // result.ok = true;
 
       return result;
     } catch (error) {

@@ -195,11 +195,12 @@ async function _createAndPostGithubRepoLink(req, res) {
     });
 
     let text = result.ok ? 'Github repo created' : 'Could not create Github repo';
-    let linkOrError = result.ok
-      ? (result.invitedUser.ok
-          ? result.html_url
-          : result.html_url + '\n\nAlthough the repo was created you were not added. This could be because you\'ve already been added to the repo before now.')
-      : result.error;
+    let linkOrError = result.ok ? result.html_url : result.error;
+    // let linkOrError = result.ok
+    //   ? (result.invitedUser.ok
+    //       ? result.html_url
+    //       : result.html_url + '\n\nAlthough the repo was created you were not added. This could be because you\'ve already been added to the repo before now.')
+    //   : result.error;
   
     await request({
       url: req.payload.response_url,
