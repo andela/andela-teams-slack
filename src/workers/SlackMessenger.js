@@ -24,6 +24,22 @@ async function _handleCreateGithubRepoDialog(req, res) {
   }
 }
 
+async function _handleCreatePtProjectDialog(req, res) {
+  try {
+    let submission = req.payload.submission;
+    var projectName = submission.repo_name;
+    projectName = helpers.formatWord(projectName);
+  
+    req.projectName = projectName;
+    req.projectDescription = submission.project_desc || '';
+    req.projectIsPrivate = submission.project_visibility === 'private';
+    _createAndPostPtProjectLink(req, res);
+  } catch (err) {
+    console.log(err);
+    // TODO: post an ephemeral message to the user (get info from req.payload)
+  }
+}
+
 async function _openDialogForCreateGithubRepo(req, res) {
   let url = 'https://slack.com/api/dialog.open';
   await request({
@@ -56,6 +72,54 @@ async function _openDialogForCreateGithubRepo(req, res) {
             type: 'select',
             label: 'Repo Visibility',
             name: 'repo_visibility',
+            value: 'public',
+            options: [{
+              label: 'Public',
+              value: 'public'
+            }, {
+              label: 'Private',
+              value: 'private'
+            }]
+          }
+        ]
+      })
+    },
+    resolveWithFullResponse: true
+  });
+}
+
+async function _openDialogForCreatePtProject(req, res) {
+  let url = 'https://slack.com/api/dialog.open';
+  await request({
+    url: url,
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    },
+    formData: {
+      token: process.env.SLACK_USER_TOKEN,
+      trigger_id: req.payload.trigger_id,
+      dialog: JSON.stringify({
+        callback_id: 'create_pt_project_dialog',
+        title: 'Create Pivotal Tracker Project',
+        submit_label: 'Create',
+        state: 'create_pt_project_dialog',
+        elements: [
+          {
+            type: 'text',
+            label: 'Project Name',
+            name: 'project_name'
+          },
+          {
+            type: 'text',
+            label: 'Description',
+            name: 'project_desc',
+            optional: true
+          },
+          {
+            type: 'select',
+            label: 'Project Visibility',
+            name: 'project_visibility',
             value: 'public',
             options: [{
               label: 'Public',
@@ -398,7 +462,7 @@ export default class SlackMessenger {
         if (req.user.email) {
           let projectName = value.substring(18);
           if (projectName === '?') {
-            _openDialogForCreateGithubRepo(req, res);////////////////////////
+            _openDialogForCreatePtProject(req, res);
           } else {
             req.projectName = projectName;
             _createAndPostPtProjectLink(req, res);
@@ -408,11 +472,13 @@ export default class SlackMessenger {
         }
       }
     } else if (payload.type === 'dialog_submission') {
-      // TODO: make API call to actually create team
-
       if (payload.callback_id === 'create_github_repo_dialog') {
         await _handleCreateGithubRepoDialog(req, res);
+      } else if (payload.callback_id === 'create_pt_project_dialog') {
+        await _handleCreatePtProjectDialog(req, res);
       } else if (payload.callback_id === 'create_team_dialog') {
+        // TODO: make API call to actually create team
+
         await _postCreateGithubReposPage(req, res);
 
         await _postCreatePtBoardPage(req, res);
