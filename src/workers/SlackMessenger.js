@@ -90,7 +90,7 @@ async function _openDialogForCreateGithubRepo(req, res) {
 
 async function _openDialogForCreatePtProject(req, res) {
   let url = 'https://slack.com/api/dialog.open';
-  await request({
+  let r = await request({
     url: url,
     method: 'POST',
     headers: {
@@ -134,6 +134,7 @@ async function _openDialogForCreatePtProject(req, res) {
     },
     resolveWithFullResponse: true
   });
+  console.log('>>>>>>>>>>');console.log(r.body);
 }
 
 async function _openDialogForCreateTeam(req, res) {
@@ -461,7 +462,7 @@ export default class SlackMessenger {
       } else if (value.startsWith('create_pt_project:')) {
         if (req.user.email) {
           let projectName = value.substring(18);
-          if (projectName === '?') {console.log('>>>>>>>>>>>>>>>>>')
+          if (projectName === '?') {
             _openDialogForCreatePtProject(req, res);
           } else {
             req.projectName = projectName;
