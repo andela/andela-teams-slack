@@ -27,8 +27,8 @@ async function _handleCreateGithubRepoDialog(req, res) {
 async function _handleCreatePtProjectDialog(req, res) {
   try {
     let submission = req.payload.submission;
-    var projectName = submission.repo_name;
-    projectName = helpers.formatWord(projectName);
+    var projectName = submission.project_name;
+    // projectName = helpers.formatWord(projectName);
   
     req.projectName = projectName;
     req.projectDescription = submission.project_desc || '';
@@ -101,7 +101,7 @@ async function _openDialogForCreatePtProject(req, res) {
       trigger_id: req.payload.trigger_id,
       dialog: JSON.stringify({
         callback_id: 'create_pt_project_dialog',
-        title: 'Create Pivotal Tracker Project',
+        title: 'Create PT Project',
         submit_label: 'Create',
         state: 'create_pt_project_dialog',
         elements: [
