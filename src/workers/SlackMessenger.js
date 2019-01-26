@@ -363,6 +363,7 @@ async function _createAndPostPtProjectLink(req, res) {
         email: req.user.email
       }
     });
+    console.log('>>>>>>');console.log(result.body)
 
     let text = result.ok ? 'Pivotal Tracker project created' : 'Could not create Pivotal Tracker project';
     // let linkOrError = result.ok ? result.url : result.error;
