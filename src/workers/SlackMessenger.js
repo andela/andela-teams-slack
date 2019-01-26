@@ -90,7 +90,7 @@ async function _openDialogForCreateGithubRepo(req, res) {
 
 async function _openDialogForCreatePtProject(req, res) {
   let url = 'https://slack.com/api/dialog.open';
-  let r = await request({
+  await request({
     url: url,
     method: 'POST',
     headers: {
@@ -101,7 +101,7 @@ async function _openDialogForCreatePtProject(req, res) {
       trigger_id: req.payload.trigger_id,
       dialog: JSON.stringify({
         callback_id: 'create_pt_project_dialog',
-        title: 'Create Pivotal Tracker Project',
+        title: 'Create PT Project',
         submit_label: 'Create',
         state: 'create_pt_project_dialog',
         elements: [
@@ -134,7 +134,6 @@ async function _openDialogForCreatePtProject(req, res) {
     },
     resolveWithFullResponse: true
   });
-  console.log('>>>>>>>>>>');console.log(r.body);
 }
 
 async function _openDialogForCreateTeam(req, res) {
