@@ -3,15 +3,20 @@ import SlackObjectResolver from '../workers/SlackObjectResolver';
 const resolver = new SlackObjectResolver();
 
 export default class Utility {
-  async getUserObjectFromReqBodyUserId(req, res, next) {
-    var user = await resolver.getUserObject(req.body.user_id);
+  async getUserObjectFromReqBodyEventUser(req, res, next) {
+    var user = await resolver.getUserObject(req.body.event.user);
     req.user = user;
     next();
   }
-  async getUserObjectFromReqPayloadUser(req, res, next) {
+  async getUserObjectFromReqBodyPayloadUserId(req, res, next) {
     const payload = JSON.parse(req.body.payload);
     req.payload = payload;
     var user = await resolver.getUserObject(payload.user.id);
+    req.user = user;
+    next();
+  }
+  async getUserObjectFromReqBodyUserId(req, res, next) {
+    var user = await resolver.getUserObject(req.body.user_id);
     req.user = user;
     next();
   }
