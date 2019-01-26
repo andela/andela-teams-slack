@@ -97,7 +97,7 @@ async function _postCreateGithubReposPage(req, res) {
         text: 'Click buttons to create Github repos',
         attachments: [{
           callback_id: 'create_github_repo',
-          color: 'good',
+          color: 'warning',
           fallback: 'Could not perform operation.',
           // text: '',
           // title: '',
@@ -117,7 +117,7 @@ async function _postCreateGithubReposPage(req, res) {
       body: {
         attachments: [{
           callback_id: 'create_github_repo',
-          color: 'good',
+          color: 'warning',
           fallback: 'Could not perform operation.',
           actions: actions.slice(3)
         }]
@@ -168,7 +168,7 @@ async function _postCreatePtBoardPage(req, res) {
         text: 'Click buttons to create Pivotal Tracker projects',
         attachments: [{
           callback_id: 'create_pt_project',
-          color: 'good',
+          color: 'warning',
           fallback: 'Could not perform operation.',
           actions: actions
         }]
@@ -211,7 +211,7 @@ async function _createAndPostGithubRepoLink(req, res) {
       body: {
         text: text,
         attachments: [{
-          color: 'good',
+          color: result.ok ? 'good' : 'danger',
           text: linkOrError
         }]
       },
@@ -311,7 +311,7 @@ export default class SlackMessenger {
         body: {
           attachments: [{
             callback_id: 'landing_page_menu',
-            color: 'good',
+            color: 'warning',
             fallback: 'Could not perform operation.',
             actions: actions
           }]
