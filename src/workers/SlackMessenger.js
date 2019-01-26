@@ -461,7 +461,7 @@ export default class SlackMessenger {
       } else if (value.startsWith('create_pt_project:')) {
         if (req.user.email) {
           let projectName = value.substring(18);
-          if (projectName === '?') {
+          if (projectName === '?') {console.log('>>>>>>>>>>>>>>>>>')
             _openDialogForCreatePtProject(req, res);
           } else {
             req.projectName = projectName;
