@@ -2,9 +2,11 @@ import request from 'request-promise-native';
 
 import Github from '../integrations/Github';
 import Helpers from './Helpers';
+import PivotalTracker from '../integrations/PivotalTracker';
 
 const github = new Github();
 const helpers = new Helpers();
+const pivotal = new PivotalTracker();
 
 async function _handleCreateGithubRepoDialog(req, res) {
   try {
@@ -259,11 +261,11 @@ async function _createAndPostGithubRepoLink(req, res) {
     });
 
     let text = result.ok ? 'Github repo created' : 'Could not create Github repo';
-    let linkOrError = result.ok ? result.html_url : result.error;
+    let linkOrError = result.ok ? result.url : result.error;
     // let linkOrError = result.ok
     //   ? (result.invitedUser.ok
-    //       ? result.html_url
-    //       : result.html_url + '\n\nAlthough the repo was created you were not added. This could be because you\'ve already been added to the repo before now.')
+    //       ? result.url
+    //       : result.url + '\n\nAlthough the repo was created you were not added. This could be because you\'ve already been added to the repo before now.')
     //   : result.error;
   
     await request({
@@ -283,6 +285,69 @@ async function _createAndPostGithubRepoLink(req, res) {
       resolveWithFullResponse: true
     });
   } catch(err) {
+    console.log(err);
+  }
+}
+
+async function _createAndPostPtProjectLink(req, res) {
+  try {
+    let result = await pivotal.project.create(req.projectName, {
+      accountId: process.env.PIVOTAL_TRACKER_ACCOUNT_ID,
+      description: req.projectDescription || '',
+      private: req.projectIsPrivate || false,
+      user: {
+        email: req.user.email
+      }
+    });
+
+    let text = result.ok ? 'Pivotal Tracker project created' : 'Could not create Pivotal Tracker project';
+    // let linkOrError = result.ok ? result.url : result.error;
+    let linkOrError = result.ok
+      ? (result.invitedUser.ok
+          ? result.url
+          : result.url + '\n\nAlthough the project was created you were not added. This could be because you\'ve already been added to the project before now.')
+      : result.error;
+  
+    await request({
+      url: req.payload.response_url,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: {
+        text: text,
+        attachments: [{
+          color: result.ok ? 'good' : 'danger',
+          text: linkOrError
+        }]
+      },
+      json: true,
+      resolveWithFullResponse: true
+    });
+  } catch(err) {
+    console.log(err);
+  }
+}
+
+async function _postNoEmailError(req, res) {
+  try {
+    await request({
+      url: req.payload.response_url,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: {
+        text: 'Your email address cannot be found on Slack',
+        attachments: [{
+          color: 'danger',
+          text: `Ensure there is a value for the *Email* field on your Slack profile`,
+        }]
+      },
+      json: true,
+      resolveWithFullResponse: true
+    });
+  } catch (err) {
     console.log(err);
   }
 }
@@ -328,6 +393,18 @@ export default class SlackMessenger {
           }
         } else {
           _postNoGithubUsernameError(req, res);
+        }
+      } else if (value.startsWith('create_pt_project:')) {
+        if (req.user.email) {
+          let projectName = value.substring(18);
+          if (projectName === '?') {
+            _openDialogForCreateGithub(req, res);////////////////////////
+          } else {
+            req.projectName = projectName;
+            _createAndPostPtProjectLink(req, res);
+          }
+        } else {
+          _postNoEmailError(req, res);
         }
       }
     } else if (payload.type === 'dialog_submission') {

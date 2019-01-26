@@ -100,6 +100,7 @@ class Project {
       // for uniformity with the slack API (and easy error detection)
       // add the 'ok' field
       result.ok = true;
+      result.url = `https://www.pivotaltracker.com/projects/${result.id}`;
 
       // result.created.id = createProjectResponse.id;
       // result.created.kind = createProjectResponse.kind;
