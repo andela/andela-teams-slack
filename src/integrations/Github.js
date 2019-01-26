@@ -112,6 +112,7 @@ class Repo {
       }
 
       result.ok = true;
+      result.url = result.html_url;
 
       // add current user to repo
       if (configuration.user) {
