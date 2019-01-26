@@ -1,7 +1,9 @@
 import Github from '../integrations/Github';
+import PivotalTracker from '../integrations/PivotalTracker';
 import SlackObjectResolver from './SlackObjectResolver';
 
 const github = new Github();
+const pivotal = new PivotalTracker();
 const resolver = new SlackObjectResolver();
 
 export default class EventHandler {
@@ -33,16 +35,20 @@ export default class EventHandler {
             if (messageLink.includes(`github.com/${process.env.GITHUB_ORGANIZATION}/`)) {
               let repo = messageLink.substring(messageLink.lastIndexOf('/') + 1);
               await github.repo.addUser(req.user.github_user_name, repo);
+            } else if (messageLink.includes('pivotaltracker.com/projects/')) {
+              let projId = messageLink.substring(messageLink.lastIndexOf('/') + 1);
+              await pivotal.project.addUser(req.user.email, projId, { role: 'owner' });//TODO: remove connfig
             }
-            // TODO: add to PT
             await resolver.postEphemeralMessage(`Confirm you have been added to ${messageLink}`, event.item.channel, event.user);
             return;
           } else if (event.type === 'reaction_removed') {
             if (messageLink.includes(`github.com/${process.env.GITHUB_ORGANIZATION}/`)) {
               let repo = messageLink.substring(messageLink.lastIndexOf('/') + 1);
               await github.repo.removeUser(req.user.github_user_name, repo);
+            } else if (messageLink.includes('pivotaltracker.com/projects/')) {
+              let projId = messageLink.substring(messageLink.lastIndexOf('/') + 1);
+              await pivotal.project.removeUser(req.user.email, projId);
             }
-            // TODO: remove from PT
             await resolver.postEphemeralMessage(`Confirm you have been removed from ${messageLink}`, event.item.channel, event.user);
             return;
           }

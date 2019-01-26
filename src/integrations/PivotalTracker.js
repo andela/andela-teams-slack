@@ -5,16 +5,6 @@ if (process.env.NODE_ENV !== 'production') {
   dotenv.config();
 }
 
-const requestOptions = {
-  baseUrl: 'https://www.pivotaltracker.com/services/v5',
-  fullResponse: false,
-  json: true,
-  headers: {
-    'Content-Type': 'application/json',
-    'X-TrackerToken': process.env.PIVOTAL_TRACKER_TOKEN,
-  }
-};
-
 /**
 * @class Project
 */
@@ -31,6 +21,16 @@ class Project {
    */
   async addUser(userEmail, projectId, configuration = { role: 'member' }) {
     try {
+      const requestOptions = {
+        baseUrl: 'https://www.pivotaltracker.com/services/v5',
+        fullResponse: false,
+        json: true,
+        headers: {
+          'Content-Type': 'application/json',
+          'X-TrackerToken': process.env.PIVOTAL_TRACKER_TOKEN,
+        }
+      };
+
       var result = {}; // the result to be returned
 
       // add user
@@ -78,6 +78,16 @@ class Project {
     configuration = { accountId: process.env.PIVOTAL_TRACKER_ACCOUNT_ID }
   ) {
     try {
+      const requestOptions = {
+        baseUrl: 'https://www.pivotaltracker.com/services/v5',
+        fullResponse: false,
+        json: true,
+        headers: {
+          'Content-Type': 'application/json',
+          'X-TrackerToken': process.env.PIVOTAL_TRACKER_TOKEN,
+        }
+      };
+
       var result = {}; // the result to be returned
 
       // create project
@@ -137,11 +147,66 @@ class Project {
    */
   async fetchStories(projectId, options = { }) {
     try {
+      const requestOptions = {
+        baseUrl: 'https://www.pivotaltracker.com/services/v5',
+        fullResponse: false,
+        json: true,
+        headers: {
+          'Content-Type': 'application/json',
+          'X-TrackerToken': process.env.PIVOTAL_TRACKER_TOKEN,
+        }
+      };
+
       let result = {};
       requestOptions.uri = `/projects/${projectId}/stories`;
       result = await request.get(requestOptions);
 
       // console.log(result);
+
+      // for uniformity with the slack API (and easy error detection)
+      // add the 'ok' field
+      result.ok = true;
+
+      return result;
+    } catch (error) {
+      return {
+        ok: false,
+        error: error.message
+      };
+    }
+  }
+  /**
+   * @method addUser
+   * @desc This method removes a user from a Pivotal Tracker project
+   *
+   * @param { object } userEmail the email of the user to add
+   * @param { string } projectId the ID of the project
+   *
+   * @returns { object } a response object showing the result of the operation
+   */
+  async removeUser(userEmail, projectId) {
+    try {
+      // first get all memberships
+      const requestOptions = {
+        baseUrl: 'https://www.pivotaltracker.com/services/v5',
+        // fullResponse: false,
+        json: true,
+        headers: {
+          'Content-Type': 'application/json',
+          'X-TrackerToken': process.env.PIVOTAL_TRACKER_TOKEN,
+        }
+      };
+
+      var result = {}; // the result to be returned
+
+      requestOptions.uri = `/projects/${projectId}/memberships`;
+      result = await request.get(requestOptions);
+      const memberships = result.body;
+      const member = memberships.find(m => m.person.email === userEmail);
+
+      // remove user
+      requestOptions.uri = `/projects/${projectId}/memberships/${member.id}`;
+      result = await request.delete(requestOptions);
 
       // for uniformity with the slack API (and easy error detection)
       // add the 'ok' field
