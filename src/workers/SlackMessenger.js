@@ -2,9 +2,139 @@ import request from 'request-promise-native';
 
 import Github from '../integrations/Github';
 import Helpers from './Helpers';
+import PivotalTracker from '../integrations/PivotalTracker';
 
 const github = new Github();
 const helpers = new Helpers();
+const pivotal = new PivotalTracker();
+
+async function _handleCreateGithubRepoDialog(req, res) {
+  try {
+    let submission = req.payload.submission;
+    var repoName = submission.repo_name;
+    repoName = helpers.formatWord(repoName);
+  
+    req.repoName = repoName;
+    req.repoDescription = submission.repo_desc || '';
+    req.repoIsPrivate = submission.repo_visibility === 'private';
+    _createAndPostGithubRepoLink(req, res);
+  } catch (err) {
+    console.log(err);
+    // TODO: post an ephemeral message to the user (get info from req.payload)
+  }
+}
+
+async function _handleCreatePtProjectDialog(req, res) {
+  try {
+    let submission = req.payload.submission;
+    var projectName = submission.repo_name;
+    projectName = helpers.formatWord(projectName);
+  
+    req.projectName = projectName;
+    req.projectDescription = submission.project_desc || '';
+    req.projectIsPrivate = submission.project_visibility === 'private';
+    _createAndPostPtProjectLink(req, res);
+  } catch (err) {
+    console.log(err);
+    // TODO: post an ephemeral message to the user (get info from req.payload)
+  }
+}
+
+async function _openDialogForCreateGithubRepo(req, res) {
+  let url = 'https://slack.com/api/dialog.open';
+  await request({
+    url: url,
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    },
+    formData: {
+      token: process.env.SLACK_USER_TOKEN,
+      trigger_id: req.payload.trigger_id,
+      dialog: JSON.stringify({
+        callback_id: 'create_github_repo_dialog',
+        title: 'Create Github Repo',
+        submit_label: 'Create',
+        state: 'create_github_repo_dialog',
+        elements: [
+          {
+            type: 'text',
+            label: 'Repo Name',
+            name: 'repo_name'
+          },
+          {
+            type: 'text',
+            label: 'Description',
+            name: 'repo_desc',
+            optional: true
+          },
+          {
+            type: 'select',
+            label: 'Repo Visibility',
+            name: 'repo_visibility',
+            value: 'public',
+            options: [{
+              label: 'Public',
+              value: 'public'
+            }, {
+              label: 'Private',
+              value: 'private'
+            }]
+          }
+        ]
+      })
+    },
+    resolveWithFullResponse: true
+  });
+}
+
+async function _openDialogForCreatePtProject(req, res) {
+  let url = 'https://slack.com/api/dialog.open';
+  await request({
+    url: url,
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    },
+    formData: {
+      token: process.env.SLACK_USER_TOKEN,
+      trigger_id: req.payload.trigger_id,
+      dialog: JSON.stringify({
+        callback_id: 'create_pt_project_dialog',
+        title: 'Create Pivotal Tracker Project',
+        submit_label: 'Create',
+        state: 'create_pt_project_dialog',
+        elements: [
+          {
+            type: 'text',
+            label: 'Project Name',
+            name: 'project_name'
+          },
+          {
+            type: 'text',
+            label: 'Description',
+            name: 'project_desc',
+            optional: true
+          },
+          {
+            type: 'select',
+            label: 'Project Visibility',
+            name: 'project_visibility',
+            value: 'public',
+            options: [{
+              label: 'Public',
+              value: 'public'
+            }, {
+              label: 'Private',
+              value: 'private'
+            }]
+          }
+        ]
+      })
+    },
+    resolveWithFullResponse: true
+  });
+}
 
 async function _openDialogForCreateTeam(req, res) {
   let url = 'https://slack.com/api/dialog.open';
@@ -97,7 +227,7 @@ async function _postCreateGithubReposPage(req, res) {
         text: 'Click buttons to create Github repos',
         attachments: [{
           callback_id: 'create_github_repo',
-          color: 'good',
+          color: 'warning',
           fallback: 'Could not perform operation.',
           // text: '',
           // title: '',
@@ -117,7 +247,7 @@ async function _postCreateGithubReposPage(req, res) {
       body: {
         attachments: [{
           callback_id: 'create_github_repo',
-          color: 'good',
+          color: 'warning',
           fallback: 'Could not perform operation.',
           actions: actions.slice(3)
         }]
@@ -168,7 +298,7 @@ async function _postCreatePtBoardPage(req, res) {
         text: 'Click buttons to create Pivotal Tracker projects',
         attachments: [{
           callback_id: 'create_pt_project',
-          color: 'good',
+          color: 'warning',
           fallback: 'Could not perform operation.',
           actions: actions
         }]
@@ -187,7 +317,7 @@ async function _createAndPostGithubRepoLink(req, res) {
     let result = await github.repo.create(req.repoName, {
       description: req.repoDescription || '',
       organization: process.env.GITHUB_ORGANIZATION,
-      private: false,
+      private: req.repoIsPrivate || false,
       type: 'org',
       user: {
         githubUsername: req.user.github_user_name
@@ -195,10 +325,51 @@ async function _createAndPostGithubRepoLink(req, res) {
     });
 
     let text = result.ok ? 'Github repo created' : 'Could not create Github repo';
+    let linkOrError = result.ok ? result.url : result.error;
+    // let linkOrError = result.ok
+    //   ? (result.invitedUser.ok
+    //       ? result.url
+    //       : result.url + '\n\nAlthough the repo was created you were not added. This could be because you\'ve already been added to the repo before now.')
+    //   : result.error;
+  
+    await request({
+      url: req.payload.response_url,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: {
+        text: text,
+        attachments: [{
+          color: result.ok ? 'good' : 'danger',
+          text: linkOrError
+        }]
+      },
+      json: true,
+      resolveWithFullResponse: true
+    });
+  } catch(err) {
+    console.log(err);
+  }
+}
+
+async function _createAndPostPtProjectLink(req, res) {
+  try {
+    let result = await pivotal.project.create(req.projectName, {
+      accountId: process.env.PIVOTAL_TRACKER_ACCOUNT_ID,
+      description: req.projectDescription || '',
+      private: req.projectIsPrivate || false,
+      user: {
+        email: req.user.email
+      }
+    });
+
+    let text = result.ok ? 'Pivotal Tracker project created' : 'Could not create Pivotal Tracker project';
+    // let linkOrError = result.ok ? result.url : result.error;
     let linkOrError = result.ok
       ? (result.invitedUser.ok
-          ? result.html_url
-          : result.html_url + '\n\nAlthough the repo was created you were not added. This could be because you\'ve already been added to the repo before now.')
+          ? result.url
+          : result.url + '\n\nAlthough the project was created you were not added. This could be because you\'ve already been added to the project before now.')
       : result.error;
   
     await request({
@@ -210,7 +381,7 @@ async function _createAndPostGithubRepoLink(req, res) {
       body: {
         text: text,
         attachments: [{
-          color: 'good',
+          color: result.ok ? 'good' : 'danger',
           text: linkOrError
         }]
       },
@@ -218,6 +389,29 @@ async function _createAndPostGithubRepoLink(req, res) {
       resolveWithFullResponse: true
     });
   } catch(err) {
+    console.log(err);
+  }
+}
+
+async function _postNoEmailError(req, res) {
+  try {
+    await request({
+      url: req.payload.response_url,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: {
+        text: 'Your email address cannot be found on Slack',
+        attachments: [{
+          color: 'danger',
+          text: `Ensure there is a value for the *Email* field on your Slack profile`,
+        }]
+      },
+      json: true,
+      resolveWithFullResponse: true
+    });
+  } catch (err) {
     console.log(err);
   }
 }
@@ -234,7 +428,7 @@ async function _postNoGithubUsernameError(req, res) {
         text: 'Your Github profile cannot be found on Slack',
         attachments: [{
           color: 'danger',
-          text: `Ensure there is a value for the field *Github* on your Slack profile`,
+          text: `Ensure there is a value for the *Github* field on your Slack profile`,
         }]
       },
       json: true,
@@ -256,7 +450,7 @@ export default class SlackMessenger {
         if (req.user.github_user_name) {
           let repoName = value.substring(19);
           if (repoName === '?') {
-            // TODO: show create github repo dialog
+            _openDialogForCreateGithubRepo(req, res);
           } else {
             req.repoName = repoName;
             _createAndPostGithubRepoLink(req, res);
@@ -264,14 +458,30 @@ export default class SlackMessenger {
         } else {
           _postNoGithubUsernameError(req, res);
         }
+      } else if (value.startsWith('create_pt_project:')) {
+        if (req.user.email) {
+          let projectName = value.substring(18);
+          if (projectName === '?') {
+            _openDialogForCreatePtProject(req, res);
+          } else {
+            req.projectName = projectName;
+            _createAndPostPtProjectLink(req, res);
+          }
+        } else {
+          _postNoEmailError(req, res);
+        }
       }
     } else if (payload.type === 'dialog_submission') {
-      // TODO: make API call to actually create team
+      if (payload.callback_id === 'create_github_repo_dialog') {
+        await _handleCreateGithubRepoDialog(req, res);
+      } else if (payload.callback_id === 'create_pt_project_dialog') {
+        await _handleCreatePtProjectDialog(req, res);
+      } else if (payload.callback_id === 'create_team_dialog') {
+        // TODO: make API call to actually create team
 
-      if (payload.callback_id === 'create_team_dialog') {
         await _postCreateGithubReposPage(req, res);
 
-        _postCreatePtBoardPage(req, res);
+        await _postCreatePtBoardPage(req, res);
       }
     }
   }
@@ -310,7 +520,7 @@ export default class SlackMessenger {
         body: {
           attachments: [{
             callback_id: 'landing_page_menu',
-            color: 'good',
+            color: 'warning',
             fallback: 'Could not perform operation.',
             actions: actions
           }]

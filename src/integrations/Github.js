@@ -51,14 +51,12 @@ class Repo {
       };
       result = await request.put(requestOptions);
 
-      if (typeof result === 'undefined') { 
-        throw new
-        Error(`Failed to add user '${username}' to Github repo.`);
-      }
+      // if (typeof result === 'undefined') { 
+      //   throw new
+      //   Error(`Failed to add user '${username}' to Github repo.`);
+      // }
 
-      // for uniformity with the slack API (and easy error detection)
-      // add the 'ok' field
-      result.ok = true;
+      // result.ok = true;
 
       return result;
     } catch (error) {
@@ -114,6 +112,7 @@ class Repo {
       }
 
       result.ok = true;
+      result.url = result.html_url;
 
       // add current user to repo
       if (configuration.user) {
@@ -123,6 +122,36 @@ class Repo {
           { permission: 'admin' }
         );
       }
+
+      return result;
+    } catch (error) {
+      return {
+        ok: false,
+        error: error.message
+      };
+    }
+  }
+  /**
+   * @method addUser
+   * @desc This method removes a user from a Github repo
+   *
+   * @param { string } username the Github username of the user to add
+   * @param { object } repo the name of the repo
+   *
+   * @returns { object } a response object showing the result of the operation
+   */
+  async removeUser(username, repo, configuration = { organization: process.env.GITHUB_ORGANIZATION }) {
+    try {
+      let result = {}; // the result to be returned
+
+      // just to be sure configuration.organization is not undefined
+      configuration.organization =
+      configuration.organization || process.env.GITHUB_ORGANIZATION;
+
+      // add user
+      requestOptions.uri = `/repos/${configuration.organization}/${repo}/collaborators/${username}`;
+      requestOptions.headers.Accept = 'application/vnd.github.swamp-thing-preview+json';
+      result = await request.delete(requestOptions);
 
       return result;
     } catch (error) {

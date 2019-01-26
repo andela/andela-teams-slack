@@ -3,8 +3,8 @@ import dotenv from 'dotenv';
 import express from 'express';
 import bodyParser from 'body-parser';
 
+import Eventhandler from './workers/EventHandler';
 import SlackMessenger from './workers/SlackMessenger';
-import SlackObjectResolver from './workers/SlackObjectResolver';
 import Utility from './middleware/Utility';
 
 
@@ -16,39 +16,17 @@ const app = new express();
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 
+const handler = new Eventhandler();
 const messenger = new SlackMessenger();
-const resolver = new SlackObjectResolver();
 const utils = new Utility();
 
 app.get('/', async (req, res) => {
   res.status(200).send("Hello World!");
 });
 
-app.post('/events', async (req, res) => {
-  res.header('Content-Type', 'application/x-www-form-urlencoded');
-  // if Slack is "challenging" our URL in order to verify it
-  if (req.body.challenge) {
-    return res.status(200).json({ challenge: req.body.challenge });
-  } else {
-    let event = req.body.event;
-    if (event.type === 'reaction_added' && event.reaction === 'add_me') {
-      console.log('Add me to this:')
-      if (event.item.type === 'message') {
-        let messageText = await resolver.getMessageFromChannel(event.item.ts, event.item.channel);
-        console.log(messageText);
-        // TODO: check if messageText is a link <...>
-        // TODO: make API call (the user id is event.user)
-      }
-    } else if (event.type === 'reaction_removed' && event.reaction === 'add_me') {
-      console.log('Remove me from this:')
-      let messageText = await resolver.getMessageFromChannel(event.item.ts, event.item.channel);
-      console.log(messageText);
-    }
-    return res.status(200).send();
-  }
-})
+app.post('/events', handler.challenge, utils.getUserObjectFromReqBodyEventUser, handler.addMeReaction, handler.default)
 
-app.post('/interactions', utils.postEmptyMessage, utils.getUserObjectFromReqPayloadUser, messenger.handleInteractions)
+app.post('/interactions', utils.postEmptyMessage, utils.getUserObjectFromReqBodyPayloadUserId, messenger.handleInteractions)
 
 app.post('/slash/teams', utils.postWelcomeMessage, utils.getUserObjectFromReqBodyUserId, messenger.postLandingPage)
 
