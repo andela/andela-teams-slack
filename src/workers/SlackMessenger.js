@@ -24,7 +24,7 @@ async function _handleCreateGithubRepoDialog(req, res) {
   }
 }
 
-async function _openDialogForCreateGithub(req, res) {
+async function _openDialogForCreateGithubRepo(req, res) {
   let url = 'https://slack.com/api/dialog.open';
   await request({
     url: url,
@@ -386,7 +386,7 @@ export default class SlackMessenger {
         if (req.user.github_user_name) {
           let repoName = value.substring(19);
           if (repoName === '?') {
-            _openDialogForCreateGithub(req, res);
+            _openDialogForCreateGithubRepo(req, res);
           } else {
             req.repoName = repoName;
             _createAndPostGithubRepoLink(req, res);
@@ -398,7 +398,7 @@ export default class SlackMessenger {
         if (req.user.email) {
           let projectName = value.substring(18);
           if (projectName === '?') {
-            _openDialogForCreateGithub(req, res);////////////////////////
+            _openDialogForCreateGithubRepo(req, res);////////////////////////
           } else {
             req.projectName = projectName;
             _createAndPostPtProjectLink(req, res);
