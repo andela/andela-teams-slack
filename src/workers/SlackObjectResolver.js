@@ -78,4 +78,22 @@ export default class SlackObjectResolver {
       return user;
     }
   }
+  async postEphemeralMessage(message, channelId, userId) {
+    // post ephemeral message in channel, visible only to user
+    let url = 'https://slack.com/api/chat.postEphemeral';
+    await request({
+      url: url,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      formData: {
+        token: process.env.SLACK_USER_TOKEN,
+        channel: channelId,
+        text: message,
+        user: userId
+      },
+      resolveWithFullResponse: true
+    });
+  }
 }

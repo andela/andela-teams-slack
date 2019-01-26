@@ -130,6 +130,36 @@ class Repo {
       };
     }
   }
+  /**
+   * @method addUser
+   * @desc This method removes a user from a Github repo
+   *
+   * @param { string } username the Github username of the user to add
+   * @param { object } repo the name of the repo
+   *
+   * @returns { object } a response object showing the result of the operation
+   */
+  async removeUser(username, repo, configuration = { organization: process.env.GITHUB_ORGANIZATION }) {
+    try {
+      let result = {}; // the result to be returned
+
+      // just to be sure configuration.organization is not undefined
+      configuration.organization =
+      configuration.organization || process.env.GITHUB_ORGANIZATION;
+
+      // add user
+      requestOptions.uri = `/repos/${configuration.organization}/${repo}/collaborators/${username}`;
+      requestOptions.headers.Accept = 'application/vnd.github.swamp-thing-preview+json';
+      result = await request.delete(requestOptions);
+
+      return result;
+    } catch (error) {
+      return {
+        ok: false,
+        error: error.message
+      };
+    }
+  }
 }
 
 /**
