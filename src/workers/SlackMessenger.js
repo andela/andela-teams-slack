@@ -27,8 +27,8 @@ async function _handleCreateGithubRepoDialog(req, res) {
 async function _handleCreatePtProjectDialog(req, res) {
   try {
     let submission = req.payload.submission;
-    var projectName = submission.repo_name;
-    projectName = helpers.formatWord(projectName);
+    var projectName = submission.project_name;
+    // projectName = helpers.formatWord(projectName);
   
     req.projectName = projectName;
     req.projectDescription = submission.project_desc || '';
@@ -363,7 +363,6 @@ async function _createAndPostPtProjectLink(req, res) {
         email: req.user.email
       }
     });
-    console.log('>>>>>>');console.log(result.body)
 
     let text = result.ok ? 'Pivotal Tracker project created' : 'Could not create Pivotal Tracker project';
     // let linkOrError = result.ok ? result.url : result.error;
