@@ -6,6 +6,70 @@ import Helpers from './Helpers';
 const github = new Github();
 const helpers = new Helpers();
 
+async function _handleCreateGithubRepoDialog(req, res) {
+  try {
+    let submission = req.payload.submission;
+    var repoName = submission.repo_name;
+    repoName = helpers.formatWord(repoName);
+  
+    req.repoName = repoName;
+    req.repoDescription = submission.repo_desc || '';
+    req.repoIsPrivate = submission.repo_visibility === 'private';
+    _createAndPostGithubRepoLink(req, res);
+  } catch (err) {
+    console.log(err);
+    // TODO: post an ephemeral message to the user (get info from req.payload)
+  }
+}
+
+async function _openDialogForCreateGithub(req, res) {
+  let url = 'https://slack.com/api/dialog.open';
+  await request({
+    url: url,
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    },
+    formData: {
+      token: process.env.SLACK_USER_TOKEN,
+      trigger_id: req.payload.trigger_id,
+      dialog: JSON.stringify({
+        callback_id: 'create_github_repo_dialog',
+        title: 'Create Github Repo',
+        submit_label: 'Create',
+        state: 'create_github_repo_dialog',
+        elements: [
+          {
+            type: 'text',
+            label: 'Repo Name',
+            name: 'repo_name'
+          },
+          {
+            type: 'text',
+            label: 'Description',
+            name: 'repo_desc',
+            optional: true
+          },
+          {
+            type: 'select',
+            label: 'Repo Visibility',
+            name: 'repo_visibility',
+            value: 'public',
+            options: [{
+              label: 'Public',
+              value: 'public'
+            }, {
+              label: 'Private',
+              value: 'private'
+            }]
+          }
+        ]
+      })
+    },
+    resolveWithFullResponse: true
+  });
+}
+
 async function _openDialogForCreateTeam(req, res) {
   let url = 'https://slack.com/api/dialog.open';
   await request({
@@ -187,7 +251,7 @@ async function _createAndPostGithubRepoLink(req, res) {
     let result = await github.repo.create(req.repoName, {
       description: req.repoDescription || '',
       organization: process.env.GITHUB_ORGANIZATION,
-      private: false,
+      private: req.repoIsPrivate || false,
       type: 'org',
       user: {
         githubUsername: req.user.github_user_name
@@ -257,7 +321,7 @@ export default class SlackMessenger {
         if (req.user.github_user_name) {
           let repoName = value.substring(19);
           if (repoName === '?') {
-            // TODO: show create github repo dialog
+            _openDialogForCreateGithub(req, res);
           } else {
             req.repoName = repoName;
             _createAndPostGithubRepoLink(req, res);
@@ -269,10 +333,12 @@ export default class SlackMessenger {
     } else if (payload.type === 'dialog_submission') {
       // TODO: make API call to actually create team
 
-      if (payload.callback_id === 'create_team_dialog') {
+      if (payload.callback_id === 'create_github_repo_dialog') {
+        await _handleCreateGithubRepoDialog(req, res);
+      } else if (payload.callback_id === 'create_team_dialog') {
         await _postCreateGithubReposPage(req, res);
 
-        _postCreatePtBoardPage(req, res);
+        await _postCreatePtBoardPage(req, res);
       }
     }
   }
