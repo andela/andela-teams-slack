@@ -1,5 +1,5 @@
 export default class HelperFunctions {
-  formatWord(word) {
+  getUrlFriendlyName(word) {
     return word.replace(/\s/g, '-').toLowerCase();
   }
 

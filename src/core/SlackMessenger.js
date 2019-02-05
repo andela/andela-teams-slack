@@ -1,7 +1,7 @@
 import request from 'request-promise-native';
 
 import Github from '../integrations/Github';
-import Helpers from './Helpers';
+import Helpers from './HelperFunctions';
 import PivotalTracker from '../integrations/PivotalTracker';
 
 const github = new Github();
@@ -12,7 +12,7 @@ async function _handleCreateGithubRepoDialog(req, res) {
   try {
     let submission = req.payload.submission;
     var repoName = submission.repo_name;
-    repoName = helpers.formatWord(repoName);
+    repoName = helpers.getUrlFriendlyName(repoName);
   
     req.repoName = repoName;
     req.repoDescription = submission.repo_desc || '';
@@ -28,7 +28,7 @@ async function _handleCreatePtProjectDialog(req, res) {
   try {
     let submission = req.payload.submission;
     var projectName = submission.project_name;
-    // projectName = helpers.formatWord(projectName);
+    // projectName = helpers.getUrlFriendlyName(projectName);
   
     req.projectName = projectName;
     req.projectDescription = submission.project_desc || '';
@@ -193,7 +193,7 @@ async function _postCreateGithubReposPage(req, res) {
   try {
     let submission = req.payload.submission;
     var teamName = submission.team_name;
-    teamName = helpers.formatWord(teamName);
+    teamName = helpers.getUrlFriendlyName(teamName);
     var teamProject = submission.team_project || 'Authors Haven';
     teamProject = helpers.getInitials(teamProject);
     let suggeestedNames = helpers.githubConventions(teamName, teamProject);
@@ -265,7 +265,7 @@ async function _postCreatePtBoardPage(req, res) {
   try {
     let submission = req.payload.submission;
     var teamName = submission.team_name;
-    teamName = helpers.formatWord(teamName);
+    teamName = helpers.getUrlFriendlyName(teamName);
     var teamProject = submission.team_project || 'Authors Haven';
     teamProject = helpers.getInitials(teamProject);
     let suggeestedNames = helpers.ptConventions(teamName, teamProject);
