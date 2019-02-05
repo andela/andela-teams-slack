@@ -21,7 +21,7 @@ const messenger = new SlackMessenger();
 const utils = new Utility();
 
 app.get('/', async (req, res) => {
-  res.status(200).send("Hello World!");
+  res.status(200).send("Hello World!\nWelcome to Andela Teams for Slack");
 });
 
 app.post('/events', handler.challenge, utils.getUserObjectFromReqBodyEventUser, handler.addMeReaction, handler.default)
