@@ -1,24 +1,24 @@
 import Github from '../integrations/Github';
 import PivotalTracker from '../integrations/PivotalTracker';
-import SlackObjectResolver from './SlackObjectResolver';
+import Slack from '../integrations/Slack';
 
 const github = new Github();
 const pivotal = new PivotalTracker();
-const resolver = new SlackObjectResolver();
+const slack = new Slack();
 
 export default class EventHandler {
   async addMeReaction(req, res, next) {
     let event = req.body.event;
     if (event.reaction === 'add_me') {
       if (!req.user.email) {
-        await resolver.postEphemeralMessage(
+        await slack.chat.postEphemeral(
           'Your email address cannot be found on Slack.\nEnsure there is a value for the *Email* field on your Slack profile.',
           event.item.channel,
           event.user);
         return;
       }
       if (!req.user.github_user_name) {
-        await resolver.postEphemeralMessage(
+        await slack.chat.postEphemeral(
           'Your Github profile cannot be found on Slack.\nEnsure there is a value for the *Github* field on your Slack profile.',
           event.item.channel,
           event.user);
@@ -26,7 +26,7 @@ export default class EventHandler {
       }
 
       if (event.item.type === 'message') {
-        var messageText = await resolver.getMessageFromChannel(event.item.ts, event.item.channel);
+        var messageText = await slack.resolver.getMessageFromChannel(event.item.ts, event.item.channel);
         // check if messageText is a link <...>
         if (messageText.toLowerCase().startsWith('<http') && messageText.endsWith('>')) {
           // trim messageText of < and > to get link
@@ -39,7 +39,7 @@ export default class EventHandler {
               let projId = messageLink.substring(messageLink.lastIndexOf('/') + 1);
               await pivotal.project.addUser(req.user.email, projId, { role: 'owner' });//TODO: remove connfig
             }
-            await resolver.postEphemeralMessage(`Confirm you have been added to ${messageLink}`, event.item.channel, event.user);
+            await slack.chat.postEphemeral(`Confirm you have been added to ${messageLink}`, event.item.channel, event.user);
             return;
           } else if (event.type === 'reaction_removed') {
             if (messageLink.includes(`github.com/${process.env.GITHUB_ORGANIZATION}/`)) {
@@ -49,7 +49,7 @@ export default class EventHandler {
               let projId = messageLink.substring(messageLink.lastIndexOf('/') + 1);
               await pivotal.project.removeUser(req.user.email, projId);
             }
-            await resolver.postEphemeralMessage(`Confirm you have been removed from ${messageLink}`, event.item.channel, event.user);
+            await slack.chat.postEphemeral(`Confirm you have been removed from ${messageLink}`, event.item.channel, event.user);
             return;
           }
         }
