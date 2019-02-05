@@ -5,7 +5,7 @@ import bodyParser from 'body-parser';
 
 import Eventhandler from './workers/EventHandler';
 import SlackMessenger from './workers/SlackMessenger';
-import Utility from './middleware/Utility';
+import Utility from './core/Utility';
 
 
 if (process.env.NODE_ENV !== 'production') {

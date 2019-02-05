@@ -1,4 +1,4 @@
-export default class Helpers {
+export default class HelperFunctions {
   formatWord(word) {
     return word.replace(/\s/g, '-').toLowerCase();
   }
