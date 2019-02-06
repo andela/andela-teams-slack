@@ -3,8 +3,8 @@ import dotenv from 'dotenv';
 import express from 'express';
 import bodyParser from 'body-parser';
 
-import Eventhandler from './workers/EventHandler';
-import SlackMessenger from './workers/SlackMessenger';
+import Eventhandler from './core/EventHandler';
+import SlackMessenger from './core/SlackMessenger';
 import Utility from './core/Utility';
 
 
