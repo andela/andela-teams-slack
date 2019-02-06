@@ -5,6 +5,7 @@ import bodyParser from 'body-parser';
 
 import Eventhandler from './core/EventHandler';
 import SlackMessenger from './core/SlackMessenger';
+import SlashCommandHandler from './core/SlashCommandHandler';
 import Utility from './core/Utility';
 
 
@@ -18,6 +19,7 @@ app.use(bodyParser.json());
 
 const handler = new Eventhandler();
 const messenger = new SlackMessenger();
+const slash = new SlashCommandHandler();
 const utils = new Utility();
 
 app.get('/', async (req, res) => {
@@ -28,7 +30,7 @@ app.post('/events', handler.challenge, utils.getUserObjectFromReqBodyEventUser, 
 
 app.post('/interactions', utils.postEmptyMessage, utils.getUserObjectFromReqBodyPayloadUserId, messenger.handleInteractions)
 
-app.post('/slash/teams', utils.postWelcomeMessage, utils.getUserObjectFromReqBodyUserId, messenger.postLandingPage)
+app.post('/slash/teams', utils.postWelcomeMessage, utils.getUserObjectFromReqBodyUserId, slash.teams)
 
 let server = app.listen(process.env.PORT || 5000, () => {
   let port = server.address().port;

@@ -24,6 +24,20 @@ class Chat {
       resolveWithFullResponse: true
     });
   }
+  async postResponse(message, responseUrl, attachments) {
+    await request({
+      url: responseUrl,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: {
+        attachments
+      },
+      json: true,
+      resolveWithFullResponse: true
+    });
+  }
 }
 
 class Resolver {
