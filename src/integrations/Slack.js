@@ -17,15 +17,16 @@ class Chat {
         url: url,
         method: 'POST',
         headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
+          'Content-Type': 'application/json'//'application/x-www-form-urlencoded'
         },
-        formData: JSON.stringify({
+        body: {
           // token: process.env.SLACK_USER_TOKEN,
           // channel: channelId,
           text: message,
           // user: userId,
           attachments
-        }),
+        },
+        json: true,
         resolveWithFullResponse: true
       });
       console.log(r.body);
