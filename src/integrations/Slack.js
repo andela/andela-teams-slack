@@ -1,6 +1,72 @@
+import dotenv from 'dotenv';
 import request from 'request-promise-native';
 
-export default class SlackObjectResolver {
+if (process.env.NODE_ENV !== 'production') {
+  dotenv.config();
+}
+
+class Chat {
+  async postEphemeral(message, channelId, userId, attachments) {
+    try {
+      // post ephemeral message in channel, visible only to user
+      let url = 'https://slack.com/api/chat.postEphemeral';
+      url += `?token=${process.env.SLACK_USER_TOKEN}`;
+      url += `&channel=${channelId}`;
+      url += `&user=${userId}`;
+      url += `&text=${message}`;
+      let r = await request({
+        url: url,
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        resolveWithFullResponse: true
+      });
+    } catch (err) {
+      console.log(err);
+    }
+  }
+  async postResponse(message, responseUrl, attachments) {
+    try {
+      await request({
+        url: responseUrl,
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: {
+          text: message,
+          attachments
+        },
+        json: true,
+        resolveWithFullResponse: true
+      });
+    } catch (err) {
+      console.log(err);
+    }
+  }
+}
+
+class Dialog {
+  async open(triggerId, dialogJson) {
+    let url = 'https://slack.com/api/dialog.open';
+    await request({
+      url,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      formData: {
+        token: process.env.SLACK_USER_TOKEN,
+        trigger_id: triggerId,
+        dialog: JSON.stringify(dialogJson)
+      },
+      resolveWithFullResponse: true
+    });
+  }
+}
+
+class Resolver {
   async getMessageFromChannel(ts, channelId) {
     let url = 'https://slack.com/api/conversations.history';
     url += '?channel=' + channelId;
@@ -78,22 +144,15 @@ export default class SlackObjectResolver {
       return user;
     }
   }
-  async postEphemeralMessage(message, channelId, userId) {
-    // post ephemeral message in channel, visible only to user
-    let url = 'https://slack.com/api/chat.postEphemeral';
-    await request({
-      url: url,
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      formData: {
-        token: process.env.SLACK_USER_TOKEN,
-        channel: channelId,
-        text: message,
-        user: userId
-      },
-      resolveWithFullResponse: true
-    });
+}
+
+export default class Slack {
+  /**
+   * @constructor
+   */
+  constructor() {
+    this.chat = new Chat();
+    this.dialog = new Dialog();
+    this.resolver = new Resolver();
   }
 }
