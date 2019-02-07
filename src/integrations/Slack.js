@@ -10,7 +10,7 @@ class Chat {
     try {console.log(process.env.SLACK_USER_TOKEN)
       // post ephemeral message in channel, visible only to user
       let url = 'https://slack.com/api/chat.postEphemeral';
-      await request({
+      let r = await request({
         url: url,
         method: 'POST',
         headers: {
@@ -25,6 +25,7 @@ class Chat {
         }),
         resolveWithFullResponse: true
       });
+      console.log(r.body);
     } catch (err) {
       console.log(err);
     }
