@@ -13,9 +13,9 @@ class Chat {
       url: url,
       method: 'POST',
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
+        'Content-Type': 'application/json'
       },
-      formData: {
+      body: {
         token: process.env.SLACK_USER_TOKEN,
         channel: channelId,
         text: message,

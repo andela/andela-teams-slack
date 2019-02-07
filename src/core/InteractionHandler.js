@@ -10,7 +10,7 @@ const helpers = new HelperFunctions();
 const pivotal = new PivotalTracker();
 const slack = new Slack();
 
-async function _createAndPostGithubRepoLink(req, res) {console.log('>>>>>>>>>>>>>>>>>>2')
+async function _createAndPostGithubRepoLink(req, res) {
   try {
     let result = await github.repo.create(req.repoName, {
       description: req.repoDescription || '',
@@ -78,7 +78,7 @@ async function _createAndPostPtProjectLink(req, res) {
   }
 }
 
-async function _handleCreateGithubRepoDialog(req, res) {console.log('>>>>>>>>>>>>>>>>>>1')
+async function _handleCreateGithubRepoDialog(req, res) {
   try {
     let submission = req.payload.submission;
     var repoName = submission.repo_name;
