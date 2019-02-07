@@ -16,13 +16,13 @@ class Chat {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: {
+        body: JSON.stringify({
           token: process.env.SLACK_USER_TOKEN,
           channel: channelId,
           text: message,
           user: userId,
           attachments
-        },
+        }),
         resolveWithFullResponse: true
       });
       console.log('>>>>>>>>>>>>>>>>>>4')
