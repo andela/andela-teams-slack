@@ -7,25 +7,30 @@ if (process.env.NODE_ENV !== 'production') {
 
 class Chat {
   async postEphemeral(message, channelId, userId, attachments) {console.log('>>>>>>>>>>>>>>>>>>3')
-    // post ephemeral message in channel, visible only to user
-    let url = 'https://slack.com/api/chat.postEphemeral';
-    let r = await request({
-      url: url,
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: {
-        token: process.env.SLACK_USER_TOKEN,
-        channel: channelId,
-        text: message,
-        user: userId,
-        attachments
-      },
-      resolveWithFullResponse: true
-    });
-    console.log('>>>>>>>>>>>>>>>>>>4')
-    console.log(JSON.parse(r.body))
+    try {
+      // post ephemeral message in channel, visible only to user
+      let url = 'https://slack.com/api/chat.postEphemeral';
+      let r = await request({
+        url: url,
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: {
+          token: process.env.SLACK_USER_TOKEN,
+          channel: channelId,
+          text: message,
+          user: userId,
+          attachments
+        },
+        resolveWithFullResponse: true
+      });
+      console.log('>>>>>>>>>>>>>>>>>>4')
+      console.log(r)
+    } catch (err) {console.log('>>>>>>>>>>>>>>>>>>5')
+      console.log(err);
+    }
+    
   }
   async postResponse(message, responseUrl, attachments) {
     await request({
