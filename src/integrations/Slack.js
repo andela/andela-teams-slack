@@ -17,7 +17,7 @@ class Chat {
           'Content-Type': 'application/x-www-form-urlencoded'
         },
         formData: JSON.stringify({
-          token: 'xoxp-1853699385-155728564117-432939208275-5c4cae4499f9c6bfa0d447f880208fe9',//process.env.SLACK_USER_TOKEN,
+          token: process.env.SLACK_USER_TOKEN,
           channel: channelId,
           text: message,
           user: userId,
