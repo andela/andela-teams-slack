@@ -22,7 +22,6 @@ class Chat {
         },
         resolveWithFullResponse: true
       });
-      console.log(r.body);
     } catch (err) {
       console.log(err);
     }
