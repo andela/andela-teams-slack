@@ -30,9 +30,9 @@ async function _createAndPostGithubRepoLink(req, res) {
     //       : result.url + '\n\nAlthough the repo was created you were not added. This could be because you\'ve already been added to the repo before now.')
     //   : result.error;
   
-    // to use await slack.chat.postResponse
-    // replace args req.payload.channel.id and req.payload.user.id
-    // with req.payload.response_url
+    // to use await slack.chat.postEphemeral
+    // replace arg req.payload.response_url
+    // with req.payload.channel.id, req.payload.user.id
     await slack.chat.postResponse(
       text,
       req.payload.response_url,
@@ -40,14 +40,6 @@ async function _createAndPostGithubRepoLink(req, res) {
         color: result.ok ? 'good' : 'danger',
         text: linkOrError,
       }]);
-    // await slack.chat.postEphemeral(
-    //   text,
-    //   req.payload.channel.id,
-    //   req.payload.user.id,
-    //   [{
-    //     color: result.ok ? 'good' : 'danger',
-    //     text: linkOrError,
-    //   }]);
   } catch(err) {
     console.log(err);
   }
@@ -72,10 +64,9 @@ async function _createAndPostPtProjectLink(req, res) {
           : result.url + '\n\nAlthough the project was created you were not added. This could be because you\'ve already been added to the project before now.')
       : result.error;
   
-    await slack.chat.postEphemeral(
+    await slack.chat.postResponse(
       text,
-      req.payload.channel.id,
-      req.payload.user.id,
+      req.payload.response_url,
       [{
         color: result.ok ? 'good' : 'danger',
         text: linkOrError,

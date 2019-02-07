@@ -29,9 +29,9 @@ class Chat {
       console.log(err);
     }
   }
-  async postResponse(message, responseUrl, attachments) {console.log('>>>>>>>>>>>>>>>>>>3')
+  async postResponse(message, responseUrl, attachments) {
     try {
-      let r = await request({
+      await request({
         url: responseUrl,
         method: 'POST',
         headers: {
@@ -44,9 +44,7 @@ class Chat {
         json: true,
         resolveWithFullResponse: true
       });
-      console.log('>>>>>>>>>>>>>>>>>>4')
-      console.log(JSON.parse(r.body))
-    } catch (err) {console.log('>>>>>>>>>>>>>>>>>>5')
+    } catch (err) {
       console.log(err);
     }
   }
