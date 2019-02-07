@@ -6,7 +6,7 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 class Chat {
-  async postEphemeral(message, channelId, userId) {
+  async postEphemeral(message, channelId, userId, attachments) {
     // post ephemeral message in channel, visible only to user
     let url = 'https://slack.com/api/chat.postEphemeral';
     await request({
@@ -19,7 +19,8 @@ class Chat {
         token: process.env.SLACK_USER_TOKEN,
         channel: channelId,
         text: message,
-        user: userId
+        user: userId,
+        attachments
       },
       resolveWithFullResponse: true
     });
@@ -32,9 +33,29 @@ class Chat {
         'Content-Type': 'application/json'
       },
       body: {
+        text: message,
         attachments
       },
       json: true,
+      resolveWithFullResponse: true
+    });
+  }
+}
+
+class Dialog {
+  async open(triggerId, dialogJson) {
+    let url = 'https://slack.com/api/dialog.open';
+    await request({
+      url,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      formData: {
+        token: process.env.SLACK_USER_TOKEN,
+        trigger_id: triggerId,
+        dialog: JSON.stringify(dialogJson)
+      },
       resolveWithFullResponse: true
     });
   }
@@ -126,6 +147,7 @@ export default class Slack {
    */
   constructor() {
     this.chat = new Chat();
+    this.dialog = new Dialog();
     this.resolver = new Resolver();
   }
 }

@@ -1,4 +1,114 @@
 export default class HelperFunctions {
+  getCreateGithubRepoDialogJson() {
+    return {
+      callback_id: 'create_github_repo_dialog',
+      title: 'Create Github Repo',
+      submit_label: 'Create',
+      state: 'create_github_repo_dialog',
+      elements: [
+        {
+          type: 'text',
+          label: 'Repo Name',
+          name: 'repo_name'
+        },
+        {
+          type: 'text',
+          label: 'Description',
+          name: 'repo_desc',
+          optional: true
+        },
+        {
+          type: 'select',
+          label: 'Repo Visibility',
+          name: 'repo_visibility',
+          value: 'public',
+          options: [{
+            label: 'Public',
+            value: 'public'
+          }, {
+            label: 'Private',
+            value: 'private'
+          }]
+        }
+      ]
+    };
+  }
+
+  getCreatePtProjectDialogJson() {
+    return {
+      callback_id: 'create_pt_project_dialog',
+      title: 'Create PT Project',
+      submit_label: 'Create',
+      state: 'create_pt_project_dialog',
+      elements: [
+        {
+          type: 'text',
+          label: 'Project Name',
+          name: 'project_name'
+        },
+        {
+          type: 'text',
+          label: 'Description',
+          name: 'project_desc',
+          optional: true
+        },
+        {
+          type: 'select',
+          label: 'Project Visibility',
+          name: 'project_visibility',
+          value: 'public',
+          options: [{
+            label: 'Public',
+            value: 'public'
+          }, {
+            label: 'Private',
+            value: 'private'
+          }]
+        }
+      ]
+    };
+  }
+
+  getCreateTeamDialogJson() {
+    return {
+      callback_id: 'create_team_dialog',
+      title: 'Create Team',
+      submit_label: 'Create',
+      state: 'create_team_dialog',
+      elements: [
+        {
+          type: 'text',
+          label: 'Team Name',
+          name: 'team_name'
+        },
+        {
+          type: 'text',
+          label: 'Description',
+          name: 'team_desc',
+          optional: true
+        },
+        {
+          type: 'text',
+          label: 'Project',
+          name: 'team_project'
+        },
+        // {
+        //   type: 'select',
+        //   label: 'Team Visibility',
+        //   name: 'team_visibility',
+        //   value: 'public',
+        //   options: [{
+        //     label: 'Public',
+        //     value: 'public'
+        //   }, {
+        //     label: 'Private',
+        //     value: 'private'
+        //   }]
+        // }
+      ]
+    };
+  }
+
   getUrlFriendlyName(word) {
     return word.replace(/\s/g, '-').toLowerCase();
   }

@@ -4,7 +4,7 @@ import express from 'express';
 import bodyParser from 'body-parser';
 
 import Eventhandler from './core/EventHandler';
-import SlackMessenger from './core/SlackMessenger';
+import InteractionHandler from './core/InteractionHandler';
 import SlashCommandHandler from './core/SlashCommandHandler';
 import Utility from './core/Utility';
 
@@ -18,7 +18,7 @@ app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 
 const handler = new Eventhandler();
-const messenger = new SlackMessenger();
+const interaction = new InteractionHandler();
 const slash = new SlashCommandHandler();
 const utils = new Utility();
 
@@ -26,11 +26,23 @@ app.get('/', async (req, res) => {
   res.status(200).send("Hello World!\nWelcome to Andela Teams for Slack");
 });
 
-app.post('/events', handler.challenge, utils.getUserObjectFromReqBodyEventUser, handler.addMeReaction, handler.default)
+app.post('/events', 
+  handler.challenge,
+  utils.getUserObjectFromReqBodyEventUser,
+  handler.addMeReaction,
+  handler.default)
 
-app.post('/interactions', utils.postEmptyMessage, utils.getUserObjectFromReqBodyPayloadUserId, messenger.handleInteractions)
+app.post('/interactions',
+  utils.postEmptyMessage,
+  utils.getUserObjectFromReqBodyPayloadUserId,
+  interaction.dialogSubmission,
+  interaction.interactiveMessage,
+  interaction.default)
 
-app.post('/slash/teams', utils.postWelcomeMessage, utils.getUserObjectFromReqBodyUserId, slash.teams)
+app.post('/slash/teams',
+  utils.postWelcomeMessage,
+  utils.getUserObjectFromReqBodyUserId,
+  slash.teams)
 
 let server = app.listen(process.env.PORT || 5000, () => {
   let port = server.address().port;
