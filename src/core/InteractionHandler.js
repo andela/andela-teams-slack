@@ -33,14 +33,21 @@ async function _createAndPostGithubRepoLink(req, res) {
     // to use await slack.chat.postResponse
     // replace args req.payload.channel.id and req.payload.user.id
     // with req.payload.response_url
-    await slack.chat.postEphemeral(
+    await slack.chat.postResponse(
       text,
-      req.payload.channel.id,
-      req.payload.user.id,
+      req.payload.response_url,
       [{
         color: result.ok ? 'good' : 'danger',
         text: linkOrError,
       }]);
+    // await slack.chat.postEphemeral(
+    //   text,
+    //   req.payload.channel.id,
+    //   req.payload.user.id,
+    //   [{
+    //     color: result.ok ? 'good' : 'danger',
+    //     text: linkOrError,
+    //   }]);
   } catch(err) {
     console.log(err);
   }

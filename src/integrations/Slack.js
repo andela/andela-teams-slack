@@ -6,11 +6,11 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 class Chat {
-  async postEphemeral(message, channelId, userId, attachments) {console.log('>>>>>>>>>>>>>>>>>>3')
+  async postEphemeral(message, channelId, userId, attachments) {
     try {console.log(process.env.SLACK_USER_TOKEN)
       // post ephemeral message in channel, visible only to user
       let url = 'https://slack.com/api/chat.postEphemeral';
-      let r = await request({
+      await request({
         url: url,
         method: 'POST',
         headers: {
@@ -25,27 +25,30 @@ class Chat {
         }),
         resolveWithFullResponse: true
       });
+    } catch (err) {
+      console.log(err);
+    }
+  }
+  async postResponse(message, responseUrl, attachments) {console.log('>>>>>>>>>>>>>>>>>>3')
+    try {
+      let r = await request({
+        url: responseUrl,
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          text: message,
+          attachments
+        }),
+        json: true,
+        resolveWithFullResponse: true
+      });
       console.log('>>>>>>>>>>>>>>>>>>4')
-      console.log(r)
+      console.log(JSON.parse(r.body))
     } catch (err) {console.log('>>>>>>>>>>>>>>>>>>5')
       console.log(err);
     }
-    
-  }
-  async postResponse(message, responseUrl, attachments) {
-    await request({
-      url: responseUrl,
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: {
-        text: message,
-        attachments
-      },
-      json: true,
-      resolveWithFullResponse: true
-    });
   }
 }
 
