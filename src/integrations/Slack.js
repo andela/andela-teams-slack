@@ -37,10 +37,10 @@ class Chat {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
+        body: {
           text: message,
           attachments
-        }),
+        },
         json: true,
         resolveWithFullResponse: true
       });
