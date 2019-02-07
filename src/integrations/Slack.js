@@ -9,7 +9,7 @@ class Chat {
   async postEphemeral(message, channelId, userId, attachments) {
     try {console.log(process.env.SLACK_USER_TOKEN)
       // post ephemeral message in channel, visible only to user
-      let url = 'https://slack.com/api/chat.postEphemeral';
+      let url = `https://slack.com/api/chat.postEphemeral?token=${process.env.SLACK_USER_TOKEN}`;
       let r = await request({
         url: url,
         method: 'POST',
@@ -17,7 +17,7 @@ class Chat {
           'Content-Type': 'application/x-www-form-urlencoded'
         },
         formData: JSON.stringify({
-          token: process.env.SLACK_USER_TOKEN,
+          // token: process.env.SLACK_USER_TOKEN,
           channel: channelId,
           text: message,
           user: userId,
