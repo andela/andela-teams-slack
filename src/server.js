@@ -29,12 +29,14 @@ app.get('/', async (req, res) => {
 app.post('/events', 
   handler.challenge,
   utils.getUserObjectFromReqBodyEventUser,
+  utils.rejectUsersWithNoEmailOrGithub,
   handler.addMeReaction,
   handler.default)
 
 app.post('/interactions',
   utils.postEmptyMessage,
   utils.getUserObjectFromReqBodyPayloadUserId,
+  utils.rejectUsersWithNoEmailOrGithub,
   interaction.dialogSubmission,
   interaction.interactiveMessage,
   interaction.default)
@@ -42,6 +44,7 @@ app.post('/interactions',
 app.post('/slash/teams',
   utils.postWelcomeMessage,
   utils.getUserObjectFromReqBodyUserId,
+  utils.rejectUsersWithNoEmailOrGithub,
   slash.teams)
 
 let server = app.listen(process.env.PORT || 5000, () => {

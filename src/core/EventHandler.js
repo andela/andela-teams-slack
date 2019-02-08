@@ -10,21 +10,6 @@ export default class EventHandler {
   async addMeReaction(req, res, next) {
     let event = req.body.event;
     if (event.reaction === 'add_me') {
-      if (!req.user.email) {
-        await slack.chat.postEphemeral(
-          'Your email address cannot be found on Slack.\nEnsure there is a value for the *Email* field on your Slack profile.',
-          event.item.channel,
-          event.user);
-        return;
-      }
-      if (!req.user.github_user_name) {
-        await slack.chat.postEphemeral(
-          'Your Github profile cannot be found on Slack.\nEnsure there is a value for the *Github* field on your Slack profile.',
-          event.item.channel,
-          event.user);
-        return;
-      }
-
       if (event.item.type === 'message') {
         var messageText = await slack.resolver.getMessageFromChannel(event.item.ts, event.item.channel);
         // check if messageText is a link <...>

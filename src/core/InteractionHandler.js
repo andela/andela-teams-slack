@@ -233,42 +233,20 @@ export default class InteractionHandler {
       if (value === 'create_team') {
         await slack.dialog.open(req.payload.trigger_id, helpers.getCreateTeamDialogJson());
       } else if (value.startsWith('create_github_repo:')) {
-        if (req.user.github_user_name) {
-          let repoName = value.substring(19);
-          if (repoName === '?') {
-            await slack.dialog.open(req.payload.trigger_id, helpers.getCreateGithubRepoDialogJson());
-          } else {
-            req.repoName = repoName;
-            _createAndPostGithubRepoLink(req, res);
-          }
+        let repoName = value.substring(19);
+        if (repoName === '?') {
+          await slack.dialog.open(req.payload.trigger_id, helpers.getCreateGithubRepoDialogJson());
         } else {
-          await slack.chat.postEphemeral(
-            'Your Github profile cannot be found on Slack',
-            req.payload.channel.id,
-            req.payload.user.id,
-            [{
-              color: 'danger',
-              text: 'Ensure there is a value for the *Github* field on your Slack profile',
-            }]);
+          req.repoName = repoName;
+          _createAndPostGithubRepoLink(req, res);
         }
       } else if (value.startsWith('create_pt_project:')) {
-        if (req.user.email) {
-          let projectName = value.substring(18);
-          if (projectName === '?') {
-            await slack.dialog.open(req.payload.trigger_id, helpers.getCreatePtProjectDialogJson());
-          } else {
-            req.projectName = projectName;
-            _createAndPostPtProjectLink(req, res);
-          }
+        let projectName = value.substring(18);
+        if (projectName === '?') {
+          await slack.dialog.open(req.payload.trigger_id, helpers.getCreatePtProjectDialogJson());
         } else {
-          await slack.chat.postEphemeral(
-            'Your email address cannot be found on Slack',
-            req.payload.channel.id,
-            req.payload.user.id,
-            [{
-              color: 'danger',
-              text: 'Ensure there is a value for the *Email* field on your Slack profile',
-            }]);
+          req.projectName = projectName;
+          _createAndPostPtProjectLink(req, res);
         }
       }
 
