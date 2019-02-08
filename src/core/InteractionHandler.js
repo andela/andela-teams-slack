@@ -1,5 +1,3 @@
-import request from 'request-promise-native';
-
 import Github from '../integrations/Github';
 import HelperFunctions from './HelperFunctions';
 import PivotalTracker from '../integrations/PivotalTracker';
