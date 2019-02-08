@@ -83,28 +83,9 @@ export default class HelperFunctions {
         },
         {
           type: 'text',
-          label: 'Description',
-          name: 'team_desc',
-          optional: true
-        },
-        {
-          type: 'text',
           label: 'Project',
           name: 'team_project'
-        },
-        // {
-        //   type: 'select',
-        //   label: 'Team Visibility',
-        //   name: 'team_visibility',
-        //   value: 'public',
-        //   options: [{
-        //     label: 'Public',
-        //     value: 'public'
-        //   }, {
-        //     label: 'Private',
-        //     value: 'private'
-        //   }]
-        // }
+        }
       ]
     };
   }
