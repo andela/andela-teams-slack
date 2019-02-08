@@ -31,7 +31,7 @@ app.post('/events',
   utils.getUserObjectFromReqBodyEventUser,
   utils.rejectUsersWithNoEmailOrGithub,
   handler.addMeReaction,
-  handler.default)
+  utils.handleErrors)
 
 app.post('/interactions',
   utils.postEmptyMessage,
@@ -39,13 +39,14 @@ app.post('/interactions',
   utils.rejectUsersWithNoEmailOrGithub,
   interaction.dialogSubmission,
   interaction.interactiveMessage,
-  interaction.default)
+  utils.handleErrors)
 
 app.post('/slash/teams',
   utils.postWelcomeMessage,
   utils.getUserObjectFromReqBodyUserId,
   utils.rejectUsersWithNoEmailOrGithub,
-  slash.teams)
+  slash.teams,
+  utils.handleErrors)
 
 let server = app.listen(process.env.PORT || 5000, () => {
   let port = server.address().port;

@@ -3,7 +3,7 @@ import Slack from '../integrations/Slack';
 const slack = new Slack();
 
 export default class SlashCommandHandler {
-  async teams(req, res) {
+  async teams(req, res, next) {
     try {
       var actions = [];
       if (req.user && req.user.is_sims_facilitator) {
@@ -29,8 +29,8 @@ export default class SlashCommandHandler {
       }];
 
       await slack.chat.postResponse(null, req.body.response_url, attachments);
-    } catch (err) {
-      console.log(err);
+    } catch (error) {
+      next(error);
     }
   }
 }
