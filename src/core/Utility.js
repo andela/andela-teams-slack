@@ -29,31 +29,32 @@ export default class Utility {
     next();
   }
   async rejectUsersWithNoEmailOrGithub(req, res, next) {
-    // if (req.user && req.user.email && req.user.github_user_name) {
-    //   next();
-    // } else {
-    //   let channelId, userId;
-    //   if (req.body.channel_id && req.body.user_id) {
-    //     channelId = req.body.channel_id;
-    //     userId = req.body.user_id;
-    //   } else if (req.body.event) {
-    //     channelId = req.body.event.item.channel;
-    //     userId = req.body.event.user;
-    //   } else if (req.payload) {
-    //     channelId = req.payload.channel.id;
-    //     userId = req.payload.user.id;
-    //   }
-    //   if (channelId && userId) { // just in case channelId or userId is still undefined
-    //     await slack.chat.postEphemeral(
-    //       'Your email address or Github profile cannot be found on Slack',
-    //       channelId,
-    //       userId,
-    //       [{
-    //         color: 'danger',
-    //         text: 'Ensure there are values for the *Email* and *Github* fields on your Slack profile',
-    //       }]);
-    //   }
-    // }
-    next();
+    if (req.user && req.user.email && req.user.github_user_name) {
+      next();
+    } else {
+      let channelId, userId;
+      if (req.body.event
+        && req.body.event.reaction === 'add_me') {
+        channelId = req.body.event.item.channel;
+        userId = req.body.event.user;
+      } else if (req.payload) {
+        channelId = req.payload.channel.id;
+        userId = req.payload.user.id;
+      } else if (req.body.channel_id && req.body.user_id) {
+        channelId = req.body.channel_id;
+        userId = req.body.user_id;
+      }
+      // just in case channelId or userId is still undefined
+      if (channelId && userId) {
+        await slack.chat.postEphemeral(
+          'Your email address or Github profile cannot be found on Slack',
+          channelId,
+          userId,
+          [{
+            color: 'danger',
+            text: 'Ensure there are values for the *Email* and *Github* fields on your Slack profile',
+          }]);
+      }
+    }
   }
 }
