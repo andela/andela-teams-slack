@@ -126,32 +126,22 @@ export default class HelperFunctions {
         },
         {
           type: 'select',
-          label: 'Send as DM',
-          name: 'feedback_dm_user',
-          hint: 'Send feedback as direct message to user',
+          label: 'Send Feedback to Target User',
+          name: 'feedback_to_user',
           optional: true,
           value: 'no',
           options: [{
-            label: 'Yes',
-            value: 'yes'
-          }, {
             label: 'No',
             value: 'no'
-          }]
-        },
-        {
-          type: 'select',
-          label: 'Send as Email',
-          name: 'feedback_email_user',
-          hint: 'Send feedback as email to user',
-          optional: true,
-          value: 'no',
-          options: [{
-            label: 'Yes',
-            value: 'yes'
           }, {
-            label: 'No',
-            value: 'no'
+            label: 'Send as DM',
+            value: 'dm'
+          }, {
+            label: 'Send as Email',
+            value: 'email'
+          }, {
+            label: 'Send as DM and Email',
+            value: 'dm_and_email'
           }]
         },
         {
