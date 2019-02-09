@@ -29,20 +29,25 @@ app.get('/', async (req, res) => {
 app.post('/events', 
   handler.challenge,
   utils.getUserObjectFromReqBodyEventUser,
+  utils.rejectUsersWithNoEmailOrGithub,
   handler.addMeReaction,
-  handler.default)
+  utils.handleErrors)
 
 app.post('/interactions',
   utils.postEmptyMessage,
   utils.getUserObjectFromReqBodyPayloadUserId,
+  utils.rejectUsersWithNoEmailOrGithub,
   interaction.dialogSubmission,
   interaction.interactiveMessage,
-  interaction.default)
+  interaction.messageAction,
+  utils.handleErrors)
 
 app.post('/slash/teams',
   utils.postWelcomeMessage,
   utils.getUserObjectFromReqBodyUserId,
-  slash.teams)
+  utils.rejectUsersWithNoEmailOrGithub,
+  slash.teams,
+  utils.handleErrors)
 
 let server = app.listen(process.env.PORT || 5000, () => {
   let port = server.address().port;
