@@ -42,7 +42,7 @@ class Chat {
 class Dialog {
   async open(triggerId, dialogJson) {
     let url = 'https://slack.com/api/dialog.open';
-    await request({
+    let r = await request({
       url,
       method: 'POST',
       headers: {
@@ -55,6 +55,7 @@ class Dialog {
       },
       resolveWithFullResponse: true
     });
+    console.log('>>>>>>>>>>');console.log(r.body);
   }
 }
 
