@@ -126,7 +126,7 @@ export default class HelperFunctions {
         },
         {
           type: 'select',
-          label: 'Send Feedback to Target User',
+          label: 'Send Feedback',
           name: 'feedback_to_user',
           optional: true,
           value: 'no',
