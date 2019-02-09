@@ -90,7 +90,6 @@ async function _handleCreatePtProjectDialog(req) {
 
 async function _handleRecordFeedbackDialog(req) {
   let submission = req.payload.submission;
-  console.log(submission);
   // TODO: update the feedback with the given ID
   // TODO: consider add :feedback: reaction to the message and/or highlighting the message
   await slack.chat.postEphemeral(
