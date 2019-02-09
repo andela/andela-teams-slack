@@ -1,16 +1,22 @@
 module.exports = {
-  up: (queryInterface, Sequelize) => queryInterface.createTable('Resources', {
+  up: (queryInterface, Sequelize) => queryInterface.createTable('Skills', {
       id: {
         allowNull: false,
-        autoIncrement: true,
+        autoIncrement: false,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      url: {
+      attributeId: {
+        type: Sequelize.INTEGER,
         allowNull: false,
-        type: Sequelize.STRING
+        onDelete: 'CASCADE',
+        references: {
+          model: 'Attributes',
+          key: 'id',
+          as: 'attributeId',
+        },
       },
-      userId: {
+      name: {
         allowNull: false,
         type: Sequelize.STRING
       },
@@ -25,5 +31,5 @@ module.exports = {
         defaultValue: Sequelize.literal('NOW()')
       }
     }),
-  down: (queryInterface, Sequelize) => queryInterface.dropTable('Resources')
+  down: (queryInterface, Sequelize) => queryInterface.dropTable('Skills')
 };

@@ -8,6 +8,7 @@ import InteractionHandler from './core/InteractionHandler';
 import SlashCommandHandler from './core/SlashCommandHandler';
 import Utility from './core/Utility';
 
+import models from './models'; ////////////////////////////////////////
 
 if (process.env.NODE_ENV !== 'production') {
   dotenv.config();
@@ -22,8 +23,58 @@ const interaction = new InteractionHandler();
 const slash = new SlashCommandHandler();
 const utils = new Utility();
 
+// app.use(async (req, res, next) => {
+//   const allAttributes = await models.Attribute.findAll({
+//     include: [
+//       { model: models.Skill, as: 'skills' },
+//     ]
+//   });
+//   let groups = allAttributes.map(a => {
+//     let group = {};
+//     a = a.get();
+//     group.id = a.id; // used only for sorting
+//     group.label = a.name;
+//     group.options = a.skills.map(s => {
+//       s = s.get();
+//       return {
+//         label: s.name,
+//         value: s.id
+//       }
+//     });
+//     return group;
+//   });
+//   groups = groups.sort((a, b) => a.id - b.id);
+//   console.log(groups);
+//   console.log(groups[0].options)
+//   next();
+// });
+
 app.get('/', async (req, res) => {
   res.status(200).send("Hello World!\nWelcome to Andela Teams for Slack");
+});
+
+app.post('/data/external', async (req, res, next) => {
+  const allAttributes = await models.Attribute.findAll({
+    include: [
+      { model: models.Skill, as: 'skills' },
+    ]
+  });
+  let option_groups = allAttributes.map(a => {
+    let group = {};
+    a = a.get();
+    group.id = a.id; // used only for sorting
+    group.label = a.name;
+    group.options = a.skills.map(s => {
+      s = s.get();
+      return {
+        label: s.name,
+        value: s.id
+      }
+    });
+    return group;
+  });
+  option_groups = option_groups.sort((a, b) => a.id - b.id);
+  return res.status(200).json({ option_groups });
 });
 
 app.post('/events', 
@@ -31,7 +82,7 @@ app.post('/events',
   utils.getUserObjectFromReqBodyEventUser,
   utils.rejectUsersWithNoEmailOrGithub,
   handler.addMeReaction,
-  utils.handleErrors)
+  utils.handleErrors);
 
 app.post('/interactions',
   utils.postEmptyMessage,
@@ -40,14 +91,14 @@ app.post('/interactions',
   interaction.dialogSubmission,
   interaction.interactiveMessage,
   interaction.messageAction,
-  utils.handleErrors)
+  utils.handleErrors);
 
 app.post('/slash/teams',
   utils.postWelcomeMessage,
   utils.getUserObjectFromReqBodyUserId,
   utils.rejectUsersWithNoEmailOrGithub,
   slash.teams,
-  utils.handleErrors)
+  utils.handleErrors);
 
 let server = app.listen(process.env.PORT || 5000, () => {
   let port = server.address().port;

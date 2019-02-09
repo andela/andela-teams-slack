@@ -99,30 +99,12 @@ export default class HelperFunctions {
           name: 'feedback_target_user',
           data_source: 'users'
         },
-        { // TODO: load this from an "external" data source
+        {
           type: 'select',
           label: 'Skill',
           name: 'feedback_skill',
-          optional: true,
-          option_groups: [{
-            label: 'Quality',
-            options: [{
-              label: 'Attention to Detail',
-              value: '1,1'
-            }, {
-              label: 'Requirements Analysis',
-              value: '1,2'
-            }]
-          }, {
-            label: 'Quantity',
-            options: [{
-              label: 'Developer Tools',
-              value: '2,1'
-            }, {
-              label: 'Business Tools',
-              value: '2,2'
-            }]
-          }]
+          data_source: 'external',
+          optional: true
         },
         {
           type: 'select',
