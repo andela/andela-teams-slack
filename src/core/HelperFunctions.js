@@ -3,7 +3,6 @@ export default class HelperFunctions {
     return {
       callback_id: 'create_github_repo_dialog',
       title: 'Create Github Repo',
-      submit_label: 'Create',
       state: 'create_github_repo_dialog',
       elements: [
         {
@@ -38,7 +37,6 @@ export default class HelperFunctions {
     return {
       callback_id: 'create_pt_project_dialog',
       title: 'Create PT Project',
-      submit_label: 'Create',
       state: 'create_pt_project_dialog',
       elements: [
         {
@@ -73,7 +71,6 @@ export default class HelperFunctions {
     return {
       callback_id: 'create_team_dialog',
       title: 'Create Team',
-      submit_label: 'Create',
       state: 'create_team_dialog',
       elements: [
         {
@@ -85,6 +82,92 @@ export default class HelperFunctions {
           type: 'text',
           label: 'Project',
           name: 'team_project'
+        }
+      ]
+    };
+  }
+
+  getRecordFeedbackDialogJson(feedbackId) {
+    return {
+      callback_id: `record_feedback_dialog:${feedbackId}`,
+      title: 'Record Feedback',
+      state: 'record_feedback_dialog',
+      elements: [
+        { 
+          type: 'select',
+          label: 'Target User',
+          name: 'feedback_target_user',
+          data_source: 'users'
+        },
+        { // TODO: load this from an "external" data source
+          type: 'select',
+          label: 'Skill',
+          name: 'feedback_skill',
+          optional: true,
+          option_groups: [{
+            label: 'Quality',
+            options: [{
+              label: 'Attention to Detail',
+              value: '1,1'
+            }, {
+              label: 'Requirements Analysis',
+              value: '1,2'
+            }]
+          }, {
+            label: 'Quantity',
+            options: [{
+              label: 'Developer Tools',
+              value: '2,1'
+            }, {
+              label: 'Business Tools',
+              value: '2,2'
+            }]
+          }]
+        },
+        {
+          type: 'select',
+          label: 'Send as DM',
+          name: 'feedback_dm_user',
+          hint: 'Send feedback as direct message to user',
+          optional: true,
+          value: 'no',
+          options: [{
+            label: 'Yes',
+            value: 'yes'
+          }, {
+            label: 'No',
+            value: 'no'
+          }]
+        },
+        {
+          type: 'select',
+          label: 'Send as Email',
+          name: 'feedback_email_user',
+          hint: 'Send feedback as email to user',
+          optional: true,
+          value: 'no',
+          options: [{
+            label: 'Yes',
+            value: 'yes'
+          }, {
+            label: 'No',
+            value: 'no'
+          }]
+        },
+        {
+          type: 'text',
+          label: 'CC',
+          name: 'feedback_email_cc',
+          hint: 'If you choose to send feedback as email to user, supply comma-separated list of emails to CC',
+          optional: true,
+          placeholder: 'tdd-ops@andela.com, tdd-d0-ops@andela.com'
+        },
+        {
+          type: 'textarea',
+          label: 'Context',
+          name: 'feedback_context',
+          hint: 'Provide backgroud context to the feedback',
+          optional: true
         }
       ]
     };

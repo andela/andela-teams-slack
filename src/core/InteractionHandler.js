@@ -226,4 +226,25 @@ export default class InteractionHandler {
       next(error);
     }
   }
+  async messageAction(req, res, next) {
+    try {
+      let payload = req.payload;
+      if (payload.type === 'message_action') {
+        if (payload.callback_id === 'record_feedback') {
+          if (req.user && req.user.is_sims_facilitator) {
+            let message = payload.message.text;
+            // TODO: save feedback message and get feedback ID
+            let feedbackId = 1001;
+            await slack.dialog.open(req.payload.trigger_id, helpers.getRecordFeedbackDialogJson(feedbackId));
+          } else {
+            // TODO: send ephemeral message telling user they need to be an LF
+          }
+        }
+        return;
+      }
+      next();
+    } catch(error) {
+      next(error);
+    }
+  }
 }
