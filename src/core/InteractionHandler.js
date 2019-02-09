@@ -244,7 +244,7 @@ export default class InteractionHandler {
         return;
       }
       next();
-    } catch(error) {
+    } catch(error) {console.log('>>>>>>>>>>2');console.log(error);
       next(error);
     }
   }
