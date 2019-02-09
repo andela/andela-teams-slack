@@ -1,5 +1,6 @@
 import Github from '../integrations/Github';
 import HelperFunctions from './HelperFunctions';
+import models from '../models';
 import PivotalTracker from '../integrations/PivotalTracker';
 import Slack from '../integrations/Slack';
 
@@ -37,6 +38,13 @@ async function _createAndPostGithubRepoLink(req) {
       color: result.ok ? 'good' : 'danger',
       text: linkOrError,
     }]);
+
+  if (result.url) {
+    await models.Resource.create({
+      url: result.url,
+      userId: req.payload.user.id
+    });
+  }
 }
 
 async function _createAndPostPtProjectLink(req) {
@@ -64,6 +72,13 @@ async function _createAndPostPtProjectLink(req) {
       color: result.ok ? 'good' : 'danger',
       text: linkOrError,
     }]);
+
+    if (result.url) {
+      await models.Resource.create({
+        url: result.url,
+        userId: req.payload.user.id
+      });
+    }
 }
 
 async function _handleCreateGithubRepoDialog(req) {

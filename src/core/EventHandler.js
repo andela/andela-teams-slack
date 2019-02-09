@@ -1,4 +1,5 @@
 import Github from '../integrations/Github';
+import models from '../models';
 import PivotalTracker from '../integrations/PivotalTracker';
 import Slack from '../integrations/Slack';
 
@@ -17,6 +18,17 @@ export default class EventHandler {
           if (messageText.toLowerCase().startsWith('<http') && messageText.endsWith('>')) {
             // trim messageText of < and > to get link
             let messageLink = messageText.substring(1, messageText.length - 1).toLowerCase();
+            // ensure the link was created by this app by checking the database
+            const existingResource = await models.Resource.findOne({
+              where: { url: messageLink }
+            });
+            if (!existingResource) {
+              await slack.chat.postEphemeral(
+                `The resource ${messageLink} was not created using Andela Teams.`,
+                event.item.channel,
+                event.user);
+              return;
+            }
             if (event.type === 'reaction_added') {
               if (messageLink.includes(`github.com/${process.env.GITHUB_ORGANIZATION}/`)) {
                 let repo = messageLink.substring(messageLink.lastIndexOf('/') + 1);
