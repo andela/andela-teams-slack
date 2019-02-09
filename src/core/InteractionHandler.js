@@ -94,7 +94,7 @@ async function _handleRecordFeedbackDialog(req) {
   // TODO: update the feedback with the given ID
   // TODO: consider add :feedback: reaction to the message and/or highlighting the message
   await slack.chat.postEphemeral(
-    'Feedback recorded1',
+    'Feedback recorded!',
     req.payload.channel.id,
     req.payload.user.id);
 }
