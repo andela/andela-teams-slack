@@ -29,7 +29,7 @@ export default class SlashCommandHandler {
       }];
 
       await slack.chat.postResponse(null, req.body.response_url, attachments);
-    } catch (error) {
+    } catch (error) {console.log(error);
       next(error);
     }
   }
