@@ -35,7 +35,7 @@ export default class EventHandler {
                 await github.repo.addUser(req.user.github_user_name, repo);
               } else if (messageLink.includes('pivotaltracker.com/projects/')) {
                 let projId = messageLink.substring(messageLink.lastIndexOf('/') + 1);
-                await pivotal.project.addUser(req.user.email, projId, { role: 'owner' });
+                await pivotal.project.addUser(req.user.email, projId);
               }
               await slack.chat.postEphemeral(`Confirm you have been added to ${messageLink}`, event.item.channel, event.user);
               return;
