@@ -39,6 +39,7 @@ app.post('/interactions',
   utils.rejectUsersWithNoEmailOrGithub,
   interaction.dialogSubmission,
   interaction.interactiveMessage,
+  interaction.messageAction,
   utils.handleErrors)
 
 app.post('/slash/teams',

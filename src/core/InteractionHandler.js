@@ -88,6 +88,16 @@ async function _handleCreatePtProjectDialog(req) {
   await _createAndPostPtProjectLink(req);
 }
 
+async function _handleRecordFeedbackDialog(req) {
+  let submission = req.payload.submission;
+  // TODO: update the feedback with the given ID
+  // TODO: consider add :feedback: reaction to the message and/or highlighting the message
+  await slack.chat.postEphemeral(
+    'Feedback recorded!',
+    req.payload.channel.id,
+    req.payload.user.id);
+}
+
 async function _postCreateGithubReposPage(req) {
   let submission = req.payload.submission;
   var teamName = submission.team_name;
@@ -187,6 +197,8 @@ export default class InteractionHandler {
         } else if (payload.callback_id === 'create_team_dialog') {
           await _postCreateGithubReposPage(req);
           await _postCreatePtBoardPage(req);
+        } else if (payload.callback_id.startsWith('record_feedback_dialog:')) {
+          await _handleRecordFeedbackDialog(req);
         }
         return;
       }
@@ -217,6 +229,29 @@ export default class InteractionHandler {
           } else {
             req.projectName = projectName;
             await _createAndPostPtProjectLink(req);
+          }
+        }
+        return;
+      }
+      next();
+    } catch(error) {
+      next(error);
+    }
+  }
+  async messageAction(req, res, next) {
+    try {
+      let payload = req.payload;
+      if (payload.type === 'message_action') {
+        if (payload.callback_id === 'record_feedback') {
+          if (req.user && req.user.is_sims_facilitator) {
+            let message = payload.message.text;
+            // TODO: save feedback message and get feedback ID
+            let feedbackId = 1001;
+            let response =
+              await slack.dialog.open(req.payload.trigger_id, helpers.getRecordFeedbackDialogJson(feedbackId));
+            // TODO: if response.ok is false delete just-created feedback
+          } else {
+            // TODO: send ephemeral message telling user they need to be an LF
           }
         }
         return;
