@@ -24,7 +24,7 @@ class Chat {
     return JSON.parse(response.body);
   }
   async postResponse(message, responseUrl, attachments) {
-    let response = await request({
+    await request({
       url: responseUrl,
       method: 'POST',
       headers: {
@@ -37,7 +37,6 @@ class Chat {
       json: true,
       resolveWithFullResponse: true
     });
-    return JSON.parse(response.body);
   }
 }
 
