@@ -13,7 +13,7 @@ class Chat {
     url += `&channel=${channelId}`;
     url += `&user=${userId}`;
     url += `&text=${message}`;
-    let r = await request({
+    let response = await request({
       url: url,
       method: 'POST',
       headers: {
@@ -21,9 +21,10 @@ class Chat {
       },
       resolveWithFullResponse: true
     });
+    return JSON.parse(response.body);
   }
   async postResponse(message, responseUrl, attachments) {
-    await request({
+    let response = await request({
       url: responseUrl,
       method: 'POST',
       headers: {
@@ -36,13 +37,14 @@ class Chat {
       json: true,
       resolveWithFullResponse: true
     });
+    return JSON.parse(response.body);
   }
 }
 
 class Dialog {
   async open(triggerId, dialogJson) {
     let url = 'https://slack.com/api/dialog.open';
-    let r = await request({
+    let response = await request({
       url,
       method: 'POST',
       headers: {
@@ -55,7 +57,7 @@ class Dialog {
       },
       resolveWithFullResponse: true
     });
-    console.log('>>>>>>>>>>');console.log(r.body);
+    return JSON.parse(response.body);
   }
 }
 

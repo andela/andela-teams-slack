@@ -235,7 +235,9 @@ export default class InteractionHandler {
             let message = payload.message.text;
             // TODO: save feedback message and get feedback ID
             let feedbackId = 1001;
-            await slack.dialog.open(req.payload.trigger_id, helpers.getRecordFeedbackDialogJson(feedbackId));
+            let response =
+              await slack.dialog.open(req.payload.trigger_id, helpers.getRecordFeedbackDialogJson(feedbackId));
+            // TODO: if response.ok is false delete just-created feedback
           } else {
             // TODO: send ephemeral message telling user they need to be an LF
           }
@@ -243,7 +245,7 @@ export default class InteractionHandler {
         return;
       }
       next();
-    } catch(error) {console.log('>>>>>>>>>>2');console.log(error);
+    } catch(error) {
       next(error);
     }
   }
