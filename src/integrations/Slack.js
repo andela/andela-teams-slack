@@ -37,6 +37,8 @@ class Chat {
       json: true,
       resolveWithFullResponse: true
     });
+    console.log(response.body);
+    console.log(typeof response.body);
     return JSON.parse(response.body);
   }
 }
