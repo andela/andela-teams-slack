@@ -237,6 +237,7 @@ export default class InteractionHandler {
             let feedbackId = 1001;
             let response =
               await slack.dialog.open(req.payload.trigger_id, helpers.getRecordFeedbackDialogJson(feedbackId));
+            console.log('>>>>>>>>>');console.log(response)
             // TODO: if response.ok is false delete just-created feedback
           } else {
             // TODO: send ephemeral message telling user they need to be an LF
