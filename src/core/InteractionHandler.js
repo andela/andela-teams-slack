@@ -41,7 +41,7 @@ async function _createAndPostGithubRepoLink(req) {
 
   if (result.url) {
     await models.Resource.create({
-      url: result.url,
+      url: result.url.toLowerCase(),
       userId: req.payload.user.id
     });
   }
@@ -75,7 +75,7 @@ async function _createAndPostPtProjectLink(req) {
 
     if (result.url) {
       await models.Resource.create({
-        url: result.url,
+        url: result.url.toLowerCase(),
         userId: req.payload.user.id
       });
     }
