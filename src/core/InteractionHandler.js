@@ -88,6 +88,17 @@ async function _handleCreatePtProjectDialog(req) {
   await _createAndPostPtProjectLink(req);
 }
 
+async function _handleRecordFeedbackDialog(req) {
+  let submission = req.payload.submission;
+  console.log(submission);
+  // TODO: update the feedback with the given ID
+  // TODO: consider add :feedback: reaction to the message and/or highlighting the message
+  await slack.chat.postEphemeral(
+    'Feedback recorded1',
+    req.payload.channel.id,
+    req.payload.user.id);
+}
+
 async function _postCreateGithubReposPage(req) {
   let submission = req.payload.submission;
   var teamName = submission.team_name;
@@ -187,6 +198,8 @@ export default class InteractionHandler {
         } else if (payload.callback_id === 'create_team_dialog') {
           await _postCreateGithubReposPage(req);
           await _postCreatePtBoardPage(req);
+        } else if (payload.callback_id.startsWith('record_feedback_dialog:')) {
+          await _handleRecordFeedbackDialog(req);
         }
         return;
       }
@@ -237,7 +250,6 @@ export default class InteractionHandler {
             let feedbackId = 1001;
             let response =
               await slack.dialog.open(req.payload.trigger_id, helpers.getRecordFeedbackDialogJson(feedbackId));
-            console.log('>>>>>>>>>');console.log(response)
             // TODO: if response.ok is false delete just-created feedback
           } else {
             // TODO: send ephemeral message telling user they need to be an LF
