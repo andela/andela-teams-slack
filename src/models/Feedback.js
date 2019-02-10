@@ -42,5 +42,14 @@ export default (sequelize, DataTypes) => {
     });
   };
 
+  Feedback.hook('afterCreate', (feedback, options) => {
+    // delete feedback instances older than 4 months (120 days)
+    return Feedback.destroy({
+      where: {
+        createdAt: { $lt: new Date(new Date() - 120 * 24 * 60 * 60 * 1000) }
+      }
+    })
+  });
+
   return Feedback;
 };
