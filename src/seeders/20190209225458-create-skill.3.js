@@ -10,11 +10,11 @@ module.exports = {
     }, {
       id: 303,
       attributeId: 3,
-      name: 'Problem solving'
+      name: 'Motivation & Commitment'
     }, {
       id: 304,
       attributeId: 3,
-      name: 'Holistic thinking'
+      name: 'Problem Solving & Critical Thinking'
     }], {}),
   down: (queryInterface, Sequelize) => queryInterface.bulkDelete('Skills', null, {})
 };
