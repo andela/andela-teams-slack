@@ -116,7 +116,7 @@ async function _handleRecordFeedbackDialog(req) {
   const feedback = await models.FeedbackInstance.findOne({
     where: { id: feedbackId }
   });
-  console.log('>>>>>>>>>>>>>>>>>>>>>2');console.log(feedback);
+  console.log('>>>>>>>>>>>>>>>>>>>>>2');console.log(feedback.get());
   // TODO: consider add :feedback: reaction to the message and/or highlighting the message on Slack
   await slack.chat.postEphemeral(
     'Feedback recorded!',
@@ -274,7 +274,7 @@ export default class InteractionHandler {
               from: payload.user.id,
               message: payload.message.text
             });
-            console.log('>>>>>>>>>>>>>>>>>>>>>>>>>');console.log(feedback);
+            console.log('>>>>>>>>>>>>>>>>>>>>>>>>>');console.log(feedback.get());
             let response =
               await slack.dialog.open(payload.trigger_id, helpers.getRecordFeedbackDialogJson(feedback.id));
             if (!response.ok) {
