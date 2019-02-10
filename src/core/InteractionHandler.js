@@ -105,8 +105,16 @@ async function _handleCreatePtProjectDialog(req) {
 
 async function _handleRecordFeedbackDialog(req) {
   let submission = req.payload.submission;
-  // TODO: update the feedback with the given ID
-  // TODO: consider add :feedback: reaction to the message and/or highlighting the message
+  let feedbackId = parseInt(req.payload.callback_id.substring(23), 10);
+  const feedback = await models.Feedback.update({
+    context: submission.feedback_context,
+    skillId: parseInt(submission.feedback_skill, 10) || undefined,
+    to: submission.feedback_target_user
+  }, {
+    where: { id: feedbackId }
+  });
+  console.log('>>>>>>>>>>>>>>>>>>>>>2');console.log(feedback);
+  // TODO: consider add :feedback: reaction to the message and/or highlighting the message on Slack
   await slack.chat.postEphemeral(
     'Feedback recorded!',
     req.payload.channel.id,
@@ -228,11 +236,11 @@ export default class InteractionHandler {
       if (payload.type === 'interactive_message') {
         const value = payload.actions[0].value;
         if (value === 'create_team') {
-          await slack.dialog.open(req.payload.trigger_id, helpers.getCreateTeamDialogJson());
+          await slack.dialog.open(payload.trigger_id, helpers.getCreateTeamDialogJson());
         } else if (value.startsWith('create_github_repo:')) {
           let repoName = value.substring(19);
           if (repoName === '?') {
-            await slack.dialog.open(req.payload.trigger_id, helpers.getCreateGithubRepoDialogJson());
+            await slack.dialog.open(payload.trigger_id, helpers.getCreateGithubRepoDialogJson());
           } else {
             req.repoName = repoName;
             await _createAndPostGithubRepoLink(req);
@@ -240,7 +248,7 @@ export default class InteractionHandler {
         } else if (value.startsWith('create_pt_project:')) {
           let projectName = value.substring(18);
           if (projectName === '?') {
-            await slack.dialog.open(req.payload.trigger_id, helpers.getCreatePtProjectDialogJson());
+            await slack.dialog.open(payload.trigger_id, helpers.getCreatePtProjectDialogJson());
           } else {
             req.projectName = projectName;
             await _createAndPostPtProjectLink(req);
@@ -259,14 +267,25 @@ export default class InteractionHandler {
       if (payload.type === 'message_action') {
         if (payload.callback_id === 'record_feedback') {
           if (req.user && req.user.is_sims_facilitator) {
-            let message = payload.message.text;
-            // TODO: save feedback message and get feedback ID
-            let feedbackId = 1001;
+            const feedback = await models.Feedback.create({
+              from: payload.user.id,
+              message: payload.message.text
+            });
+            console.log('>>>>>>>>>>>>>>>>>>>>>>>>>');console.log(feedback);
             let response =
-              await slack.dialog.open(req.payload.trigger_id, helpers.getRecordFeedbackDialogJson(feedbackId));
-            // TODO: if response.ok is false delete just-created feedback
+              await slack.dialog.open(payload.trigger_id, helpers.getRecordFeedbackDialogJson(feedback.id));
+            if (!response.ok) {
+              await slack.chat.postEphemeral(
+                'This action cannot be performed at the moment. Try again later.',
+                payload.channel.id,
+                payload.user.id);
+              await feedback.destroy();
+            }
           } else {
-            // TODO: send ephemeral message telling user they need to be an LF
+            await slack.chat.postEphemeral(
+              'This action can only be performed by Learning Facilitators',
+              payload.channel.id,
+              payload.user.id);
           }
         }
         return;
