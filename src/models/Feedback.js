@@ -1,5 +1,5 @@
 export default (sequelize, DataTypes) => {
-  const Feedback = sequelize.define('Feedback', {
+  const Feedback = sequelize.define('FeedbackInstance', {
     id: {
       allowNull: false,
       autoIncrement: true,

@@ -1,5 +1,5 @@
 module.exports = {
-  up: (queryInterface, Sequelize) => queryInterface.createTable('Feedback', {
+  up: (queryInterface, Sequelize) => queryInterface.createTable('FeedbackInstances', {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -41,5 +41,5 @@ module.exports = {
         type: Sequelize.DATE,
       }
     }),
-  down: (queryInterface, Sequelize) => queryInterface.dropTable('Feedback')
+  down: (queryInterface, Sequelize) => queryInterface.dropTable('FeedbackInstances')
 };
