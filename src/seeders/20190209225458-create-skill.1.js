@@ -2,7 +2,7 @@ module.exports = {
   up: (queryInterface, Sequelize) => queryInterface.bulkInsert('Skills', [{
       id: 101,  
       attributeId: 1,
-      name: 'Attention to detail'
+      name: 'Attention to Detail'
     }, {
       id: 102,
       attributeId: 1,

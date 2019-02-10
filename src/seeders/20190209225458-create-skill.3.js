@@ -6,7 +6,7 @@ module.exports = {
     }, {
       id: 302,
       attributeId: 3,
-      name: 'Decision making'
+      name: 'Decision Making'
     }, {
       id: 303,
       attributeId: 3,
