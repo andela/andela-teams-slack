@@ -27,7 +27,9 @@ app.get('/', async (req, res) => {
   res.status(200).send("Hello World!\nWelcome to Andela Teams for Slack");
 });
 
-app.post('/data/external', data.getAttributesAndSkills);
+app.post('/data/external',
+  utils.getUserObjectFromReqBodyPayloadUserId,
+  data.dialogSuggestions);
 
 app.post('/events', 
   event.challenge,
