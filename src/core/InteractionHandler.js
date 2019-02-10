@@ -106,11 +106,14 @@ async function _handleCreatePtProjectDialog(req) {
 async function _handleRecordFeedbackDialog(req) {
   let submission = req.payload.submission;
   let feedbackId = parseInt(req.payload.callback_id.substring(23), 10);
-  const feedback = await models.FeedbackInstance.update({
+  await models.FeedbackInstance.update({
     context: submission.feedback_context,
     skillId: parseInt(submission.feedback_skill, 10) || undefined,
     to: submission.feedback_target_user
   }, {
+    where: { id: feedbackId }
+  });
+  const feedback = await models.FeedbackInstance.findOne({
     where: { id: feedbackId }
   });
   console.log('>>>>>>>>>>>>>>>>>>>>>2');console.log(feedback);
