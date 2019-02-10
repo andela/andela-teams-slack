@@ -126,8 +126,8 @@ async function _handleRecordFeedbackDialogCancellation(req) {
   const feedback = await models.FeedbackInstance.findOne({
     where: { id: feedbackId }
   });
-  if (feedback) {console.log('we found the feedback:');console.log(feedback)
-    await feedback.destroy();console.log('we destroyed the feedback:');
+  if (feedback) {
+    await feedback.destroy();
   }
 }
 
