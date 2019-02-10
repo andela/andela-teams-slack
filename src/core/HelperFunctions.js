@@ -107,34 +107,6 @@ export default class HelperFunctions {
           data_source: 'external'
         },
         {
-          type: 'select',
-          label: 'Send Feedback',
-          name: 'feedback_to_user',
-          optional: true,
-          value: 'no',
-          options: [{
-            label: 'No',
-            value: 'no'
-          }, {
-            label: 'Send as DM',
-            value: 'dm'
-          }, {
-            label: 'Send as Email',
-            value: 'email'
-          }, {
-            label: 'Send as DM and Email',
-            value: 'dm_and_email'
-          }]
-        },
-        {
-          type: 'text',
-          label: 'CC',
-          name: 'feedback_email_cc',
-          hint: 'If you choose to send feedback as email to user, supply comma-separated list of emails to CC',
-          optional: true,
-          placeholder: 'tdd-ops@andela.com, tdd-d0-ops@andela.com'
-        },
-        {
           type: 'textarea',
           label: 'Context',
           name: 'feedback_context',

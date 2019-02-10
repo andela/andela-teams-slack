@@ -113,12 +113,10 @@ async function _handleRecordFeedbackDialog(req) {
   }, {
     where: { id: feedbackId }
   });
-  // TODO: consider add :feedback: reaction to the message and/or highlighting the message on Slack
   await slack.chat.postEphemeral(
     'Feedback recorded!',
     req.payload.channel.id,
     req.payload.user.id);
-  // TODO: send DM and/or email to user
 }
 
 async function _handleRecordFeedbackDialogCancellation(req) {
