@@ -113,15 +113,12 @@ async function _handleRecordFeedbackDialog(req) {
   }, {
     where: { id: feedbackId }
   });
-  const feedback = await models.FeedbackInstance.findOne({
-    where: { id: feedbackId }
-  });
-  console.log('>>>>>>>>>>>>>>>>>>>>>2');console.log(feedback.get());
   // TODO: consider add :feedback: reaction to the message and/or highlighting the message on Slack
   await slack.chat.postEphemeral(
     'Feedback recorded!',
     req.payload.channel.id,
     req.payload.user.id);
+  // TODO: send DM and/or email to user
 }
 
 async function _postCreateGithubReposPage(req) {
@@ -274,7 +271,6 @@ export default class InteractionHandler {
               from: payload.user.id,
               message: payload.message.text
             });
-            console.log('>>>>>>>>>>>>>>>>>>>>>>>>>');console.log(feedback.get());
             let response =
               await slack.dialog.open(payload.trigger_id, helpers.getRecordFeedbackDialogJson(feedback.id));
             if (!response.ok) {
