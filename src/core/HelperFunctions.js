@@ -91,6 +91,7 @@ export default class HelperFunctions {
     return {
       callback_id: `record_feedback_dialog:${feedbackId}`,
       title: 'Record Feedback',
+      notify_on_cancel: true,
       state: 'record_feedback_dialog',
       elements: [
         { 

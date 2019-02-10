@@ -121,6 +121,16 @@ async function _handleRecordFeedbackDialog(req) {
   // TODO: send DM and/or email to user
 }
 
+async function _handleRecordFeedbackDialogCancellation(req) {
+  let feedbackId = parseInt(req.payload.callback_id.substring(23), 10);
+  const feedback = await models.FeedbackInstance.findOne({
+    where: { id: feedbackId }
+  });
+  if (feedback) {
+    await feedback.destroy();
+  }
+}
+
 async function _postCreateGithubReposPage(req) {
   let submission = req.payload.submission;
   var teamName = submission.team_name;
@@ -209,6 +219,20 @@ async function _postCreatePtBoardPage(req) {
 }
 
 export default class InteractionHandler {
+  async dialogCancellation(req, res, next) {
+    try {
+      let payload = req.payload;
+      if (payload.type === 'dialog_cancellation') {
+        if (payload.callback_id.startsWith('record_feedback_dialog:')) {
+          await _handleRecordFeedbackDialogCancellation(req);
+        }
+        return;
+      }
+      next();
+    } catch(error) {
+      next(error);
+    }
+  }
   async dialogSubmission(req, res, next) {
     try {
       let payload = req.payload;
