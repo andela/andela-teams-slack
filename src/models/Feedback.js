@@ -42,23 +42,22 @@ export default (sequelize, DataTypes) => {
     });
   };
 
-  Feedback.hook('afterSave', (feedback, options) => {
+  Feedback.hook('afterCreate', (feedback, options) => {
     console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>')
     // delete feedback instances older than 4 months (120 days)
-    const r1 = await Feedback.findAll({
+    // const r1 = await Feedback.findAll({
+    //   where: {
+    //     //createdAt: { $lt: new Date(new Date() - 120 * 24 * 60 * 60 * 1000) }
+    //     createdAt: { $lt: new Date(new Date() - 60 * 60 * 1000) }
+    //   }
+    // });
+    // console.log('<<<<<<<<<<<<1:');console.log(r1);console.log(r1.get())
+    return Feedback.destroy({
       where: {
         //createdAt: { $lt: new Date(new Date() - 120 * 24 * 60 * 60 * 1000) }
         createdAt: { $lt: new Date(new Date() - 60 * 60 * 1000) }
       }
-    });
-    console.log('<<<<<<<<<<<<1:');console.log(r1);console.log(r1.get())
-    const r = await Feedback.destroy({
-      where: {
-        //createdAt: { $lt: new Date(new Date() - 120 * 24 * 60 * 60 * 1000) }
-        createdAt: { $lt: new Date(new Date() - 60 * 60 * 1000) }
-      }
-    });
-    console.log('<<<<<<<<<<<<2:');console.log(r)
+    }).then(() => console.log('<<<<<<<<<<<<<<<<<<<<'))
   });
 
   return Feedback;
