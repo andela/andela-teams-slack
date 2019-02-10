@@ -103,8 +103,7 @@ export default class HelperFunctions {
           type: 'select',
           label: 'Skill',
           name: 'feedback_skill',
-          data_source: 'external',
-          optional: true
+          data_source: 'external'
         },
         {
           type: 'select',
