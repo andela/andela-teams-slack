@@ -1,0 +1,233 @@
+import Github from '../integrations/Github';
+import HelperFunctions from './HelperFunctions';
+import models from '../models';
+import PivotalTracker from '../integrations/PivotalTracker';
+import Slack from '../integrations/Slack';
+
+const github = new Github();
+const helpers = new HelperFunctions();
+const pivotal = new PivotalTracker();
+const slack = new Slack();
+
+async function _createAndPostGithubRepoLink(req) {
+  let result = await github.repo.create(req.repoName, {
+    description: req.repoDescription || '',
+    organization: process.env.GITHUB_ORGANIZATION,
+    private: req.repoIsPrivate || false,
+    type: 'org',
+    user: {
+      githubUsername: req.user.github_user_name
+    }
+  });
+
+  let text = result.ok ? 'Github repo created' : 'Could not create Github repo';
+  let linkOrError = result.ok ? result.url : result.error;
+  // let linkOrError = result.ok
+  //   ? (result.invitedUser.ok
+  //       ? result.url
+  //       : result.url + '\n\nAlthough the repo was created you were not added. This could be because you\'ve already been added to the repo before now.')
+  //   : result.error;
+
+  // to use await slack.chat.postEphemeral
+  // replace arg req.payload.response_url
+  // with req.payload.channel.id, req.payload.user.id
+  await slack.chat.postResponse(
+    text,
+    req.payload.response_url,
+    [{
+      color: result.ok ? 'good' : 'danger',
+      text: linkOrError,
+    }]);
+
+  if (result.url) {
+    await models.Resource.create({
+      url: result.url.toLowerCase(),
+      userId: req.payload.user.id
+    });
+  }
+}
+
+async function _createAndPostPtProjectLink(req) {
+  let result = await pivotal.project.create(req.projectName, {
+    accountId: process.env.PIVOTAL_TRACKER_ACCOUNT_ID,
+    description: req.projectDescription || '',
+    private: req.projectIsPrivate || false,
+    user: {
+      email: req.user.email
+    }
+  });
+
+  let text = result.ok ? 'Pivotal Tracker project created' : 'Could not create Pivotal Tracker project';
+  // let linkOrError = result.ok ? result.url : result.error;
+  let linkOrError = result.ok
+    ? (result.invitedUser.ok
+        ? result.url
+        : result.url + '\n\nAlthough the project was created you were not added. This could be because you\'ve already been added to the project before now.')
+    : result.error;
+
+  await slack.chat.postResponse(
+    text,
+    req.payload.response_url,
+    [{
+      color: result.ok ? 'good' : 'danger',
+      text: linkOrError,
+    }]);
+
+    if (result.url) {
+      await models.Resource.create({
+        url: result.url.toLowerCase(),
+        userId: req.payload.user.id
+      });
+    }
+}
+
+async function _handleCreateGithubRepoDialog(req) {
+  let submission = req.payload.submission;
+  var repoName = submission.repo_name;
+  repoName = helpers.getUrlFriendlyName(repoName);
+
+  req.repoName = repoName;
+  req.repoDescription = submission.repo_desc || '';
+  req.repoIsPrivate = submission.repo_visibility === 'private';
+  await _createAndPostGithubRepoLink(req);
+}
+
+async function _handleCreatePtProjectDialog(req) {
+  let submission = req.payload.submission;
+  var projectName = submission.project_name;
+  // projectName = helpers.getUrlFriendlyName(projectName);
+
+  req.projectName = projectName;
+  req.projectDescription = submission.project_desc || '';
+  req.projectIsPrivate = submission.project_visibility === 'private';
+  await _createAndPostPtProjectLink(req);
+}
+
+async function _handleRecordFeedbackDialog(req) {
+  let submission = req.payload.submission;
+  // TODO: update the feedback with the given ID
+  // TODO: consider add :feedback: reaction to the message and/or highlighting the message
+  await slack.chat.postEphemeral(
+    'Feedback recorded!',
+    req.payload.channel.id,
+    req.payload.user.id);
+}
+
+async function _postCreateGithubReposPage(req) {
+  let submission = req.payload.submission;
+  var teamName = submission.team_name;
+  teamName = helpers.getUrlFriendlyName(teamName);
+  var teamProject = submission.team_project || 'Authors Haven';
+  teamProject = helpers.getInitials(teamProject);
+  let suggestedNames = helpers.githubConventions(teamName, teamProject);
+
+  var actions = [];
+  var i = 0;
+  for (i = 0; i <= suggestedNames.length; i++) {
+    actions.push({
+      name: 'create_github_repo',
+      text: suggestedNames[i],
+      type: 'button',
+      value: `create_github_repo:${suggestedNames[i]}`
+    });
+  }
+  actions.push({
+    name: 'create_github_repo',
+    text: 'Custom...',
+    style: 'primary',
+    type: 'button',
+    value: 'create_github_repo:?'
+  });
+
+  // since slack allows a max of 5 action buttons, I'll split them
+  await slack.chat.postResponse(
+    'Click buttons to create Github repos',
+    req.payload.response_url,
+    [{
+      callback_id: 'create_github_repo',
+      color: 'warning',
+      fallback: 'Could not perform operation.',
+      // text: '',
+      // title: '',
+      // title_link: '',
+      actions: actions.slice(0, 3)
+    }]);
+  await slack.chat.postResponse(
+    null,
+    req.payload.response_url,
+    [{
+      callback_id: 'create_github_repo',
+      color: 'warning',
+      fallback: 'Could not perform operation.',
+      actions: actions.slice(3)
+    }]);
+}
+
+async function _postCreatePtBoardPage(req) {
+  let submission = req.payload.submission;
+  var teamName = submission.team_name;
+  teamName = helpers.getUrlFriendlyName(teamName);
+  var teamProject = submission.team_project || 'Authors Haven';
+  teamProject = helpers.getInitials(teamProject);
+  let suggestedNames = helpers.ptConventions(teamName, teamProject);
+
+  var actions = [];
+  var i = 0;
+  for (i = 0; i <= suggestedNames.length; i++) {
+    actions.push({
+      name: 'create_pt_project',
+      text: suggestedNames[i],
+      type: 'button',
+      value: `create_pt_project:${suggestedNames[i]}`
+    });
+  }
+  actions.push({
+    name: 'create_pt_project',
+    text: 'Custom...',
+    style: 'primary',
+    type: 'button',
+    value: 'create_pt_project:?'
+  });
+
+  await slack.chat.postResponse(
+    'Click buttons to create Pivotal Tracker projects',
+    req.payload.response_url,
+    [{
+      callback_id: 'create_pt_project',
+      color: 'warning',
+      fallback: 'Could not perform operation.',
+      actions: actions
+    }]);
+}
+
+export default class DataHandler {
+  async getAttributesAndSkills(req, res, next) {
+    try {
+      console.log(req.body);
+      const allAttributes = await models.Attribute.findAll({
+        include: [
+          { model: models.Skill, as: 'skills' },
+        ]
+      });
+      let option_groups = allAttributes.map(a => {
+        let group = {};
+        a = a.get();
+        group.id = a.id; // used only for sorting
+        group.label = a.name;
+        group.options = a.skills.map(s => {
+          s = s.get();
+          return {
+            label: s.name,
+            value: s.id
+          }
+        });
+        return group;
+      });
+      option_groups = option_groups.sort((a, b) => a.id - b.id);
+      res.status(200).json({ option_groups });
+      next();
+    } catch(error) {
+      next(error);
+    }
+  }
+}
