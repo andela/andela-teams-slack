@@ -209,7 +209,7 @@ async function _postCreatePtBoardPage(req) {
 }
 
 export default class InteractionHandler {
-  async dialogSubmission(req, res, next) {
+  async dialogSubmission(req, res, next) {console.log(req.body)
     try {
       let payload = req.payload;
       if (payload.type === 'dialog_submission') {
