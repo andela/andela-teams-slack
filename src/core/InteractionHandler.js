@@ -106,7 +106,7 @@ async function _handleCreatePtProjectDialog(req) {
 async function _handleRecordFeedbackDialog(req) {
   let submission = req.payload.submission;
   let feedbackId = parseInt(req.payload.callback_id.substring(23), 10);
-  const feedback = await models.Feedback.update({
+  const feedback = await models.FeedbackInstance.update({
     context: submission.feedback_context,
     skillId: parseInt(submission.feedback_skill, 10) || undefined,
     to: submission.feedback_target_user
@@ -267,7 +267,7 @@ export default class InteractionHandler {
       if (payload.type === 'message_action') {
         if (payload.callback_id === 'record_feedback') {
           if (req.user && req.user.is_sims_facilitator) {
-            const feedback = await models.Feedback.create({
+            const feedback = await models.FeedbackInstance.create({
               from: payload.user.id,
               message: payload.message.text
             });
