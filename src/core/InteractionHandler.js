@@ -113,11 +113,10 @@ async function _handleRecordFeedbackDialog(req) {
   }, {
     where: { id: feedbackId }
   });
-  const r = await slack.chat.postEphemeral(
+  await slack.chat.postEphemeral(
     'Feedback recorded!',
     req.payload.channel.id,
     req.payload.user.id);
-  console.log('>>>>>>>>>>>>>>>>>');console.log(r)
 }
 
 async function _handleRecordFeedbackDialogCancellation(req) {
