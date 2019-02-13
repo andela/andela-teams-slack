@@ -1,8 +1,48 @@
+import Github from '../integrations/Github';
+import models from '../models';
+import PivotalTracker from '../integrations/PivotalTracker';
 import Slack from '../integrations/Slack';
 
+const github = new Github();
+const pivotal = new PivotalTracker();
 const slack = new Slack();
 
 export default class Utility {
+  async addOrRemoveUser(url, user, userId, channelId, addUser = false) {
+    // ensure the link was created by this app by checking the database
+    const existingResource = await models.Resource.findOne({
+      where: { url }
+    });
+    if (!existingResource) {
+      await slack.chat.postEphemeral(
+        `The resource ${url} was not created using Andela Teams.`,
+        channelId,
+        userId);
+      return;
+    }
+
+    if (addUser) {
+      if (url.includes(`github.com/${process.env.GITHUB_ORGANIZATION}/`)) {
+        let repo = url.substring(url.lastIndexOf('/') + 1);
+        await github.repo.addUser(user.github_user_name, repo);
+      } else if (url.includes('pivotaltracker.com/projects/')) {
+        let projId = url.substring(url.lastIndexOf('/') + 1);
+        await pivotal.project.addUser(user.email, projId);
+      }
+      await slack.chat.postEphemeral(`Confirm you have been added to ${url}`, channelId, userId);
+      return;
+    } else {
+      if (url.includes(`github.com/${process.env.GITHUB_ORGANIZATION}/`)) {
+        let repo = url.substring(url.lastIndexOf('/') + 1);
+        await github.repo.removeUser(user.github_user_name, repo);
+      } else if (url.includes('pivotaltracker.com/projects/')) {
+        let projId = url.substring(url.lastIndexOf('/') + 1);
+        await pivotal.project.removeUser(user.email, projId);
+      }
+      await slack.chat.postEphemeral(`Confirm you have been removed from ${url}`, channelId, userId);
+      return;
+    }
+  }
   async getUserObjectFromReqBodyEventUser(req, res, next) {
     try {
       var user = await slack.resolver.getUserObject(req.body.event.user);

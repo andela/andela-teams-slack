@@ -91,6 +91,7 @@ export default class HelperFunctions {
     return {
       callback_id: `record_feedback_dialog:${feedbackId}`,
       title: 'Record Feedback',
+      notify_on_cancel: true,
       state: 'record_feedback_dialog',
       elements: [
         { 
@@ -99,58 +100,24 @@ export default class HelperFunctions {
           name: 'feedback_target_user',
           data_source: 'users'
         },
-        { // TODO: load this from an "external" data source
+        {
           type: 'select',
           label: 'Skill',
           name: 'feedback_skill',
-          optional: true,
-          option_groups: [{
-            label: 'Quality',
-            options: [{
-              label: 'Attention to Detail',
-              value: '1,1'
-            }, {
-              label: 'Requirements Analysis',
-              value: '1,2'
-            }]
-          }, {
-            label: 'Quantity',
-            options: [{
-              label: 'Developer Tools',
-              value: '2,1'
-            }, {
-              label: 'Business Tools',
-              value: '2,2'
-            }]
-          }]
+          data_source: 'external'
         },
         {
           type: 'select',
-          label: 'Send Feedback',
-          name: 'feedback_to_user',
-          optional: true,
-          value: 'no',
+          label: 'Type',
+          name: 'feedback_type',
+          value: 'negative',
           options: [{
-            label: 'No',
-            value: 'no'
+            label: '😊', // \u263A
+            value: 'positive'
           }, {
-            label: 'Send as DM',
-            value: 'dm'
-          }, {
-            label: 'Send as Email',
-            value: 'email'
-          }, {
-            label: 'Send as DM and Email',
-            value: 'dm_and_email'
+            label: '\u2639', // 😞
+            value: 'negative'
           }]
-        },
-        {
-          type: 'text',
-          label: 'CC',
-          name: 'feedback_email_cc',
-          hint: 'If you choose to send feedback as email to user, supply comma-separated list of emails to CC',
-          optional: true,
-          placeholder: 'tdd-ops@andela.com, tdd-d0-ops@andela.com'
         },
         {
           type: 'textarea',

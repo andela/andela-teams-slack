@@ -1,16 +1,12 @@
 module.exports = {
-  up: (queryInterface, Sequelize) => queryInterface.createTable('Resources', {
+  up: (queryInterface, Sequelize) => queryInterface.createTable('Attributes', {
       id: {
         allowNull: false,
-        autoIncrement: true,
+        autoIncrement: false,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      url: {
-        allowNull: false,
-        type: Sequelize.STRING
-      },
-      userId: {
+      name: {
         allowNull: false,
         type: Sequelize.STRING
       },
@@ -25,5 +21,5 @@ module.exports = {
         defaultValue: Sequelize.literal('NOW()')
       }
     }),
-  down: (queryInterface, Sequelize) => queryInterface.dropTable('Resources')
+  down: (queryInterface, Sequelize) => queryInterface.dropTable('Attributes')
 };
