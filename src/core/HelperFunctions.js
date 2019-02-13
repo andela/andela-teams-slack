@@ -112,10 +112,10 @@ export default class HelperFunctions {
           name: 'feedback_type',
           value: 'negative',
           options: [{
-            label: '\u263A 😊',
+            label: '😊', // \u263A
             value: 'positive'
           }, {
-            label: '\u2639 😞',
+            label: '\u2639', // 😞
             value: 'negative'
           }]
         },
