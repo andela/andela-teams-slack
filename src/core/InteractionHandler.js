@@ -3,11 +3,13 @@ import HelperFunctions from './HelperFunctions';
 import models from '../models';
 import PivotalTracker from '../integrations/PivotalTracker';
 import Slack from '../integrations/Slack';
+import Utility from './Utility';
 
 const github = new Github();
 const helpers = new HelperFunctions();
 const pivotal = new PivotalTracker();
 const slack = new Slack();
+const utils = new Utility();
 
 async function _createAndPostGithubRepoLink(req) {
   let result = await github.repo.create(req.repoName, {
@@ -308,6 +310,18 @@ export default class InteractionHandler {
               'This action can only be performed by Learning Facilitators',
               payload.channel.id,
               payload.user.id);
+          }
+        } else if (payload.callback_id === 'join_team' || payload.callback_id === 'leave_team') {
+          var messageText = payload.message.text;
+          // check if messageText is a link <...>
+          if (messageText.toLowerCase().startsWith('<http') && messageText.endsWith('>')) {
+            // trim messageText of < and > to get link
+            let messageLink = messageText.substring(1, messageText.length - 1).toLowerCase();
+            utils.addOrRemoveUser(
+              messageLink, req.user,
+              payload.user.id,
+              payload.channel.id,
+              payload.callback_id === 'join_team');
           }
         }
         return;
