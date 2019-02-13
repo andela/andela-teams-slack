@@ -1,11 +1,6 @@
-import Github from '../integrations/Github';
-import models from '../models';
-import PivotalTracker from '../integrations/PivotalTracker';
 import Slack from '../integrations/Slack';
 import Utility from './Utility';
 
-const github = new Github();
-const pivotal = new PivotalTracker();
 const slack = new Slack();
 const utils = new Utility();
 

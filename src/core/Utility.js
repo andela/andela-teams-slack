@@ -27,7 +27,7 @@ export default class Utility {
         await github.repo.addUser(user.github_user_name, repo);
       } else if (url.includes('pivotaltracker.com/projects/')) {
         let projId = url.substring(url.lastIndexOf('/') + 1);
-        await pivotal.project.addUser(user.email, projId, {role:'owner'});
+        await pivotal.project.addUser(user.email, projId);
       }
       await slack.chat.postEphemeral(`Confirm you have been added to ${url}`, channelId, userId);
       return;
