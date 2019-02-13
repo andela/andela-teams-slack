@@ -110,7 +110,7 @@ async function _handleRecordFeedbackDialog(req) {
     context: submission.feedback_context,
     skillId: parseInt(submission.feedback_skill, 10) || undefined,
     to: submission.feedback_target_user,
-    type: submission.feedback_type
+    type: submission.feedback_type || 'negative'
   }, {
     where: { id: feedbackId }
   });
