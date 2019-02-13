@@ -109,7 +109,8 @@ async function _handleRecordFeedbackDialog(req) {
   await models.FeedbackInstance.update({
     context: submission.feedback_context,
     skillId: parseInt(submission.feedback_skill, 10) || undefined,
-    to: submission.feedback_target_user
+    to: submission.feedback_target_user,
+    type: submission.feedback_type
   }, {
     where: { id: feedbackId }
   });

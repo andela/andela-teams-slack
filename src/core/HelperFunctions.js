@@ -107,6 +107,19 @@ export default class HelperFunctions {
           data_source: 'external'
         },
         {
+          type: 'select',
+          label: 'Type',
+          name: 'feedback_type',
+          value: 'negative',
+          options: [{
+            label: '😊', // \u263A
+            value: 'positive'
+          }, {
+            label: '\u2639', // 😞
+            value: 'negative'
+          }]
+        },
+        {
           type: 'textarea',
           label: 'Context',
           name: 'feedback_context',
