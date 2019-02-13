@@ -31,6 +31,11 @@ export default (sequelize, DataTypes) => {
     to: {
       allowNull: true,
       type: DataTypes.STRING
+    },
+    type: {
+      allowNull: false,
+      type: DataTypes.STRING,
+      defaultValue: 'negative'
     }
   });
 
