@@ -15,6 +15,10 @@ module.exports = {
       id: 304,
       attributeId: 3,
       name: 'Problem Solving & Critical Thinking'
+    }, {
+      id: 305,
+      attributeId: 3,
+      name: 'Holistic/Big Picture Thinking\u1d47'
     }], {}),
   down: (queryInterface, Sequelize) => queryInterface.bulkDelete('Skills', null, {})
 };

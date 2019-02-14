@@ -6,11 +6,11 @@ module.exports = {
     }, {
       id: 202,
       attributeId: 2,
-      name: 'Scoping and estimation\u1d2d'
+      name: 'Scoping and estimation\u1d47'
     }, {
       id: 203,
       attributeId: 2,
-      name: 'Project Management Tools\u1d2d'
+      name: 'Project Management Tools\u1d47'
     }], {}),
   down: (queryInterface, Sequelize) => queryInterface.bulkDelete('Skills', null, {})
 };

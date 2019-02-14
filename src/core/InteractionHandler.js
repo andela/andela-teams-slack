@@ -297,7 +297,7 @@ export default class InteractionHandler {
               message: payload.message.text
             });
             let response =
-              await slack.dialog.open(payload.trigger_id, helpers.getRecordFeedbackDialogJson(feedback.id));console.log(response);
+              await slack.dialog.open(payload.trigger_id, helpers.getRecordFeedbackDialogJson(feedback.id));
             if (!response.ok) {
               await slack.chat.postEphemeral(
                 'This action cannot be performed at the moment. Try again later.',
