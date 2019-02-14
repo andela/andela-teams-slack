@@ -38,7 +38,7 @@ module.exports = {
     }, {
       id: 1095,
       attributeId: 1,
-      name: ''//'----------'
+      name: ' '//'----------'
     }, {
       id: 110,
       attributeId: 1,
