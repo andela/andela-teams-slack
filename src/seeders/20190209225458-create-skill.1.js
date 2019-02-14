@@ -36,10 +36,6 @@ module.exports = {
       attributeId: 1,
       name: 'Version control'
     }, {
-      id: 1095,
-      attributeId: 1,
-      name: '----------'
-    }, {
       id: 110,
       attributeId: 1,
       name: 'Patterns (MVC)\u1d47'
