@@ -116,7 +116,7 @@ async function _handleRecordFeedbackDialog(req) {
   }, {
     where: { id: feedbackId }
   });
-  await slack.chat.postEphemeral(
+  await slack.chat.postEphemeralOrDM(
     'Feedback recorded!',
     req.payload.channel.id,
     req.payload.user.id);
@@ -299,14 +299,14 @@ export default class InteractionHandler {
             let response =
               await slack.dialog.open(payload.trigger_id, helpers.getRecordFeedbackDialogJson(feedback.id));
             if (!response.ok) {
-              await slack.chat.postEphemeral(
+              await slack.chat.postEphemeralOrDM(
                 'This action cannot be performed at the moment. Try again later.',
                 payload.channel.id,
                 payload.user.id);
               await feedback.destroy();
             }
           } else {
-            await slack.chat.postEphemeral(
+            await slack.chat.postEphemeralOrDM(
               'This action can only be performed by Learning Facilitators',
               payload.channel.id,
               payload.user.id);

@@ -1,12 +1,39 @@
 import dotenv from 'dotenv';
 import request from 'request-promise-native';
+import SlackBot from 'slackbots';
 
 if (process.env.NODE_ENV !== 'production') {
   dotenv.config();
 }
 
+const bot = new SlackBot({
+  token: process.env.SLACK_BOT_TOKEN, 
+  name: 'Andela Teams'
+});
+
 class Chat {
-  async postEphemeral(message, channelId, userId, attachments) {
+  constructor() {
+    this.postDM = this.postDM.bind(this);
+    this.postEphemeral = this.postEphemeral.bind(this);
+    this.postEphemeralOrDM = this.postEphemeralOrDM.bind(this);
+    this.postResponse = this.postResponse.bind(this);
+  }
+  async postDM(message, userId, attachments) {console.log('postDM>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
+    let response;
+    const user = await new Resolver().getUserInfoObject(userId);
+    if (user && user.name) {
+      response = await bot.postMessageToUser(
+        user.name,
+        message,
+        {
+          attachments
+        }
+      );
+    }
+    console.log(response);console.log('postDM<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<')
+    // return JSON.parse(response.body);
+  }
+  async postEphemeral(message, channelId, userId, attachments) {console.log('postEphemeral>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
     // post ephemeral message in channel, visible only to user
     let url = 'https://slack.com/api/chat.postEphemeral';
     url += `?token=${process.env.SLACK_USER_TOKEN}`;
@@ -21,7 +48,14 @@ class Chat {
       },
       resolveWithFullResponse: true
     });
+    console.log(JSON.parse(response.body));console.log('postEphemeral<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<')
     return JSON.parse(response.body);
+  }
+  async postEphemeralOrDM(message, channelId, userId, attachments) {console.log('postEphemeralOrDM>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
+    let response = await this.postEphemeral(message, channelId, userId, attachments);
+    if (response.ok) {
+      await this.postDM(message, userId, attachments);
+    }console.log('postEphemeralOrDM<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<')
   }
   async postResponse(message, responseUrl, attachments) {
     await request({
@@ -81,7 +115,27 @@ class Resolver {
     }
     return data; // TODO: what to return otherwise
   }
-  async getUserObject(userId) {
+  async getUserInfoObject(userId) {
+    var user;
+    
+    // make a request to resolve the user
+    let url = 'https://slack.com/api/users.info';
+    url += '?user=' + userId;
+    url += '&token=' + process.env.SLACK_USER_TOKEN;
+    let response = await request({
+      url: url,
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      resolveWithFullResponse: true
+    });
+    let data = JSON.parse(response.body);
+    user = data.user || user;
+
+    return user;
+  }
+  async getUserProfileObject(userId) {
     var user;
     
     // make a request to resolve the user

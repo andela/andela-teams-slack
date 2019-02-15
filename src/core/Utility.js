@@ -14,7 +14,7 @@ export default class Utility {
       where: { url }
     });
     if (!existingResource) {
-      await slack.chat.postEphemeral(
+      await slack.chat.postEphemeralOrDM(
         `The resource ${url} was not created using Andela Teams.`,
         channelId,
         userId);
@@ -29,7 +29,7 @@ export default class Utility {
         let projId = url.substring(url.lastIndexOf('/') + 1);
         await pivotal.project.addUser(user.email, projId);
       }
-      await slack.chat.postEphemeral(`Confirm you have been added to ${url}`, channelId, userId);
+      await slack.chat.postEphemeralOrDM(`Confirm you have been added to ${url}`, channelId, userId);
       return;
     } else {
       if (url.includes(`github.com/${process.env.GITHUB_ORGANIZATION}/`)) {
@@ -39,13 +39,13 @@ export default class Utility {
         let projId = url.substring(url.lastIndexOf('/') + 1);
         await pivotal.project.removeUser(user.email, projId);
       }
-      await slack.chat.postEphemeral(`Confirm you have been removed from ${url}`, channelId, userId);
+      await slack.chat.postEphemeralOrDM(`Confirm you have been removed from ${url}`, channelId, userId);
       return;
     }
   }
   async getUserObjectFromReqBodyEventUser(req, res, next) {
     try {
-      var user = await slack.resolver.getUserObject(req.body.event.user);
+      var user = await slack.resolver.getUserProfileObject(req.body.event.user);
       req.user = user;
       next();
     } catch(error) {
@@ -56,7 +56,7 @@ export default class Utility {
     try {
       const payload = JSON.parse(req.body.payload);
       req.payload = payload;
-      var user = await slack.resolver.getUserObject(payload.user.id);
+      var user = await slack.resolver.getUserProfileObject(payload.user.id);
       req.user = user;
       next();
     } catch(error) {
@@ -65,7 +65,7 @@ export default class Utility {
   }
   async getUserObjectFromReqBodyUserId(req, res, next) {
     try {
-      var user = await slack.resolver.getUserObject(req.body.user_id);
+      var user = await slack.resolver.getUserProfileObject(req.body.user_id);
       req.user = user;
       next();
     } catch(error) {
@@ -88,7 +88,7 @@ export default class Utility {
           userId = req.body.user_id;
         }
         if (channelId && userId) {
-          await slack.chat.postEphemeral(
+          await slack.chat.postEphemeralOrDM(
             err.message || err,
             channelId,
             userId);
@@ -124,7 +124,7 @@ export default class Utility {
           userId = req.body.user_id;
         }
         if (channelId && userId) {
-          await slack.chat.postEphemeral(
+          await slack.chat.postEphemeralOrDM(
             'Your email address or Github profile cannot be found on Slack',
             channelId,
             userId,
