@@ -11,7 +11,7 @@ const pivotal = new PivotalTracker();
 const slack = new Slack();
 const utils = new Utility();
 
-async function _createAndPostGithubRepoLink(req) {console.log('_createAndPostGithubRepoLink>>>>>>>>>>>>>>>>>>>>>')
+async function _createAndPostGithubRepoLink(req) {
   let result = await github.repo.create(req.repoName, {
     description: req.repoDescription || '',
     organization: process.env.GITHUB_ORGANIZATION,
@@ -21,7 +21,6 @@ async function _createAndPostGithubRepoLink(req) {console.log('_createAndPostGit
       githubUsername: req.user.github_user_name
     }
   });
-  console.log('result>>>>>>>>>>>>>>>>>>>>>>>>>>');console.log(result)
 
   let text = result.url ? 'Github repo created' : 'Could not create Github repo';
   let linkOrError = result.url ? result.url : result.error || result.message;
@@ -38,7 +37,7 @@ async function _createAndPostGithubRepoLink(req) {console.log('_createAndPostGit
     text,
     req.payload.response_url,
     [{
-      color: result.ok ? 'good' : 'danger',
+      color: result.url ? 'good' : 'danger',
       text: linkOrError,
     }]);
 
@@ -46,9 +45,8 @@ async function _createAndPostGithubRepoLink(req) {console.log('_createAndPostGit
     await models.Resource.create({
       url: result.url.toLowerCase(),
       userId: req.payload.user.id
-    });console.log('saved the link<<<<<<<<<<<<<<<<<<<<<<<<')
+    });
   }
-  console.log('_createAndPostGithubRepoLink<<<<<<<<<<<<<<<<<<<<<<<<')
 }
 
 async function _createAndPostPtProjectLink(req) {
@@ -73,7 +71,7 @@ async function _createAndPostPtProjectLink(req) {
     text,
     req.payload.response_url,
     [{
-      color: result.ok ? 'good' : 'danger',
+      color: result.url ? 'good' : 'danger',
       text: linkOrError,
     }]);
 
@@ -85,7 +83,7 @@ async function _createAndPostPtProjectLink(req) {
     }
 }
 
-async function _handleCreateGithubRepoDialog(req) {console.log('_handleCreateGithubRepoDialog>>>>>>>>>>>>>>>>>>')
+async function _handleCreateGithubRepoDialog(req) {
   let submission = req.payload.submission;
   var repoName = submission.repo_name;
   repoName = helpers.getUrlFriendlyName(repoName);
@@ -93,7 +91,7 @@ async function _handleCreateGithubRepoDialog(req) {console.log('_handleCreateGit
   req.repoName = repoName;
   req.repoDescription = submission.repo_desc || '';
   req.repoIsPrivate = submission.repo_visibility === 'private';
-  await _createAndPostGithubRepoLink(req);console.log('_handleCreateGithubRepoDialog<<<<<<<<<<<<<<<<<<')
+  await _createAndPostGithubRepoLink(req);
 }
 
 async function _handleCreatePtProjectDialog(req) {
@@ -140,7 +138,7 @@ async function _postAnalyticsPage(req) {
     name: 'analytics',
     text: 'Feedback...',
     type: 'button',
-    value: 'analytics_feedback'
+    value: 'feedback_analytics'
   });
 
   await slack.chat.postResponse(
@@ -302,7 +300,9 @@ export default class InteractionHandler {
             req.projectName = projectName;
             await _createAndPostPtProjectLink(req);
           }
-        }
+        } else if (value === 'feedback_analytics') {
+          await slack.dialog.open(payload.trigger_id, helpers.getFeedbackAnalyticsDialogJson());
+        } 
         return;
       }
       next();

@@ -87,6 +87,66 @@ export default class HelperFunctions {
     };
   }
 
+  getFeedbackAnalyticsDialogJson() {
+    return {
+      callback_id: 'feedback_analytics_dialog',
+      title: 'Feedback Analytics',
+      state: 'feedback_analytics_dialog',
+      elements: [
+        { 
+          type: 'select',
+          label: 'Feedback Recipient',
+          name: 'feedback_target_user',
+          data_source: 'conversations'
+        },
+        {
+          type: 'select',
+          label: 'Type',
+          name: 'feedback_type',
+          value: 'negative',
+          options: [{
+            label: '😊', // \u263A
+            value: 'positive'
+          }, {
+            label: '\u2639', // 😞
+            value: 'negative'
+          }]
+        },
+        {
+          type: 'select',
+          label: 'Start Date',
+          name: 'feedback_start_date',
+          data_source: 'external'
+        },
+        {
+          type: 'select',
+          label: 'End Date',
+          name: 'feedback_end_date',
+          data_source: 'external'
+        },
+        {
+          type: 'select',
+          label: 'Analytics Type',
+          name: 'feedback_analytics_type',
+          value: 'feedback_table',
+          options: [{
+            label: 'Table of feedback instances',
+            value: 'feedback_table'
+          }, {
+            label: 'Distribution of feedback over time',
+            value: 'feedback_time_distribution'
+          }, {
+            label: 'Attributes chart',
+            value: 'attributes_chart'
+          }, {
+            label: 'Skills chart',
+            value: 'skills_chart'
+          }]
+        }
+      ]
+    };
+  }
+
   getRecordFeedbackDialogJson(feedbackId) {
     return {
       callback_id: `record_feedback_dialog:${feedbackId}`,
