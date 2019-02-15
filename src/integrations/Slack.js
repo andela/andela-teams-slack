@@ -53,7 +53,7 @@ class Chat {
   }
   async postEphemeralOrDM(message, channelId, userId, attachments) {console.log('postEphemeralOrDM>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
     let response = await this.postEphemeral(message, channelId, userId, attachments);
-    if (response.ok) {
+    if (!response.ok) {
       await this.postDM(message, userId, attachments);
     }console.log('postEphemeralOrDM<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<')
   }
