@@ -23,13 +23,13 @@ async function _createAndPostGithubRepoLink(req) {console.log('_createAndPostGit
   });
   console.log('result>>>>>>>>>>>>>>>>>>>>>>>>>>');console.log(result)
 
-  let text = result.ok ? 'Github repo created' : 'Could not create Github repo';
-  let linkOrError = result.ok ? result.url : result.error;
-  // let linkOrError = result.ok
+  let text = result.url ? 'Github repo created' : 'Could not create Github repo';
+  let linkOrError = result.url ? result.url : result.error || result.message;
+  // let linkOrError = result.url
   //   ? (result.invitedUser.ok
   //       ? result.url
   //       : result.url + '\n\nAlthough the repo was created you were not added. This could be because you\'ve already been added to the repo before now.')
-  //   : result.error;
+  //   : result.error || result.message;
 
   // to use await slack.chat.postEphemeral
   // replace arg req.payload.response_url
@@ -61,9 +61,9 @@ async function _createAndPostPtProjectLink(req) {
     }
   });
 
-  let text = result.ok ? 'Pivotal Tracker project created' : 'Could not create Pivotal Tracker project';
+  let text = result.url ? 'Pivotal Tracker project created' : 'Could not create Pivotal Tracker project';
   // let linkOrError = result.ok ? result.url : result.error;
-  let linkOrError = result.ok
+  let linkOrError = result.url
     ? (result.invitedUser.ok
         ? result.url
         : result.url + '\n\nAlthough the project was created you were not added. This could be because you\'ve already been added to the project before now.')
@@ -132,6 +132,26 @@ async function _handleRecordFeedbackDialogCancellation(req) {
   if (feedback) {
     await feedback.destroy();
   }
+}
+
+async function _postAnalyticsPage(req) {
+  var actions = [];
+  actions.push({
+    name: 'analytics',
+    text: 'Feedback...',
+    type: 'button',
+    value: 'analytics_feedback'
+  });
+
+  await slack.chat.postResponse(
+    'Analytics',
+    req.payload.response_url,
+    [{
+      callback_id: 'analytics',
+      color: 'warning',
+      fallback: 'Could not perform operation.',
+      actions: actions
+    }]);
 }
 
 async function _postCreateGithubReposPage(req) {
@@ -262,7 +282,9 @@ export default class InteractionHandler {
       let payload = req.payload;
       if (payload.type === 'interactive_message') {
         const value = payload.actions[0].value;
-        if (value === 'create_team') {
+        if (value === 'analytics') {
+          await _postAnalyticsPage(req);
+        } else if (value === 'create_team') {
           await slack.dialog.open(payload.trigger_id, helpers.getCreateTeamDialogJson());
         } else if (value.startsWith('create_github_repo:')) {
           let repoName = value.substring(19);
