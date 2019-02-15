@@ -124,7 +124,7 @@ class Repo {
       }
 
       return result;
-    } catch (error) {
+    } catch (error) {console.log('xxxxxxxxxxxxxxxxxxxxxxxxxxxxx');console.log(error);
       return {
         ok: false,
         error: error.message
