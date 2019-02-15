@@ -27,6 +27,14 @@ module.exports = {
       id: 607,
       attributeId: 6,
       name: 'Vision Alignment'
+    }, {
+      id: 608,
+      attributeId: 6,
+      name: 'Cultural Awareness\u1d47'
+    }, {
+      id: 609,
+      attributeId: 6,
+      name: 'Organizational Functional Awareness\u1d47'
     }], {}),
   down: (queryInterface, Sequelize) => queryInterface.bulkDelete('Skills', null, {})
 };
