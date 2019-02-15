@@ -11,7 +11,7 @@ const pivotal = new PivotalTracker();
 const slack = new Slack();
 const utils = new Utility();
 
-async function _createAndPostGithubRepoLink(req) {
+async function _createAndPostGithubRepoLink(req) {console.log('_createAndPostGithubRepoLink>>>>>>>>>>>>>>>>>>>>>')
   let result = await github.repo.create(req.repoName, {
     description: req.repoDescription || '',
     organization: process.env.GITHUB_ORGANIZATION,
@@ -21,6 +21,7 @@ async function _createAndPostGithubRepoLink(req) {
       githubUsername: req.user.github_user_name
     }
   });
+  console.log('result>>>>>>>>>>>>>>>>>>>>>>>>>>');console.log(result)
 
   let text = result.ok ? 'Github repo created' : 'Could not create Github repo';
   let linkOrError = result.ok ? result.url : result.error;
@@ -45,8 +46,9 @@ async function _createAndPostGithubRepoLink(req) {
     await models.Resource.create({
       url: result.url.toLowerCase(),
       userId: req.payload.user.id
-    });
+    });console.log('saved the link<<<<<<<<<<<<<<<<<<<<<<<<')
   }
+  console.log('_createAndPostGithubRepoLink<<<<<<<<<<<<<<<<<<<<<<<<')
 }
 
 async function _createAndPostPtProjectLink(req) {
@@ -83,7 +85,7 @@ async function _createAndPostPtProjectLink(req) {
     }
 }
 
-async function _handleCreateGithubRepoDialog(req) {
+async function _handleCreateGithubRepoDialog(req) {console.log('_handleCreateGithubRepoDialog>>>>>>>>>>>>>>>>>>')
   let submission = req.payload.submission;
   var repoName = submission.repo_name;
   repoName = helpers.getUrlFriendlyName(repoName);
@@ -91,7 +93,7 @@ async function _handleCreateGithubRepoDialog(req) {
   req.repoName = repoName;
   req.repoDescription = submission.repo_desc || '';
   req.repoIsPrivate = submission.repo_visibility === 'private';
-  await _createAndPostGithubRepoLink(req);
+  await _createAndPostGithubRepoLink(req);console.log('_handleCreateGithubRepoDialog<<<<<<<<<<<<<<<<<<')
 }
 
 async function _handleCreatePtProjectDialog(req) {

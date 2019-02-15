@@ -14,6 +14,12 @@ export default class SlashCommandHandler {
           type: 'button',
           value: 'create_team'
         });
+        actions.push({
+          name: 'landing_page_menu',
+          text: 'Analytics',
+          type: 'button',
+          value: 'analytics'
+        });
       }
       actions.push({
         name: 'landing_page_menu',
