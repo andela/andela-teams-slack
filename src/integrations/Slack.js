@@ -18,11 +18,10 @@ class Chat {
     this.postEphemeralOrDM = this.postEphemeralOrDM.bind(this);
     this.postResponse = this.postResponse.bind(this);
   }
-  async postDM(message, userId, attachments) {console.log('postDM>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
-    let response;
+  async postDM(message, userId, attachments) {
     const user = await new Resolver().getUserInfoObject(userId);
     if (user && user.name) {
-      response = await bot.postMessageToUser(
+      await bot.postMessageToUser(
         user.name,
         message,
         {
@@ -30,10 +29,8 @@ class Chat {
         }
       );
     }
-    console.log(response);console.log('postDM<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<')
-    // return JSON.parse(response.body);
   }
-  async postEphemeral(message, channelId, userId, attachments) {console.log('postEphemeral>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
+  async postEphemeral(message, channelId, userId, attachments) {
     // post ephemeral message in channel, visible only to user
     let url = 'https://slack.com/api/chat.postEphemeral';
     url += `?token=${process.env.SLACK_USER_TOKEN}`;
@@ -48,14 +45,13 @@ class Chat {
       },
       resolveWithFullResponse: true
     });
-    console.log(JSON.parse(response.body));console.log('postEphemeral<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<')
     return JSON.parse(response.body);
   }
-  async postEphemeralOrDM(message, channelId, userId, attachments) {console.log('postEphemeralOrDM>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
+  async postEphemeralOrDM(message, channelId, userId, attachments) {
     let response = await this.postEphemeral(message, channelId, userId, attachments);
     if (!response.ok) {
       await this.postDM(message, userId, attachments);
-    }console.log('postEphemeralOrDM<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<')
+    }
   }
   async postResponse(message, responseUrl, attachments) {
     await request({
