@@ -138,20 +138,21 @@ async function _handleFeedbackAnalyticsDialog(req) {
         $lte: new Date(submission.feedback_start_date)
       }
     };
-    query.include = [{
-      model: models.Skill,
-      as: 'skill',
-      through: {
-        attributes: ['name'],
-        include: [{
-          model: models.Attribute,
-          as: 'attribute',
-          through: {
-            attributes: ['name']
-          }
-        }]
-      }
-    }];
+    query.include = [{ all: true, nested: true }];
+    // query.include = [{
+    //   model: models.Skill,
+    //   as: 'skill',
+    //   through: {
+    //     attributes: ['name'],
+    //     include: [{
+    //       model: models.Attribute,
+    //       as: 'attribute',
+    //       through: {
+    //         attributes: ['name']
+    //       }
+    //     }]
+    //   }
+    // }];
     const token = jwt.sign(query, process.env.JWT_SECRET);
     returnUrl += token;
   }
