@@ -31,10 +31,11 @@ function _getDates() {
     let date = moment().subtract(i, 'days');
     let monthName = date.format('MMMM');
     if (dateMap.has(monthName)) {
+      console.log('typeof dateMap.get(monthName)>>>>>>>>>>>>>>>>>>>>>>>>>');console.log(typeof dateMap.get(monthName))
       console.log('dateMap.get(monthName)>>>>>>>>>>>>>>>>>>>>>>>>>');console.log(dateMap.get(monthName))
-      let dates = dateMap.get(monthName);
-      console.log('dates>>>>>>>>>>>>>>>>>>>>>>>>>');console.log(dates)
-      dateMap.set(monthName, dates.push(date))
+      // let dates = Array.from(dateMap.get(monthName));
+      // console.log('dates>>>>>>>>>>>>>>>>>>>>>>>>>');console.log(dates)
+      dateMap.set(monthName, dateMap.get(monthName).push(date))
     } else {
       dateMap.set(monthName, [date])
     }
