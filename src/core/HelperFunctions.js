@@ -97,6 +97,7 @@ export default class HelperFunctions {
           type: 'select',
           label: 'Feedback Recipient',
           name: 'feedback_target_user',
+          optional: true,
           data_source: 'conversations'
         },
         {

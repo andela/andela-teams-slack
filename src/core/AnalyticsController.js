@@ -7,26 +7,26 @@ const slack = new Slack();
 
 async function _getFeedbackTable(records) {
   let resolvedUsersMap = new Map();
-  let rows = [];console.log(`${records.length} records found`)
-  for (let i = 0; i < records.length; i++) {console.log(`interation number ${i+1}`)
-    let record = records[i].get();console.log('record:', record)
+  let rows = [];
+  for (let i = 0; i < records.length; i++) {
+    let record = records[i].get();
     let recipientName, senderName;
-    if (record.to) {console.log('entered record.to:', record.to)
-      if (resolvedUsersMap.has(record.to)) {console.log('record.to previously cached')
-        recipientName = resolvedUsersMap.get(record.to);console.log('recipientName:', recipientName)
-      } else {console.log('record.to not yet cached')
+    if (record.to) {
+      if (resolvedUsersMap.has(record.to)) {
+        recipientName = resolvedUsersMap.get(record.to);
+      } else {
         let user = await slack.resolver.getUserProfileObject(record.to);
-        recipientName = user.real_name;console.log('recipientName:', recipientName)
-        resolvedUsersMap.set(record.to, user.real_name);console.log('record.to now cached', resolvedUsersMap);
+        recipientName = user.real_name;
+        resolvedUsersMap.set(record.to, user.real_name);
       }
     }
-    if (record.from) {console.log('entered record.from:', record.from)
-      if (resolvedUsersMap.has(record.from)) {console.log('record.from previously cached')
-        senderName = resolvedUsersMap.get(record.from);console.log('senderName:', senderName)
-      } else {console.log('record.from not yet cached')
+    if (record.from) {
+      if (resolvedUsersMap.has(record.from)) {
+        senderName = resolvedUsersMap.get(record.from);
+      } else {
         let user = await slack.resolver.getUserProfileObject(record.from);
-        senderName = user.real_name;console.log('senderName:', senderName)
-        resolvedUsersMap.set(record.from, user.real_name);console.log('record.from now cached', resolvedUsersMap);
+        senderName = user.real_name;
+        resolvedUsersMap.set(record.from, user.real_name);
       }
     }
     rows.push({
@@ -35,7 +35,6 @@ async function _getFeedbackTable(records) {
       senderName
     });
   }
-  console.log('final rows before return:', rows)
   return rows;
 }
 
