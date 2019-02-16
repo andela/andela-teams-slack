@@ -7,9 +7,9 @@ const slack = new Slack();
 
 async function _getFeedbackTable(records) {
   let resolvedUsersMap = new Map();
-  let rows = [];
+  let rows = [];console.log(`${records.length} records found`)
   for (let i = 0; i < records.length; i++) {console.log(`interation number ${i+1}`)
-    let record = records[i].get();console.log('record:', record)
+    let record = records[i];console.log('record:', record.get())
     let recipientName, senderName;
     if (record.to) {console.log('entered record.to:', record.to)
       if (resolvedUsersMap.has(record.to)) {console.log('record.to previously cached')
@@ -30,7 +30,7 @@ async function _getFeedbackTable(records) {
       }
     }
     rows.push({
-      ...record,
+      ...(record.get()),
       recipientName,
       senderName
     });
