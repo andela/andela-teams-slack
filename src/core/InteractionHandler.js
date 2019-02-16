@@ -1,3 +1,5 @@
+import jwt from 'jsonwebtoken';
+
 import Github from '../integrations/Github';
 import HelperFunctions from './HelperFunctions';
 import models from '../models';
@@ -22,13 +24,13 @@ async function _createAndPostGithubRepoLink(req) {
     }
   });
 
-  let text = result.ok ? 'Github repo created' : 'Could not create Github repo';
-  let linkOrError = result.ok ? result.url : result.error;
-  // let linkOrError = result.ok
+  let text = result.url ? 'Github repo created' : 'Could not create Github repo';
+  let linkOrError = result.url ? result.url : result.error || result.message;
+  // let linkOrError = result.url
   //   ? (result.invitedUser.ok
   //       ? result.url
   //       : result.url + '\n\nAlthough the repo was created you were not added. This could be because you\'ve already been added to the repo before now.')
-  //   : result.error;
+  //   : result.error || result.message;
 
   // to use await slack.chat.postEphemeral
   // replace arg req.payload.response_url
@@ -37,7 +39,7 @@ async function _createAndPostGithubRepoLink(req) {
     text,
     req.payload.response_url,
     [{
-      color: result.ok ? 'good' : 'danger',
+      color: result.url ? 'good' : 'danger',
       text: linkOrError,
     }]);
 
@@ -59,9 +61,9 @@ async function _createAndPostPtProjectLink(req) {
     }
   });
 
-  let text = result.ok ? 'Pivotal Tracker project created' : 'Could not create Pivotal Tracker project';
+  let text = result.url ? 'Pivotal Tracker project created' : 'Could not create Pivotal Tracker project';
   // let linkOrError = result.ok ? result.url : result.error;
-  let linkOrError = result.ok
+  let linkOrError = result.url
     ? (result.invitedUser.ok
         ? result.url
         : result.url + '\n\nAlthough the project was created you were not added. This could be because you\'ve already been added to the project before now.')
@@ -71,7 +73,7 @@ async function _createAndPostPtProjectLink(req) {
     text,
     req.payload.response_url,
     [{
-      color: result.ok ? 'good' : 'danger',
+      color: result.url ? 'good' : 'danger',
       text: linkOrError,
     }]);
 
@@ -122,6 +124,46 @@ async function _handleRecordFeedbackDialog(req) {
     req.payload.user.id);
 }
 
+async function _handleFeedbackAnalyticsDialog(req) {
+  let returnUrl = `https://${req.get('host')}/ui/analytics/feedback/`;
+  let submission = req.payload.submission;
+  let targetUsers = [];
+  if (submission.feedback_target_user.startsWith('U')) { // user ID
+    targetUsers.push(submission.feedback_target_user);
+  } else if (submission.feedback_target_user.startsWith('C') // channel ID
+    || submission.feedback_target_user.startsWith('G')) { // private channel or multi-DM ID
+    targetUsers = await slack.resolver.getChannelMembers(submission.feedback_target_user);
+  }
+  let query = {};
+  if (submission.feedback_analytics_type === 'feedback_table') {
+    returnUrl += 'table/';
+    query.where = {
+      to: { $in: targetUsers },
+      type: submission.feedback_type,
+      createdAt: { 
+        $gte: new Date(submission.feedback_start_date),
+        $lte: new Date(submission.feedback_end_date)
+      }
+    };
+    query.include = [{
+      model: models.Skill,
+      as: 'skill',
+      attributes: ['name'],
+      include: [{
+        model: models.Attribute,
+        as: 'attribute',
+        attributes: ['name'],
+      }]
+    }];
+    const token = jwt.sign(query, process.env.JWT_SECRET);
+    returnUrl += token;
+  }
+  await slack.chat.postEphemeralOrDM(
+    returnUrl,
+    req.payload.channel.id,
+    req.payload.user.id);
+}
+
 async function _handleRecordFeedbackDialogCancellation(req) {
   let feedbackId = parseInt(req.payload.callback_id.substring(23), 10);
   const feedback = await models.FeedbackInstance.findOne({
@@ -130,6 +172,26 @@ async function _handleRecordFeedbackDialogCancellation(req) {
   if (feedback) {
     await feedback.destroy();
   }
+}
+
+async function _postAnalyticsPage(req) {
+  var actions = [];
+  actions.push({
+    name: 'analytics',
+    text: 'Feedback...',
+    type: 'button',
+    value: 'feedback_analytics'
+  });
+
+  await slack.chat.postResponse(
+    'Analytics',
+    req.payload.response_url,
+    [{
+      callback_id: 'analytics',
+      color: 'warning',
+      fallback: 'Could not perform operation.',
+      actions: actions
+    }]);
 }
 
 async function _postCreateGithubReposPage(req) {
@@ -245,6 +307,8 @@ export default class InteractionHandler {
         } else if (payload.callback_id === 'create_team_dialog') {
           await _postCreateGithubReposPage(req);
           await _postCreatePtBoardPage(req);
+        } else if (payload.callback_id === 'feedback_analytics_dialog') {
+          await _handleFeedbackAnalyticsDialog(req);
         } else if (payload.callback_id.startsWith('record_feedback_dialog:')) {
           await _handleRecordFeedbackDialog(req);
         }
@@ -260,7 +324,9 @@ export default class InteractionHandler {
       let payload = req.payload;
       if (payload.type === 'interactive_message') {
         const value = payload.actions[0].value;
-        if (value === 'create_team') {
+        if (value === 'analytics') {
+          await _postAnalyticsPage(req);
+        } else if (value === 'create_team') {
           await slack.dialog.open(payload.trigger_id, helpers.getCreateTeamDialogJson());
         } else if (value.startsWith('create_github_repo:')) {
           let repoName = value.substring(19);
@@ -278,7 +344,9 @@ export default class InteractionHandler {
             req.projectName = projectName;
             await _createAndPostPtProjectLink(req);
           }
-        }
+        } else if (value === 'feedback_analytics') {
+          await slack.dialog.open(payload.trigger_id, helpers.getFeedbackAnalyticsDialogJson());
+        } 
         return;
       }
       next();

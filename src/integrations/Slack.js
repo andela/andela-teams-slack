@@ -91,6 +91,26 @@ class Dialog {
 }
 
 class Resolver {
+  async getChannelMembers(channelId) {
+    let members = [];
+    let url = 'https://slack.com/api/conversations.members';
+    url += '?channel=' + channelId;
+    url += '&token=' + process.env.SLACK_USER_TOKEN;
+    let response = await request({
+      url: url,
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      resolveWithFullResponse: true
+    });
+    let data = JSON.parse(response.body);
+    if (data.ok && data.members) {
+      members = data.members;
+    }
+
+    return members;
+  }
   async getMessageFromChannel(ts, channelId) {
     let url = 'https://slack.com/api/conversations.history';
     url += '?channel=' + channelId;
