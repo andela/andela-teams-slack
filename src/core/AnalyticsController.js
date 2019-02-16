@@ -9,17 +9,21 @@ export default class AnalyticsController {
       const query = jwt.verify(token, process.env.JWT_SECRET);
       const query2 = {
         where: {
-          // createdAt: { 
-          //   $gte: new Date('2019-01-13T10:50:34.113Z'),
-          //   $lte: new Date('2019-02-17T10:50:33.911Z')
-          // }
+          createdAt: { 
+            $gte: new Date('2019-01-13T10:50:34.113Z'),
+            $lte: new Date('2019-02-17T10:50:33.911Z')
+          }
         },
         //include: [{ all: true, nested: true }]
         include: [{
           model: models.Skill,
           as: 'skill',
           attributes: ['name'],
-          required: false
+          include: [{
+            model: models.Attribute,
+            as: 'attribute',
+            attributes: ['name'],
+          }]
         }]
       }
       const dbres = await models.FeedbackInstance.findAndCountAll();
