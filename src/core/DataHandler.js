@@ -27,9 +27,9 @@ async function _getAttributesAndSkills() {
 
 function _getDates() {
   let dateMap = new Map();
-  let now = moment();
+  // let now = moment();
   for (let i = 0; i <= 90; i++) {
-    let date = now.subtract(i, 'days');
+    let date = moment().subtract(i, 'days');
     let monthName = date.format('MMMM');
     if (dateMap.has(monthName)) {
       console.log('dateMap.get(monthName)>>>>>>>>>>>>>>>>>>>>>>>>>');console.log(dateMap.get(monthName))
