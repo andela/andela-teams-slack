@@ -29,7 +29,7 @@ app.get('/', async (req, res) => {
   res.status(200).send("Hello World!\nWelcome to Andela Teams for Slack");
 });
 
-app.post('/api/analytics/feedback/:token',
+app.get('/api/analytics/feedback/:token',
   analytics.feedback);
 
 app.post('/data/external',
