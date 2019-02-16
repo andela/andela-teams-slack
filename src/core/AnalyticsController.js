@@ -18,9 +18,18 @@ export default class AnalyticsController {
           query.include[0].include[0].model = models.Attribute;
         }
       }
-      const feedbackInstances = await models.FeedbackInstance.findAll(query);
-      for (let i = 0; i < feedbackInstances.length; i++) {
-        feedbackInstances[i].toUser = await slack.resolver.getUserProfileObject(feedbackInstances[i].to);
+      const fdbckInstances = await models.FeedbackInstance.findAll(query);
+      let resolvedUsersMap = new Map();
+      let feedbackInstances = [];
+      for (let i = 0; i < fdbckInstances.length; i++) {
+        if (resolvedUsersMap.has(fdbckInstances[i].to)) {
+          feedbackInstances.push({...fdbckInstances[i], toUser: resolvedUsersMap.get(fdbckInstances[i].to)});
+        } else {
+          let toUser = await slack.resolver.getUserProfileObject(fdbckInstances[i].to);
+          console.log(toUser);
+          resolvedUsersMap.set(fdbckInstances[i].to, toUser);
+          feedbackInstances.push({...fdbckInstances[i], toUser});
+        }
       }
       return res.status(200).json({ feedbackInstances });
     } catch(error) {
