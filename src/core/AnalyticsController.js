@@ -18,10 +18,12 @@ export default class AnalyticsController {
         include: [{
           model: models.Skill,
           as: 'skill',
-          attributes: ['name']
-          //required: false
+          attributes: ['name'],
+          required: false
         }]
       }
+      const dbres = await models.FeedbackInstance.findAndCountAll();
+      console.log(dbres.count);
       const feedbackInstances = await models.FeedbackInstance.findAll(query2);
       return res.status(200).json({ feedbackInstances });
     } catch(error) {
