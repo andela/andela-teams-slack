@@ -93,7 +93,7 @@ class Dialog {
 class Resolver {
   async getChannelMembers(channelId) {
     let members = [];
-    url = 'https://slack.com/api/conversations.members';
+    let url = 'https://slack.com/api/conversations.members';
     url += '?channel=' + channelId;
     url += '&token=' + process.env.SLACK_USER_TOKEN;
     response = await request({
