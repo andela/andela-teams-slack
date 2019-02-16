@@ -34,8 +34,9 @@ function _getDates() {
     if (dateMap[monthName]) { //dateMap.has(monthName)
       console.log('dateMap.get(monthName)>>>>>>>>>>>>>>>>>>>>>>>>>');console.log(dateMap[monthName])
       let dates = Array.from(dateMap[monthName]);
+      dates.push(date);
       console.log('dates>>>>>>>>>>>>>>>>>>>>>>>>>');console.log(dates)
-      dateMap[monthName] = dates.push(date); //dateMap.set(monthName, dates.push(date));
+      dateMap[monthName] = dates; //dateMap.set(monthName, dates.push(date));
     } else {
       console.log('set date>>>>>>>>>>>>>>>>>>>>>>>>>');console.log(date)
       dateMap[monthName] = [date]; //dateMap.set(monthName, [date]);
