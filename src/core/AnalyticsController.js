@@ -22,25 +22,32 @@ export default class AnalyticsController {
       let resolvedUsersMap = new Map();
       let feedbackInstances = [];
       for (let i = 0; i < fdbckInstances.length; i++) {
+        let feedback = fdbckInstances[i];
         let recipientName, senderName;
-        if (resolvedUsersMap.has(fdbckInstances[i].to)) {
-          recipientName = resolvedUsersMap.get(fdbckInstances[i].to);
-        } else {
-          let user = await slack.resolver.getUserProfileObject(fdbckInstances[i].to);
-          recipientName = user.real_name;
-          resolvedUsersMap.set(fdbckInstances[i].to, user.real_name);
+        if (feedback.to) {
+          if (resolvedUsersMap.has(feedback.to)) {
+            recipientName = resolvedUsersMap.get(feedback.to);
+          } else {
+            let user = await slack.resolver.getUserProfileObject(feedback.to);
+            recipientName = user.real_name;
+            resolvedUsersMap.set(feedback.to, user.real_name);
+          }
         }
-        if (resolvedUsersMap.has(fdbckInstances[i].from)) {
-          senderName = resolvedUsersMap.get(fdbckInstances[i].from);
-        } else {
-          let user = await slack.resolver.getUserProfileObject(fdbckInstances[i].from);
-          senderName = user.real_name;
-          resolvedUsersMap.set(fdbckInstances[i].from, user.real_name);
+        if (feedback.from) {
+          if (resolvedUsersMap.has(feedback.from)) {
+            senderName = resolvedUsersMap.get(feedback.from);
+          } else {
+            let user = await slack.resolver.getUserProfileObject(feedback.from);
+            senderName = user.real_name;
+            resolvedUsersMap.set(feedback.from, user.real_name);
+          }
         }
         feedbackInstances.push({
-          ...(fdbckInstances[i].get()),
+          ...(feedback.get()),
           recipientName,
-          senderName
+          senderName,
+          testUndefined: undefined,
+          testNull: null
         });
       }
       return res.status(200).json({ feedbackInstances });
