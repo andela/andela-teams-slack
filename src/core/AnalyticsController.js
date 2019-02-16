@@ -7,14 +7,11 @@ export default class AnalyticsController {
     try {
       let token = req.params.token;
       const query = jwt.verify(token, process.env.JWT_SECRET);
-      console.log(query);
-      console.log(query.include);
-      console.log(query.include[0].through);
       const query2 = {
         where: {
           createdAt: { 
             $gte: '2019-01-13T10:50:34.113Z',
-            $lte: '2019-02-13T10:50:33.911Z'
+            $lte: '2019-02-17T10:50:33.911Z'
           }
         },
         include: [{ all: true, nested: true }]
