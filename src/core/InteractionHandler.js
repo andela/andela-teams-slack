@@ -125,7 +125,7 @@ async function _handleRecordFeedbackDialog(req) {
 }
 
 async function _handleFeedbackAnalyticsDialog(req) {
-  let returnUrl = `https://${req.get('host')}/ui/analytics/feedback/`;
+  let returnUrl = `https://${req.get('host')}/ui/analytics/feedback`;
   let submission = req.payload.submission;
   let targetUsers = [];
   if (submission.feedback_target_user.startsWith('U')) { // user ID
@@ -136,7 +136,7 @@ async function _handleFeedbackAnalyticsDialog(req) {
   }
   let query = {};
   if (submission.feedback_analytics_type === 'feedback_table') {
-    returnUrl += 'table/';
+    returnUrl += '/table';
     query.where = {
       to: { $in: targetUsers },
       type: submission.feedback_type,
@@ -155,9 +155,20 @@ async function _handleFeedbackAnalyticsDialog(req) {
         attributes: ['name'],
       }]
     }];
-    const token = jwt.sign(query, process.env.JWT_SECRET);
-    returnUrl += token;
+  } else if (submission.feedback_analytics_type === 'feedback_time_distribution') {
+    returnUrl += '/dist';
+    query.where = {
+      to: { $in: targetUsers },
+      type: submission.feedback_type,
+      createdAt: { 
+        $gte: new Date(submission.feedback_start_date),
+        $lte: new Date(submission.feedback_end_date)
+      }
+    };
+    query.attributes = ['id', 'type', 'createdAt'];
   }
+  const token = jwt.sign(query, process.env.JWT_SECRET);
+  returnUrl += `/${token}`;
   await slack.chat.postEphemeralOrDM(
     returnUrl,
     req.payload.channel.id,

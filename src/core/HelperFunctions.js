@@ -103,7 +103,8 @@ export default class HelperFunctions {
           type: 'select',
           label: 'Type',
           name: 'feedback_type',
-          value: 'negative',
+          // value: 'negative',
+          optional: true,
           options: [{
             label: '😊', // \u263A
             value: 'positive'

@@ -18,37 +18,44 @@ export default class AnalyticsController {
           query.include[0].include[0].model = models.Attribute;
         }
       }
-      const fdbckInstances = await models.FeedbackInstance.findAll(query);
+      let query2 = {
+        attributes: [
+          'createdAt'
+          [models.sequelize.fn('count', models.sequelize.col('id')), 'count']
+        ],
+        group: ['createdAt']
+      };
+      const records = await models.FeedbackInstance.findAll(query2);
       let resolvedUsersMap = new Map();
-      let feedbackInstances = [];
-      for (let i = 0; i < fdbckInstances.length; i++) {
-        let feedback = fdbckInstances[i];
+      let rows = [];
+      for (let i = 0; i < records.length; i++) {
+        let record = records[i];
         let recipientName, senderName;
-        if (feedback.to) {
-          if (resolvedUsersMap.has(feedback.to)) {
-            recipientName = resolvedUsersMap.get(feedback.to);
+        if (record.to) {
+          if (resolvedUsersMap.has(record.to)) {
+            recipientName = resolvedUsersMap.get(record.to);
           } else {
-            let user = await slack.resolver.getUserProfileObject(feedback.to);
+            let user = await slack.resolver.getUserProfileObject(record.to);
             recipientName = user.real_name;
-            resolvedUsersMap.set(feedback.to, user.real_name);
+            resolvedUsersMap.set(record.to, user.real_name);
           }
         }
-        if (feedback.from) {
-          if (resolvedUsersMap.has(feedback.from)) {
-            senderName = resolvedUsersMap.get(feedback.from);
+        if (record.from) {
+          if (resolvedUsersMap.has(record.from)) {
+            senderName = resolvedUsersMap.get(record.from);
           } else {
-            let user = await slack.resolver.getUserProfileObject(feedback.from);
+            let user = await slack.resolver.getUserProfileObject(record.from);
             senderName = user.real_name;
-            resolvedUsersMap.set(feedback.from, user.real_name);
+            resolvedUsersMap.set(record.from, user.real_name);
           }
         }
-        feedbackInstances.push({
-          ...(feedback.get()),
+        rows.push({
+          ...(record.get()),
           recipientName,
           senderName
         });
       }
-      return res.status(200).json({ feedbackInstances });
+      return res.status(200).json({ rows });
     } catch(error) {
       next(error);
     }
