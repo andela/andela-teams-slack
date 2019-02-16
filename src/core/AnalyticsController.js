@@ -19,20 +19,7 @@ export default class AnalyticsController {
             $lte: '2019-02-13T10:50:33.911Z'
           }
         },
-        include: [{
-          model: models.Skill,
-          as: 'skill',
-          through: {
-            attributes: ['name']
-          },
-          include: [{
-            model: models.Attribute,
-            as: 'attribute',
-            through: {
-              attributes: ['name']
-            }
-          }]
-        }]
+        include: [{ all: true, nested: true }]
       }
       console.log(query2);
       console.log(query2.include);
