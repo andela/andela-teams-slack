@@ -1,3 +1,5 @@
+import jwt from 'jsonwebtoken';
+
 import Github from '../integrations/Github';
 import HelperFunctions from './HelperFunctions';
 import models from '../models';
@@ -122,23 +124,36 @@ async function _handleRecordFeedbackDialog(req) {
     req.payload.user.id);
 }
 
-async function _handleFeedbackAnalyticsDialog(req) {console.log(req.payload.submission)
+async function _handleFeedbackAnalyticsDialog(req) {
   let returnUrl = `https://${req.get('host')}/ui/analytics/feedback/`;
-  console.log(returnUrl);
   let submission = req.payload.submission;
   let query = {};
   if (submission.feedback_analytics_type === 'feedback_table') {
     returnUrl += 'table/';
     query.where = {
-      to: submission.feedback_target_user,
+      to: submission.feedback_target_user, // to: {$in: [array of user IDs]}
       type: submission.feedback_type,
-      createdAt: [{ 
-        $gte: new Date(submission.feedback_end_date)
-      }, { 
+      createdAt: { 
+        $gte: new Date(submission.feedback_end_date),
         $lte: new Date(submission.feedback_start_date)
-      }]
+      }
     };
-    console.log(query);
+    query.include = [{
+      model: models.Skill,
+      as: 'skill',
+      through: {
+        attributes: ['name'],
+        include: [{
+          model: models.Attribute,
+          as: 'attribute',
+          through: {
+            attributes: ['name']
+          }
+        }]
+      }
+    }];
+    const token = jwt.sign(query, process.env.JWT_SECRET);
+    returnUrl += token;
   }
   await slack.chat.postEphemeralOrDM(
     returnUrl,
