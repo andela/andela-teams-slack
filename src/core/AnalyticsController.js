@@ -46,6 +46,7 @@ function _getFeedbackTimeDistribution(records) {console.log('enters _getFeedback
       dateGroupsMap.set(
         record.createdAt,
         Number(dateGroupsMap.get(record.createdAt)) + Number(record.count));
+      console.log('record.count:');console.log(record.count);
       console.log('after another caching:');console.log(dateGroupsMap);
     } else {console.log('date not yet cached:' + record.createdAt)
       dateGroupsMap.set(record.createdAt, Number(record.count));
