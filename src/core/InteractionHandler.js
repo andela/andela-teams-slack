@@ -1,3 +1,5 @@
+import url from 'url';
+
 import Github from '../integrations/Github';
 import HelperFunctions from './HelperFunctions';
 import models from '../models';
@@ -118,6 +120,20 @@ async function _handleRecordFeedbackDialog(req) {
   });
   await slack.chat.postEphemeralOrDM(
     'Feedback recorded!',
+    req.payload.channel.id,
+    req.payload.user.id);
+}
+
+async function _handleFeedbackAnalyticsDialog(req) {
+  const urlObject = url.parse(req.fullUrl);
+  const protocol =
+    (req.secure || req.connection.encrypted) ? 'https:' : 'http:';
+  let url = `${protocol}//${urlObject.host}${urlObject.pathname}/ui/analytics/feedback/table/`;
+  let submission = req.payload.submission;
+  console.log(submission)
+  let query = {};
+  await slack.chat.postEphemeralOrDM(
+    url,
     req.payload.channel.id,
     req.payload.user.id);
 }
@@ -265,6 +281,8 @@ export default class InteractionHandler {
         } else if (payload.callback_id === 'create_team_dialog') {
           await _postCreateGithubReposPage(req);
           await _postCreatePtBoardPage(req);
+        } else if (payload.callback_id === 'feedback_analytics_dialog') {
+          await _handleFeedbackAnalyticsDialog(req);
         } else if (payload.callback_id.startsWith('record_feedback_dialog:')) {
           await _handleRecordFeedbackDialog(req);
         }
