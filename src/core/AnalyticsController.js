@@ -23,12 +23,12 @@ export default class AnalyticsController {
       let feedbackInstances = [];
       for (let i = 0; i < fdbckInstances.length; i++) {
         if (resolvedUsersMap.has(fdbckInstances[i].to)) {
-          feedbackInstances.push({...fdbckInstances[i], toUser: resolvedUsersMap.get(fdbckInstances[i].to)});
+          feedbackInstances.push({...fdbckInstances[i], recipientName: resolvedUsersMap.get(fdbckInstances[i].to)});
         } else {
-          let toUser = await slack.resolver.getUserProfileObject(fdbckInstances[i].to);
-          console.log(toUser);
-          resolvedUsersMap.set(fdbckInstances[i].to, toUser);
-          feedbackInstances.push({...fdbckInstances[i], toUser});
+          let user = await slack.resolver.getUserProfileObject(fdbckInstances[i].to);
+          console.log(user);
+          resolvedUsersMap.set(fdbckInstances[i].to, user.real_name);
+          feedbackInstances.push({ ...fdbckInstances[i], recipientName: user.real_name });
         }
       }
       return res.status(200).json({ feedbackInstances });
