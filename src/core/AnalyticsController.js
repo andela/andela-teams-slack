@@ -3,32 +3,21 @@ import jwt from 'jsonwebtoken';
 import models from '../models';
 
 export default class AnalyticsController {
-  async feedback(req, res, next) {console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>')
+  async feedback(req, res, next) {
     try {
       let token = req.params.token;
       const query = jwt.verify(token, process.env.JWT_SECRET);
-      const query2 = {
-        where: {
-          createdAt: { 
-            $gte: new Date('2019-01-13T10:50:34.113Z'),
-            $lte: new Date('2019-02-17T10:50:33.911Z')
-          }
-        },
-        //include: [{ all: true, nested: true }]
-        include: [{
-          model: models.Skill,
-          as: 'skill',
-          attributes: ['name'],
-          include: [{
-            model: models.Attribute,
-            as: 'attribute',
-            attributes: ['name'],
-          }]
-        }]
+      console.log(query);
+      // because include.model seems to be lost during encoding, I recreate it
+      // after decoding
+      if (query.include && query.include[0]) {
+        query.include[0].model = models.Skill;
+        if (query.include[0].include && query.include[0].include[0]) {
+          query.include[0].include[0].model = models.Attribute;
+        }
       }
-      const dbres = await models.FeedbackInstance.findAndCountAll();
-      console.log(dbres.count);
-      const feedbackInstances = await models.FeedbackInstance.findAll(query2);
+      console.log(query);
+      const feedbackInstances = await models.FeedbackInstance.findAll(query);
       return res.status(200).json({ feedbackInstances });
     } catch(error) {
       next(error);

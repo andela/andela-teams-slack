@@ -139,20 +139,16 @@ async function _handleFeedbackAnalyticsDialog(req) {
       }
     };
     query.include = [{ all: true, nested: true }];
-    // query.include = [{
-    //   model: models.Skill,
-    //   as: 'skill',
-    //   through: {
-    //     attributes: ['name'],
-    //     include: [{
-    //       model: models.Attribute,
-    //       as: 'attribute',
-    //       through: {
-    //         attributes: ['name']
-    //       }
-    //     }]
-    //   }
-    // }];
+    query.include = [{
+      model: models.Skill,
+      as: 'skill',
+      attributes: ['name'],
+      include: [{
+        model: models.Attribute,
+        as: 'attribute',
+        attributes: ['name'],
+      }]
+    }];
     const token = jwt.sign(query, process.env.JWT_SECRET);
     returnUrl += token;
   }
