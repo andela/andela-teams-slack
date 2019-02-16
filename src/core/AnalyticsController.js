@@ -25,6 +25,7 @@ export default class AnalyticsController {
         ],
         group: ['createdAt']
       };
+      console.log(query2);
       const records = await models.FeedbackInstance.findAll(query2);
       let resolvedUsersMap = new Map();
       let rows = [];
