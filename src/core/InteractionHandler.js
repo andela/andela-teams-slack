@@ -125,7 +125,10 @@ async function _handleRecordFeedbackDialog(req) {
 }
 
 async function _handleFeedbackAnalyticsDialog(req) {console.log(req.payload.submission)
-  const urlObject = url.parse(req.fullUrl);
+  console.log(req.originalUrl);
+  console.log(req.path);
+  console.log(`${req.protocol}://${req.get('host')}${req.path}`);
+  const urlObject = url.parse(`${req.protocol}://${req.get('host')}${req.path}`);
   const protocol =
     (req.secure || req.connection.encrypted) ? 'https:' : 'http:';
   let returnUrl = `${protocol}//${urlObject.host}${urlObject.pathname}/ui/analytics/feedback/table/`;
