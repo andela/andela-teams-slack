@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import models from '../models';
 
 export default class AnalyticsController {
-  async feedback(req, res, next) {
+  async feedback(req, res, next) {console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>')
     try {
       let token = req.params.token;
       const query = jwt.verify(token, process.env.JWT_SECRET);
