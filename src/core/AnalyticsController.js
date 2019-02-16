@@ -37,36 +37,38 @@ async function _getFeedbackTable(records) {
   }
 }
 
-function _getFeedbackTimeDistribution(records) {
+function _getFeedbackTimeDistribution(records) {console.log('enters _getFeedbackTimeDistribution(records)')
   let dateGroupsMap = new Map();
   let totalCount = 0;
-  for (let i = 0; i < records.length; i++) {
-    let record = records[i];
-    if (dateGroupsMap.has(record.createdAt)) {
+  for (let i = 0; i < records.length; i++) {console.log('interation number ' + (i + 1))
+    let record = records[i];console.log('found record:');console.log(record.get())
+    if (dateGroupsMap.has(record.createdAt)) {console.log('date previously cached:' + record.createdAt)
       dateGroupsMap.set(
         record.createdAt,
         Number(dateGroupsMap.get(record.createdAt)) + Number(record.count));
-    } else {
+      console.log('after another caching:');console.log(dateGroupsMap);
+    } else {console.log('date not yet cached:' + record.createdAt)
       dateGroupsMap.set(record.createdAt, Number(record.count));
+      console.log('after initial caching:');console.log(dateGroupsMap);
     }
-    totalCount += Number(record.count);
+    totalCount += Number(record.count);console.log('total count: ' + totalCount)
   }
   let rows = [];
-  for (let [createdAt, count] in dateGroupsMap) {console.log(createdAt);console.log(count);
+  for (let [createdAt, count] in dateGroupsMap) {console.log('interating through dateGroupsMap:');console.log(createdAt);console.log(count);
     rows.push({
       createdAt,
       count,
       percent: (Number(count) / totalCount) * 100
     });
-  }console.log(rows)
+  }console.log('final rows before return: ');console.log(rows)
   return rows;
 }
 
 export default class AnalyticsController {
-  async feedback(req, res, next) {console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
+  async feedback(req, res, next) {
     try {
       let token = req.params.token;
-      const query = jwt.verify(token, process.env.JWT_SECRET);console.log(query)
+      const query = jwt.verify(token, process.env.JWT_SECRET);
       if (query.feedbackAnalyticsType === 'feedback_table') {
         query.include = [{
           model: models.Skill,
@@ -85,7 +87,8 @@ export default class AnalyticsController {
         ];
         query.group = ['createdAt'];
       }
-      const records = await models.FeedbackInstance.findAll(query);console.log(records)
+      const records = await models.FeedbackInstance.findAll(query);
+      console.log('finds records:');console.log(records)
       let rows = [];
       if (query.feedbackAnalyticsType === 'feedback_table') {
         rows = await _getFeedbackTable(records);
