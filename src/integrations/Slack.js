@@ -96,7 +96,7 @@ class Resolver {
     let url = 'https://slack.com/api/conversations.members';
     url += '?channel=' + channelId;
     url += '&token=' + process.env.SLACK_USER_TOKEN;
-    response = await request({
+    let response = await request({
       url: url,
       method: 'GET',
       headers: {
@@ -104,7 +104,7 @@ class Resolver {
       },
       resolveWithFullResponse: true
     });
-    data = JSON.parse(response.body);
+    let data = JSON.parse(response.body);
     if (data.ok && data.members) {
       members = data.members;
     }
