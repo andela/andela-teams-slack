@@ -23,15 +23,15 @@ export default class AnalyticsController {
           model: models.Skill,
           as: 'skill',
           through: {
-            attributes: ['name'],
-            include: [{
-              model: models.Attribute,
-              as: 'attribute',
-              through: {
-                attributes: ['name']
-              }
-            }]
-          }
+            attributes: ['name']
+          },
+          include: [{
+            model: models.Attribute,
+            as: 'attribute',
+            through: {
+              attributes: ['name']
+            }
+          }]
         }]
       }
       console.log(query2);
