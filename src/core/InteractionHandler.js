@@ -124,13 +124,12 @@ async function _handleRecordFeedbackDialog(req) {
     req.payload.user.id);
 }
 
-async function _handleFeedbackAnalyticsDialog(req) {
+async function _handleFeedbackAnalyticsDialog(req) {console.log(req.payload.submission)
   const urlObject = url.parse(req.fullUrl);
   const protocol =
     (req.secure || req.connection.encrypted) ? 'https:' : 'http:';
-  let url = `${protocol}//${urlObject.host}${urlObject.pathname}/ui/analytics/feedback/table/`;
+  url = `${protocol}//${urlObject.host}${urlObject.pathname}/ui/analytics/feedback/table/`;
   let submission = req.payload.submission;
-  console.log(submission)
   let query = {};
   await slack.chat.postEphemeralOrDM(
     url,
