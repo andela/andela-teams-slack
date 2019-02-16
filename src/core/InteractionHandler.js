@@ -154,8 +154,6 @@ async function _handleFeedbackAnalyticsDialog(req) {
     }];
     const token = jwt.sign(query, process.env.JWT_SECRET);
     returnUrl += token;
-    console.log(token);
-    console.log(returnUrl);
   }
   await slack.chat.postEphemeralOrDM(
     returnUrl,
