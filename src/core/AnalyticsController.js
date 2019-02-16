@@ -5,11 +5,11 @@ import Slack from '../integrations/Slack';
 
 const slack = new Slack();
 
-async function _getFeedbackTable(records) {
+async function _getFeedbackTable(records) {console.log('enters _getFeedbackTable(records)')
   let resolvedUsersMap = new Map();
-  let rows = [];
+  let rows = [];console.log(`found ${records.length} records`)
   for (let i = 0; i < records.length; i++) {
-    let record = records[i];
+    let record = records[i].get();
     let recipientName, senderName;
     if (record.to) {
       if (resolvedUsersMap.has(record.to)) {
@@ -30,39 +30,35 @@ async function _getFeedbackTable(records) {
       }
     }
     rows.push({
-      ...(record.get()),
+      ...record,
       recipientName,
       senderName
     });
   }
 }
 
-function _getFeedbackTimeDistribution(records) {console.log('enters _getFeedbackTimeDistribution(records)')
+function _getFeedbackTimeDistribution(records) {
   let dateGroupsMap = new Map();
   let totalCount = 0;
-  for (let i = 0; i < records.length; i++) {console.log('interation number ' + (i + 1))
-    let record = records[i].get();console.log('found record:');console.log(record)
-    console.log('record.count:');console.log(record.count);
-    if (dateGroupsMap.has(record.createdAt)) {console.log('date previously cached:' + record.createdAt)
+  for (let i = 0; i < records.length; i++) {
+    let record = records[i].get();
+    if (dateGroupsMap.has(record.createdAt)) {
       dateGroupsMap.set(
         record.createdAt,
         Number(dateGroupsMap.get(record.createdAt)) + Number(record.count));
-      console.log('record.count:');console.log(record.count);
-      console.log('after another caching:');console.log(dateGroupsMap);
-    } else {console.log('date not yet cached:' + record.createdAt)
+    } else {
       dateGroupsMap.set(record.createdAt, Number(record.count));
-      console.log('after initial caching:');console.log(dateGroupsMap);
     }
-    totalCount += Number(record.count);console.log('total count: ' + totalCount)
+    totalCount += Number(record.count);
   }
   let rows = [];
-  for (let [createdAt, count] of dateGroupsMap) {console.log('interating through dateGroupsMap:');console.log(createdAt);console.log(count);
+  for (let [createdAt, count] of dateGroupsMap) {
     rows.push({
       createdAt,
       count,
       percent: (Number(count) / totalCount) * 100
     });
-  }console.log('final rows before return: ');console.log(rows)
+  }
   return rows;
 }
 
