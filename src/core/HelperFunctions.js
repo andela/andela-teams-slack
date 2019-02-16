@@ -118,12 +118,12 @@ export default class HelperFunctions {
           name: 'feedback_start_date',
           data_source: 'external'
         },
-        {
-          type: 'select',
-          label: 'End Date',
-          name: 'feedback_end_date',
-          data_source: 'external'
-        },
+        // {
+        //   type: 'select',
+        //   label: 'End Date',
+        //   name: 'feedback_end_date',
+        //   data_source: 'external'
+        // },
         {
           type: 'select',
           label: 'Analytics Type',
