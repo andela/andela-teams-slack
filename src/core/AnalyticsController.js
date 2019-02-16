@@ -19,7 +19,7 @@ export default class AnalyticsController {
         }
       }
       const feedbackInstances = await models.FeedbackInstance.findAll(query);
-      for (let i = 0; i < feedbackInstances.get().length; i++) {
+      for (let i = 0; i < feedbackInstances.length; i++) {
         feedbackInstances[i].toUser = await slack.resolver.getUserProfileObject(feedbackInstances[i].to);
       }
       return res.status(200).json({ feedbackInstances });
