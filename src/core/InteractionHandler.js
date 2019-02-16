@@ -134,8 +134,8 @@ async function _handleFeedbackAnalyticsDialog(req) {
       to: submission.feedback_target_user, // to: {$in: [array of user IDs]}
       type: submission.feedback_type,
       createdAt: { 
-        $gte: new Date(submission.feedback_end_date),
-        $lte: new Date(submission.feedback_start_date)
+        $gte: new Date(submission.feedback_start_date),
+        $lte: new Date(submission.feedback_end_date)
       }
     };
     query.include = [{ all: true, nested: true }];

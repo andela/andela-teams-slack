@@ -116,12 +116,14 @@ export default class HelperFunctions {
           type: 'select',
           label: 'Start Date',
           name: 'feedback_start_date',
+          hint: 'This is the back date (which should be in the past of the front date)',
           data_source: 'external'
         },
         {
           type: 'select',
           label: 'End Date',
           name: 'feedback_end_date',
+          hint: 'This is the front date (which should be in the future of the back date)',
           data_source: 'external'
         },
         {
