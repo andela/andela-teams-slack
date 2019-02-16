@@ -42,17 +42,19 @@ function _getFeedbackTimeDistribution(records) {console.log('enters _getFeedback
   let totalCount = 0;
   for (let i = 0; i < records.length; i++) {console.log('interation number ' + (i + 1))
     let record = records[i];console.log('found record:');console.log(record.get())
+    console.log('record.count:');console.log(record.count);
+    console.log('record.get().count:');console.log(record.get().count);
     if (dateGroupsMap.has(record.createdAt)) {console.log('date previously cached:' + record.createdAt)
       dateGroupsMap.set(
         record.createdAt,
-        Number(dateGroupsMap.get(record.createdAt)) + Number(record.count));
+        Number(dateGroupsMap.get(record.createdAt)) + Number(record.get().count));
       console.log('record.count:');console.log(record.count);
       console.log('after another caching:');console.log(dateGroupsMap);
     } else {console.log('date not yet cached:' + record.createdAt)
-      dateGroupsMap.set(record.createdAt, Number(record.count));
+      dateGroupsMap.set(record.createdAt, Number(record.get().count));
       console.log('after initial caching:');console.log(dateGroupsMap);
     }
-    totalCount += Number(record.count);console.log('total count: ' + totalCount)
+    totalCount += Number(record.get().count);console.log('total count: ' + totalCount)
   }
   let rows = [];
   for (let [createdAt, count] in dateGroupsMap) {console.log('interating through dateGroupsMap:');console.log(createdAt);console.log(count);
