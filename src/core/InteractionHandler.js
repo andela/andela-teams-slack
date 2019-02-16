@@ -128,11 +128,11 @@ async function _handleFeedbackAnalyticsDialog(req) {console.log(req.payload.subm
   const urlObject = url.parse(req.fullUrl);
   const protocol =
     (req.secure || req.connection.encrypted) ? 'https:' : 'http:';
-  url = `${protocol}//${urlObject.host}${urlObject.pathname}/ui/analytics/feedback/table/`;
+  let returnUrl = `${protocol}//${urlObject.host}${urlObject.pathname}/ui/analytics/feedback/table/`;
   let submission = req.payload.submission;
   let query = {};
   await slack.chat.postEphemeralOrDM(
-    url,
+    returnUrl,
     req.payload.channel.id,
     req.payload.user.id);
 }
