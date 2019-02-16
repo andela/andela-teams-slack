@@ -1,5 +1,3 @@
-import url from 'url';
-
 import Github from '../integrations/Github';
 import HelperFunctions from './HelperFunctions';
 import models from '../models';
@@ -125,15 +123,23 @@ async function _handleRecordFeedbackDialog(req) {
 }
 
 async function _handleFeedbackAnalyticsDialog(req) {console.log(req.payload.submission)
-  console.log(req.originalUrl);
-  console.log(req.path);
-  console.log(`${req.protocol}://${req.get('host')}${req.path}`);
-  const urlObject = url.parse(`${req.protocol}://${req.get('host')}${req.path}`);
-  const protocol =
-    (req.secure || req.connection.encrypted) ? 'https:' : 'http:';
-  let returnUrl = `${protocol}//${urlObject.host}${urlObject.pathname}/ui/analytics/feedback/table/`;
+  let returnUrl = `https://${req.get('host')}/ui/analytics/feedback/`;
+  console.log(returnUrl);
   let submission = req.payload.submission;
   let query = {};
+  if (submission.feedback_analytics_type === 'feedback_table') {
+    returnUrl += 'table/';
+    query.where = {
+      to: submission.feedback_target_user,
+      type: submission.feedback_type,
+      createdAt: [{ 
+        $gte: new Date(submission.feedback_end_date)
+      }, { 
+        $lte: new Date(submission.feedback_start_date)
+      }]
+    };
+    console.log(query);
+  }
   await slack.chat.postEphemeralOrDM(
     returnUrl,
     req.payload.channel.id,
