@@ -52,21 +52,21 @@ function _getFeedbackTimeDistribution(records) {
     totalCount += Number(record.count);
   }
   let rows = [];
-  for (let [createdAt, count] in dateGroupsMap) {
+  for (let [createdAt, count] in dateGroupsMap) {console.log(createdAt);console.log(count);
     rows.push({
       createdAt,
       count,
       percent: (Number(count) / totalCount) * 100
     });
-  }
+  }console.log(rows)
   return rows;
 }
 
 export default class AnalyticsController {
-  async feedback(req, res, next) {
+  async feedback(req, res, next) {console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
     try {
       let token = req.params.token;
-      const query = jwt.verify(token, process.env.JWT_SECRET);
+      const query = jwt.verify(token, process.env.JWT_SECRET);console.log(query)
       if (query.feedbackAnalyticsType === 'feedback_table') {
         query.include = [{
           model: models.Skill,
@@ -85,7 +85,7 @@ export default class AnalyticsController {
         ];
         query.group = ['createdAt'];
       }
-      const records = await models.FeedbackInstance.findAll(query);
+      const records = await models.FeedbackInstance.findAll(query);console.log(records)
       let rows = [];
       if (query.feedbackAnalyticsType === 'feedback_table') {
         rows = await _getFeedbackTable(records);
