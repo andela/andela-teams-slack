@@ -20,7 +20,7 @@ export default class AnalyticsController {
       }
       let query2 = {
         attributes: [
-          'createdAt',
+          models.sequelize.fn('date', models.sequelize.col('createdAt')),
           [models.sequelize.fn('count', models.sequelize.col('id')), 'count']
         ],
         group: ['createdAt']
