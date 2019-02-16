@@ -14,9 +14,9 @@ export default class AnalyticsController {
           //   $lte: new Date('2019-02-17T10:50:33.911Z')
           // }
         },
-        // include: [{ all: true, nested: true }]
+        include: [{ all: true, nested: true }]
       }
-      const feedbackInstances = await models.FeedbackInstance.findAll();
+      const feedbackInstances = await models.FeedbackInstance.findAll(query2);
       return res.status(200).json({ feedbackInstances });
     } catch(error) {
       next(error);
