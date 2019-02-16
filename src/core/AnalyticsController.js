@@ -18,10 +18,8 @@ export default class AnalyticsController {
         include: [{
           model: models.Skill,
           as: 'skill',
-          required: false,
-          through: {
-            attributes: ['name']
-          }
+          attributes: ['name']
+          //required: false
         }]
       }
       const feedbackInstances = await models.FeedbackInstance.findAll(query2);
