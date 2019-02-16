@@ -45,9 +45,7 @@ export default class AnalyticsController {
         feedbackInstances.push({
           ...(feedback.get()),
           recipientName,
-          senderName,
-          testUndefined: undefined,
-          testNull: null
+          senderName
         });
       }
       return res.status(200).json({ feedbackInstances });
