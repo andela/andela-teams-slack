@@ -126,7 +126,7 @@ async function _handleRecordFeedbackDialog(req) {
 
 async function _handleFeedbackAnalyticsDialog(req) {
   let returnUrl = `https://${req.get('host')}/ui/analytics/feedback/`;
-  let submission = req.payload.submission;
+  let submission = req.payload.submission;console.log(submission);
   let targetUsers = [];
   if (submission.feedback_target_user.startsWith('U')) { // user ID
     targetUsers.push(submission.feedback_target_user);
