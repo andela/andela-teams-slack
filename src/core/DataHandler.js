@@ -32,18 +32,13 @@ function _getDates() {
     let date = moment().subtract(i, 'days');
     let monthName = date.format('MMMM');
     if (dateMap.has(monthName)) {
-      console.log('dateMap.get(monthName)>>>>>>>>>>>>>>>>>>>>>>>>>');console.log(dateMap.get(monthName))
       let dates = Array.from(dateMap.get(monthName));
       dates.push(date);
-      console.log('dates>>>>>>>>>>>>>>>>>>>>>>>>>');console.log(dates)
       dateMap.set(monthName, dates);
     } else {
-      console.log('set date>>>>>>>>>>>>>>>>>>>>>>>>>');console.log(date)
       dateMap.set(monthName, [date]);
-      console.log('dateMap>>>>>>>>>>>>>>>>>>>>>>>>>');console.log(dateMap)
     }
   }
-  console.log('dateMap>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>');console.log(dateMap)
   let option_groups = [];
   for (let [monthName, dates] of dateMap) {
     let group = {};
@@ -56,20 +51,6 @@ function _getDates() {
     });
     option_groups.push(group);
   }
-  // for (let monthName in dateMap) {
-  //   if (dateMap.hasOwnProperty(monthName)) {
-  //     let group = {};
-  //     group.label = monthName;
-  //     group.options = dateMap[monthName].map(d => {
-  //       return {
-  //         label: d.format('dddd, MMMM Do YYYY'),
-  //         value: d.toDate()
-  //       }
-  //     });
-  //     option_groups.push(group);
-  //   }
-  // }
-  console.log('option_groups>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>');console.log(option_groups)
   return { option_groups };
 }
 

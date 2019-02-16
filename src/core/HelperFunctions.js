@@ -118,12 +118,12 @@ export default class HelperFunctions {
           name: 'feedback_start_date',
           data_source: 'external'
         },
-        // {
-        //   type: 'select',
-        //   label: 'End Date',
-        //   name: 'feedback_end_date',
-        //   data_source: 'external'
-        // },
+        {
+          type: 'select',
+          label: 'End Date',
+          name: 'feedback_end_date',
+          data_source: 'external'
+        },
         {
           type: 'select',
           label: 'Analytics Type',
@@ -133,7 +133,7 @@ export default class HelperFunctions {
             label: 'Table of feedback instances',
             value: 'feedback_table'
           }, {
-            label: 'Distribution of feedback over time',
+            label: 'Distribution of feedback instances over time',
             value: 'feedback_time_distribution'
           }, {
             label: 'Attributes chart',
