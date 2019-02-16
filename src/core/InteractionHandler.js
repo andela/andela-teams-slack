@@ -134,38 +134,21 @@ async function _handleFeedbackAnalyticsDialog(req) {
     || submission.feedback_target_user.startsWith('G')) { // private channel or multi-DM ID
     targetUsers = await slack.resolver.getChannelMembers(submission.feedback_target_user);
   }
-  let query = {};
+  let query = {
+    where: {
+      to: { $in: targetUsers },
+      type: submission.feedback_type,
+      createdAt: { 
+        $gte: new Date(submission.feedback_start_date),
+        $lte: new Date(submission.feedback_end_date)
+      }
+    },
+    feedbackAnalyticsType: submission.feedback_analytics_type
+  };
   if (submission.feedback_analytics_type === 'feedback_table') {
     returnUrl += '/table';
-    query.where = {
-      to: { $in: targetUsers },
-      type: submission.feedback_type,
-      createdAt: { 
-        $gte: new Date(submission.feedback_start_date),
-        $lte: new Date(submission.feedback_end_date)
-      }
-    };
-    query.include = [{
-      model: models.Skill,
-      as: 'skill',
-      attributes: ['name'],
-      include: [{
-        model: models.Attribute,
-        as: 'attribute',
-        attributes: ['name'],
-      }]
-    }];
   } else if (submission.feedback_analytics_type === 'feedback_time_distribution') {
     returnUrl += '/dist';
-    query.where = {
-      to: { $in: targetUsers },
-      type: submission.feedback_type,
-      createdAt: { 
-        $gte: new Date(submission.feedback_start_date),
-        $lte: new Date(submission.feedback_end_date)
-      }
-    };
-    query.attributes = ['id', 'type', 'createdAt'];
   }
   const token = jwt.sign(query, process.env.JWT_SECRET);
   returnUrl += `/${token}`;
