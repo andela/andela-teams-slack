@@ -10,8 +10,8 @@ export default class AnalyticsController {
       const query2 = {
         where: {
           createdAt: { 
-            $gte: '2019-01-13T10:50:34.113Z',
-            $lte: '2019-02-17T10:50:33.911Z'
+            $gte: new Date('2019-01-13T10:50:34.113Z'),
+            $lte: new Date('2019-02-17T10:50:33.911Z')
           }
         },
         include: [{ all: true, nested: true }]
