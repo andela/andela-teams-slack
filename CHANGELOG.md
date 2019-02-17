@@ -29,15 +29,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.1.0] - 2019-01-28
 ### Added
-- [Run the `/team` or `/teams` command to get started](https://github.com/andela-stuff/andela-teams-slack/pull/1).
-> [slash command]
-> [welcome page]
+- Run the `/team` or `/teams` command to get started.
+    - [slash command]
+    - [welcome page]
+    - https://github.com/andela-stuff/andela-teams-slack/pull/1
 - Click the `Create Team` to see the __Create Team__ dialog.
-> [create team dialog]
+    - [create team dialog]
 - Submitting the __Create Team__ dialog presents you buttons containing suggested names of Github repos and Pivotal Tracker projects. Clicking any of the buttons creates the repo/project with the name appearing on the button.
-> [suggested names]
-> [repo created image]
+    - [suggested names]
+    - [repo created image]
 - To create a repo/project with custom settings, click the `Custom...` buttons
-> [custom github dialog]
+    - [custom github dialog]
 - To join (or leave) a repo/project, react (or _unreact_) to the URL of the repo/project with the :add_me: emoji
-> [add me reaction]
+    - [add me reaction]
