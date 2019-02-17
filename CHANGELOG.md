@@ -6,20 +6,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
-- Visual representation of analytics on feedback [@chieze-franklin](https://github.com/chieze-franklin).
+- Visual representation of analytics on feedback.
 
 ## [1.0.0] - 2019-02-18
 ### Added
-- Change text of the `Create Team` button to `Create Team...` [@chieze-franklin](https://github.com/chieze-franklin).
+- Add feedback type to the __Record Feedback__ dialog.
+- To join or leave a repo/project, on the URL click the action items `Join repo/project` or `Leave repo/project`.
 
 ### Changed
-- Write here.
+- The __Andela Teams__ bot now send a direct message to a user whenever it has insufficient permission to send an ephemeral message to that user. Such a message reports the success or failure of an action the user performed using the app.
 
-### Removed
-- Write here.
-
-### Fixed
-- Write here.
+### Deprecated
+- The use of the `:add_me:` reaction to join/leave repos/projects _may_ be unsupported in the future.
 
 ## [0.2.0] - 2019-02-11
 ### Added
