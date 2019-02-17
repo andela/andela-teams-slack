@@ -18,11 +18,11 @@ function _getAttributesChart(records) {
       continue;
     }
     record.skill.attribute = record.skill.attribute.get();
-    if (attriGroupsMap.has(record.skill.attribute.name)) {console.log(`${record.skill.attribute.name} is previously cached`);
+    if (attriGroupsMap.has(record.skill.attribute.name)) {
       attriGroupsMap.set(
         record.skill.attribute.name,
         Number(attriGroupsMap.get(record.skill.attribute.name)) + 1);
-    } else {console.log(`${record.skill.attribute.name} is not yet cached`);
+    } else {
       attriGroupsMap.set(record.skill.attribute.name, 1);
     }
     totalCount += 1;
@@ -132,7 +132,6 @@ export default class AnalyticsController {
         query.attributes = ['message'];
       }
       const records = await models.FeedbackInstance.findAll(query);
-      records.forEach(r => console.log(r.get()));
       let rows = [];
       if (query.feedbackAnalyticsType === 'feedback_table') {
         rows = await _getFeedbackTable(records);
