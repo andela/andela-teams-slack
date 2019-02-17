@@ -21,11 +21,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Write here.
 
-## [0.1.0] - 2019-02-04
+## [0.2.0] - 2019-02-11
 ### Added
-- Run the `/team` or `/teams` command to get started [@chieze-franklin](https://github.com/chieze-franklin).
-> [insert image here]
-- 
+- Click the `Mark as feedback...` menu action to record feedback.
+- The app now has a database of `D0A` and `D0B` skills (matched to their corresponding attributes).
+- Feedback instances and URLs of repos/projects that have been in the database for 4 months or more will be auto-deleted.
+
+### Changed
+- `:add_me:` reaction now works on only URLs of repos/projects created using this app. This is to avoid abuse of this feature.
 
 ## [0.1.0] - 2019-01-28
 ### Added
@@ -33,4 +36,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Click the `Create Team` button to see the __Create Team__ dialog.
 - Submitting the __Create Team__ dialog presents you buttons containing suggested names of Github repos and Pivotal Tracker projects. Clicking any of the buttons creates the repo/project with the name appearing on the button.
 - To create a repo/project with custom settings, click the `Custom...` buttons.
-- To join (or leave) a repo/project, react (or _unreact_) to the URL of the repo/project with the :add_me: emoji.
+- To join (or leave) a repo/project, react (or _unreact_) to the URL of the repo/project with the `:add_me:` emoji.
