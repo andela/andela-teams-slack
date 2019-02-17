@@ -156,23 +156,27 @@ async function _handleRecordFeedbackDialog(req) {
       });
       attachments.push({
         title: 'Feedback',
-        text: feedbackWithSkill.message
+        text: feedbackWithSkill.message,
+        color: feedbackWithSkill.type === 'positive' ? 'good' : 'danger'
       });
       if (feedbackWithSkill.context) {
         attachments.push({
           title: 'Context',
-          text: feedbackWithSkill.context
+          text: feedbackWithSkill.context,
+          color: 'warning'
         });
       }
       if (feedbackWithSkill.skill) {
         attachments.push({
           title: 'Skill',
-          text: feedbackWithSkill.skill.name
+          text: feedbackWithSkill.skill.name,
+          color: 'warning'
         });
         if (feedbackWithSkill.skill.attribute) {
           attachments.push({
             title: 'Attribute',
-            text: feedbackWithSkill.skill.attribute.name
+            text: feedbackWithSkill.skill.attribute.name,
+            color: 'warning'
           });
         }
       }
