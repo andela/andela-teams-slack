@@ -9,21 +9,21 @@ function _getAttributesChart(records) {
   let attriGroupsMap = new Map();
   let totalCount = 0;
   for (let i = 0; i < records.length; i++) {
-    let record = records[i].get();console.log(record);
-    if (!record.skill) {console.log('no record.skill found')
+    let record = records[i].get();
+    if (!record.skill) {
       continue;
     }
-    record.skill = record.skill.get();console.log(record);
-    if (!record.skill.attribute) {console.log('no record.skill.attribute found')
+    record.skill = record.skill.get();
+    if (!record.skill.attribute) {
       continue;
     }
-    record.skill.attribute = record.skill.attribute.get();console.log(record);
-    if (attriGroupsMap.has(record.skill.attribute)) {console.log(`${record.skill.attribute} is previously cached`);
+    record.skill.attribute = record.skill.attribute.get();
+    if (attriGroupsMap.has(record.skill.attribute.name)) {console.log(`${record.skill.attribute.name} is previously cached`);
       attriGroupsMap.set(
-        record.skill.attribute,
-        Number(attriGroupsMap.get(record.skill.attribute)) + 1);
-    } else {console.log(`${record.skill.attribute} is not yet cached`);
-      attriGroupsMap.set(record.skill.attribute, 1);
+        record.skill.attribute.name,
+        Number(attriGroupsMap.get(record.skill.attribute.name)) + 1);
+    } else {console.log(`${record.skill.attribute.name} is not yet cached`);
+      attriGroupsMap.set(record.skill.attribute.name, 1);
     }
     totalCount += 1;
   }
