@@ -177,7 +177,7 @@ async function _handleRecordFeedbackDialog(req) {
       });
       if (feedback.skill.attribute) {
         attachments.push({
-          title: 'Skill',
+          title: 'Attribute',
           text: feedbackObj.skill.attribute.name
         });
       }
