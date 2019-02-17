@@ -109,7 +109,6 @@ async function _handleCreatePtProjectDialog(req) {
 
 async function _handleRecordFeedbackDialog(req) {
   let submission = req.payload.submission;
-  let sender = await slack.resolver.getUserProfileObject(req.payload.user.id);
   let targetUsers = [];
   let feedbackId = parseInt(req.payload.callback_id.substring(23), 10);
   if (submission.feedback_target_user.startsWith('U')) { // user ID
@@ -121,6 +120,7 @@ async function _handleRecordFeedbackDialog(req) {
   // remove the current user from the list of target users
   let filteredUsers = 
     targetUsers.filter(userId => userId != req.payload.user.id); // I'm deliberately using != instead of !==
+  let feedbackWithSkill, attachments = [];
   let feedback = await models.FeedbackInstance.findOne({
     where: { id: feedbackId }
   });
@@ -130,7 +130,6 @@ async function _handleRecordFeedbackDialog(req) {
   delete feedbackObj.to;
   // delete feedbackObj.createdAt;
   // delete feedbackObj.updatedAt;
-  let feedbackWithSkill;
   for (let i = 0; i < filteredUsers.length; i++) {
     // for the first ID we simply update the feedback in the DB
     if (i === 0) {
@@ -155,6 +154,28 @@ async function _handleRecordFeedbackDialog(req) {
           }]
         }]
       });
+      attachments.push({
+        title: 'Feedback',
+        text: feedbackWithSkill.message
+      });
+      if (feedbackWithSkill.context) {
+        attachments.push({
+          title: 'Context',
+          text: feedbackWithSkill.context
+        });
+      }
+      if (feedbackWithSkill.skill) {
+        attachments.push({
+          title: 'Skill',
+          text: feedbackWithSkill.skill.name
+        });
+        if (feedbackWithSkill.skill.attribute) {
+          attachments.push({
+            title: 'Attribute',
+            text: feedbackWithSkill.skill.attribute.name
+          });
+        }
+      }
     }
     // for the rest we create new feedback instances
     else {
@@ -163,32 +184,9 @@ async function _handleRecordFeedbackDialog(req) {
     }
 
     // send feedback as DM (no need to await the promise)
-    let attachments = [];
-    attachments.push({
-      title: 'Feedback',
-      text: feedback.message
-    });
-    if (feedbackWithSkill.context) {
-      attachments.push({
-        title: 'Context',
-        text: feedbackWithSkill.context
-      });
-    }
-    if (feedbackWithSkill.skill) {
-      attachments.push({
-        title: 'Skill',
-        text: feedbackWithSkill.skill.name
-      });
-      if (feedbackWithSkill.skill.attribute) {
-        attachments.push({
-          title: 'Attribute',
-          text: feedbackWithSkill.skill.attribute.name
-        });
-      }
-    }
     slack.chat.postDM(
-      `Hi, you have a recorded piece of feedback from ${sender.real_name} (<@${req.payload.user.id}>)`,
-      filteredUsers[i],
+      `Hi, you have a recorded piece of feedback from <@${req.payload.user.id}>`,
+      req.payload.user.id,//filteredUsers[i],
       attachments);
   }
 
