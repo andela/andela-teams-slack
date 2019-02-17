@@ -96,6 +96,35 @@ function _getFeedbackTimeDistribution(records) {
   return rows;
 }
 
+function _getSkillsChart(records) {
+  let attriGroupsMap = new Map();
+  let totalCount = 0;
+  for (let i = 0; i < records.length; i++) {
+    let record = records[i].get();
+    if (!record.skill) {
+      continue;
+    }
+    record.skill = record.skill.get();
+    if (attriGroupsMap.has(record.skill.name)) {
+      attriGroupsMap.set(
+        record.skill.name,
+        Number(attriGroupsMap.get(record.skill.name)) + 1);
+    } else {
+      attriGroupsMap.set(record.skill.name, 1);
+    }
+    totalCount += 1;
+  }
+  let rows = [];
+  for (let [skill, count] of attriGroupsMap) {
+    rows.push({
+      skill,
+      count,
+      percent: (Number(count) / totalCount) * 100
+    });
+  }
+  return rows;
+}
+
 export default class AnalyticsController {
   async feedback(req, res, next) {
     try {
@@ -130,6 +159,13 @@ export default class AnalyticsController {
           }]
         }];
         query.attributes = ['message'];
+      }  else if (query.feedbackAnalyticsType === 'skills_chart') {
+        query.include = [{
+          model: models.Skill,
+          as: 'skill',
+          attributes: ['name']
+        }];
+        query.attributes = ['message'];
       }
       const records = await models.FeedbackInstance.findAll(query);
       let rows = [];
@@ -139,6 +175,8 @@ export default class AnalyticsController {
         rows = _getFeedbackTimeDistribution(records);
       } else if (query.feedbackAnalyticsType === 'attributes_chart') {
         rows = _getAttributesChart(records);
+      } else if (query.feedbackAnalyticsType === 'skills_chart') {
+        rows = _getSkillsChart(records);
       }
       return res.status(200).json({ rows });
     } catch(error) {
