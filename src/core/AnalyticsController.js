@@ -85,8 +85,25 @@ export default class AnalyticsController {
           [models.sequelize.fn('count', models.sequelize.col('id')), 'count']
         ];
         query.group = ['createdAt'];
+      } else if (query.feedbackAnalyticsType === 'attributes_chart') {
+        query.include = [{
+          model: models.Skill,
+          as: 'skill',
+          attributes: ['name'],
+          include: [{
+            model: models.Attribute,
+            as: 'attribute',
+            attributes: ['name'],
+          }]
+        }];
+        query.attributes = [
+          'Attributes.name',
+          [models.sequelize.fn('count', models.sequelize.col('id')), 'count']
+        ];
+        query.group = ['Attributes.name'];
       }
       const records = await models.FeedbackInstance.findAll(query);
+      records.forEach(r => console.log(r.get()));
       let rows = [];
       if (query.feedbackAnalyticsType === 'feedback_table') {
         rows = await _getFeedbackTable(records);

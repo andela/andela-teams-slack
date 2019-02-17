@@ -154,7 +154,9 @@ async function _handleFeedbackAnalyticsDialog(req) {
   if (submission.feedback_analytics_type === 'feedback_table') {
     returnUrl += '/table';
   } else if (submission.feedback_analytics_type === 'feedback_time_distribution') {
-    returnUrl += '/dist';
+    returnUrl += '/distribution';
+  } else if (submission.feedback_analytics_type === 'attributes_chart') {
+    returnUrl += '/attributes';
   }
   const token = jwt.sign(query, process.env.JWT_SECRET);
   returnUrl += `/${token}`;
