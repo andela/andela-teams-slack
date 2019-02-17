@@ -169,23 +169,23 @@ async function _handleRecordFeedbackDialog(req) {
     let attachments = [];
     attachments.push({
       title: 'Feedback',
-      text: feedbackObj.message
+      text: feedback.message
     });
     if (feedbackObjWithSkill.context) {
       attachments.push({
         title: 'Context',
-        text: feedbackObj.context
+        text: feedbackObjWithSkill.context
       });
     }
     if (feedbackObjWithSkill.skill) {
       attachments.push({
         title: 'Skill',
-        text: feedbackObj.skill.name
+        text: feedbackObjWithSkill.skill.name
       });
       if (feedbackObjWithSkill.skill.attribute) {
         attachments.push({
           title: 'Attribute',
-          text: feedbackObj.skill.attribute.name
+          text: feedbackObjWithSkill.skill.attribute.name
         });
       }
     }
