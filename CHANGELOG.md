@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add feedback type to the __Record Feedback__ dialog.
 - To join or leave a repo/project, on the URL click the action items `Join repo/project` or `Leave repo/project`.
 - Channels and multi-DMs can now be chosen as the target user (recipient) of feedback on the `Record Feedback` dialog. This records a feedback instance for all users (except the giver of the feedback of course) in the channel or multi-DM.
+- `Andela Teams` bot sends a direct message to users whenever a piece of feedback meant for them is recorded.
 
 ### Changed
 - The __Andela Teams__ bot now sends a direct message to a user whenever it has insufficient permission to send an ephemeral message to that user. Such a message reports the success or failure of an action the user performed using the app.
