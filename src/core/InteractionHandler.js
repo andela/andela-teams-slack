@@ -122,17 +122,7 @@ async function _handleRecordFeedbackDialog(req) {
   let filteredUsers = 
     targetUsers.filter(userId => userId != req.payload.user.id); // I'm deliberately using != instead of !==
   let feedback = await models.FeedbackInstance.findOne({
-    where: { id: feedbackId },
-    include: [{
-      model: models.Skill,
-      as: 'skill',
-      attributes: ['name'],
-      include: [{
-        model: models.Attribute,
-        as: 'attribute',
-        attributes: ['name'],
-      }]
-    }]
+    where: { id: feedbackId }
   });
   let feedbackObj = feedback.get();
   delete feedbackObj.id;
@@ -140,13 +130,7 @@ async function _handleRecordFeedbackDialog(req) {
   delete feedbackObj.to;
   // delete feedbackObj.createdAt;
   // delete feedbackObj.updatedAt;
-  let feedbackObjWithSkill = feedback.get();
-  if (feedbackObjWithSkill.skill) {
-    feedbackObjWithSkill.skill = feedbackObjWithSkill.skill.get();
-    if (feedbackObjWithSkill.skill.attribute) {
-      feedbackObjWithSkill.skill.attribute = feedbackObjWithSkill.skill.attribute.get();
-    }
-  }
+  let feedbackWithSkill;
   for (let i = 0; i < filteredUsers.length; i++) {
     // for the first ID we simply update the feedback in the DB
     if (i === 0) {
@@ -157,6 +141,19 @@ async function _handleRecordFeedbackDialog(req) {
         type: submission.feedback_type || 'negative'
       }, {
         where: { id: feedbackId }
+      });
+      feedbackWithSkill = await models.FeedbackInstance.findOne({
+        where: { id: feedbackId },
+        include: [{
+          model: models.Skill,
+          as: 'skill',
+          attributes: ['name'],
+          include: [{
+            model: models.Attribute,
+            as: 'attribute',
+            attributes: ['name'],
+          }]
+        }]
       });
     }
     // for the rest we create new feedback instances
@@ -171,26 +168,26 @@ async function _handleRecordFeedbackDialog(req) {
       title: 'Feedback',
       text: feedback.message
     });
-    if (feedbackObjWithSkill.context) {
+    if (feedbackWithSkill.context) {
       attachments.push({
         title: 'Context',
-        text: feedbackObjWithSkill.context
+        text: feedbackWithSkill.context
       });
     }
-    if (feedbackObjWithSkill.skill) {
+    if (feedbackWithSkill.skill) {
       attachments.push({
         title: 'Skill',
-        text: feedbackObjWithSkill.skill.name
+        text: feedbackWithSkill.skill.name
       });
-      if (feedbackObjWithSkill.skill.attribute) {
+      if (feedbackWithSkill.skill.attribute) {
         attachments.push({
           title: 'Attribute',
-          text: feedbackObjWithSkill.skill.attribute.name
+          text: feedbackWithSkill.skill.attribute.name
         });
       }
     }
     slack.chat.postDM(
-      `Hi, you have a recorded piece of feedback from ${sender.real_name}`,
+      `Hi, you have a recorded piece of feedback from ${sender.real_name} (<@${req.payload.user.id}>)`,
       filteredUsers[i],
       attachments);
   }
