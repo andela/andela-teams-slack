@@ -109,19 +109,96 @@ async function _handleCreatePtProjectDialog(req) {
 
 async function _handleRecordFeedbackDialog(req) {
   let submission = req.payload.submission;
+  let targetUsers = [];
   let feedbackId = parseInt(req.payload.callback_id.substring(23), 10);
-  await models.FeedbackInstance.update({
-    context: submission.feedback_context,
-    skillId: parseInt(submission.feedback_skill, 10) || undefined,
-    to: submission.feedback_target_user,
-    type: submission.feedback_type || 'negative'
-  }, {
+  if (submission.feedback_target_user.startsWith('U')) { // user ID
+    targetUsers.push(submission.feedback_target_user);
+  } else if (submission.feedback_target_user.startsWith('C') // channel ID
+    || submission.feedback_target_user.startsWith('G')) { // private channel or multi-DM ID
+    targetUsers = await slack.resolver.getChannelMembers(submission.feedback_target_user);
+  }
+  // remove the current user from the list of target users
+  let filteredUsers = 
+    targetUsers.filter(userId => userId != req.payload.user.id); // I'm deliberately using != instead of !==
+  let feedbackWithSkill, attachments = [];
+  let feedback = await models.FeedbackInstance.findOne({
     where: { id: feedbackId }
   });
-  await slack.chat.postEphemeralOrDM(
+  let feedbackObj = feedback.get();
+  delete feedbackObj.id;
+  delete feedbackObj.skill;
+  delete feedbackObj.to;
+  // delete feedbackObj.createdAt;
+  // delete feedbackObj.updatedAt;
+  for (let i = 0; i < filteredUsers.length; i++) {
+    // for the first ID we simply update the feedback in the DB
+    if (i === 0) {
+      await models.FeedbackInstance.update({
+        context: submission.feedback_context || undefined,
+        skillId: parseInt(submission.feedback_skill, 10) || undefined,
+        to: filteredUsers[i],
+        type: submission.feedback_type || 'negative'
+      }, {
+        where: { id: feedbackId }
+      });
+      feedbackWithSkill = await models.FeedbackInstance.findOne({
+        where: { id: feedbackId },
+        include: [{
+          model: models.Skill,
+          as: 'skill',
+          attributes: ['name'],
+          include: [{
+            model: models.Attribute,
+            as: 'attribute',
+            attributes: ['name'],
+          }]
+        }]
+      });
+      attachments.push({
+        title: 'Feedback',
+        text: feedbackWithSkill.message,
+        color: feedbackWithSkill.type === 'positive' ? 'good' : 'danger'
+      });
+      if (feedbackWithSkill.context) {
+        attachments.push({
+          title: 'Context',
+          text: feedbackWithSkill.context,
+          color: 'warning'
+        });
+      }
+      if (feedbackWithSkill.skill) {
+        attachments.push({
+          title: 'Skill',
+          text: feedbackWithSkill.skill.name,
+          color: 'warning'
+        });
+        if (feedbackWithSkill.skill.attribute) {
+          attachments.push({
+            title: 'Attribute',
+            text: feedbackWithSkill.skill.attribute.name,
+            color: 'warning'
+          });
+        }
+      }
+    }
+    // for the rest we create new feedback instances
+    else {
+      // no need to await the promise
+      models.FeedbackInstance.create({ ...feedbackObj, to: filteredUsers[i] });
+    }
+
+    // send feedback as DM (no need to await the promise)
+    slack.chat.postDM(
+      `Hi, you have a recorded piece of feedback from <@${req.payload.user.id}>`,
+      filteredUsers[i],
+      attachments);
+  }
+
+  slack.chat.postEphemeralOrDM(
     'Feedback recorded!',
     req.payload.channel.id,
     req.payload.user.id);
+  // send email
 }
 
 async function _handleFeedbackAnalyticsDialog(req) {
