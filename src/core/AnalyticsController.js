@@ -67,7 +67,7 @@ export default class AnalyticsController {
   async feedback(req, res, next) {
     try {
       let token = req.params.token;
-      const query = jwt.verify(token, process.env.JWT_SECRET);
+      const query = jwt.verify(token, process.env.JWT_SECRET);console.log(query)
       if (query.feedbackAnalyticsType === 'feedback_table') {
         query.include = [{
           model: models.Skill,
