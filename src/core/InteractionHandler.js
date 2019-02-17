@@ -127,19 +127,23 @@ async function _handleRecordFeedbackDialog(req) {
 async function _handleFeedbackAnalyticsDialog(req) {
   let returnUrl = `https://${req.get('host')}/ui/analytics/feedback`;
   let submission = req.payload.submission;
-  let targetUsers;
+  let to, type;
   if (submission.feedback_target_user) {
+    to = [];
     if (submission.feedback_target_user.startsWith('U')) { // user ID
-      targetUsers.push(submission.feedback_target_user);
+      to.push(submission.feedback_target_user);
     } else if (submission.feedback_target_user.startsWith('C') // channel ID
       || submission.feedback_target_user.startsWith('G')) { // private channel or multi-DM ID
-      targetUsers = await slack.resolver.getChannelMembers(submission.feedback_target_user);
+      to = await slack.resolver.getChannelMembers(submission.feedback_target_user);
     }
+  }
+  if (submission.feedback_type) {
+    type = submission.feedback_type;
   }
   let query = {
     where: {
-      to: targetUsers,
-      type: submission.feedback_type,
+      to,
+      type,
       createdAt: { 
         $gte: new Date(submission.feedback_start_date),
         $lte: new Date(submission.feedback_end_date)
