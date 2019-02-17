@@ -140,6 +140,13 @@ async function _handleRecordFeedbackDialog(req) {
   delete feedbackObj.to;
   // delete feedbackObj.createdAt;
   // delete feedbackObj.updatedAt;
+  let feedbackObjWithSkill = feedback.get();
+  if (feedbackObjWithSkill.skill) {
+    feedbackObjWithSkill.skill = feedbackObjWithSkill.skill.get();
+    if (feedbackObjWithSkill.skill.attribute) {
+      feedbackObjWithSkill.skill.attribute = feedbackObjWithSkill.skill.attribute.get();
+    }
+  }
   for (let i = 0; i < filteredUsers.length; i++) {
     // for the first ID we simply update the feedback in the DB
     if (i === 0) {
@@ -164,18 +171,18 @@ async function _handleRecordFeedbackDialog(req) {
       title: 'Feedback',
       text: feedbackObj.message
     });
-    if (feedback.context) {
+    if (feedbackObjWithSkill.context) {
       attachments.push({
         title: 'Context',
         text: feedbackObj.context
       });
     }
-    if (feedback.skill) {
+    if (feedbackObjWithSkill.skill) {
       attachments.push({
         title: 'Skill',
         text: feedbackObj.skill.name
       });
-      if (feedback.skill.attribute) {
+      if (feedbackObjWithSkill.skill.attribute) {
         attachments.push({
           title: 'Attribute',
           text: feedbackObj.skill.attribute.name
