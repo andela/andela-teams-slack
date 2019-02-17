@@ -5,50 +5,180 @@ import Slack from '../integrations/Slack';
 
 const slack = new Slack();
 
+function _getAttributesChart(records) {
+  let attriGroupsMap = new Map();
+  let totalCount = 0;
+  for (let i = 0; i < records.length; i++) {
+    let record = records[i].get();
+    if (!record.skill) {
+      continue;
+    }
+    record.skill = record.skill.get();
+    if (!record.skill.attribute) {
+      continue;
+    }
+    record.skill.attribute = record.skill.attribute.get();
+    if (attriGroupsMap.has(record.skill.attribute.name)) {
+      attriGroupsMap.set(
+        record.skill.attribute.name,
+        Number(attriGroupsMap.get(record.skill.attribute.name)) + 1);
+    } else {
+      attriGroupsMap.set(record.skill.attribute.name, 1);
+    }
+    totalCount += 1;
+  }
+  let rows = [];
+  for (let [attribute, count] of attriGroupsMap) {
+    rows.push({
+      attribute,
+      count,
+      percent: (Number(count) / totalCount) * 100
+    });
+  }
+  return rows;
+}
+
+async function _getFeedbackTable(records) {
+  let resolvedUsersMap = new Map();
+  let rows = [];
+  for (let i = 0; i < records.length; i++) {
+    let record = records[i].get();
+    let recipientName, senderName;
+    if (record.to) {
+      if (resolvedUsersMap.has(record.to)) {
+        recipientName = resolvedUsersMap.get(record.to);
+      } else {
+        let user = await slack.resolver.getUserProfileObject(record.to);
+        recipientName = user.real_name;
+        resolvedUsersMap.set(record.to, user.real_name);
+      }
+    }
+    if (record.from) {
+      if (resolvedUsersMap.has(record.from)) {
+        senderName = resolvedUsersMap.get(record.from);
+      } else {
+        let user = await slack.resolver.getUserProfileObject(record.from);
+        senderName = user.real_name;
+        resolvedUsersMap.set(record.from, user.real_name);
+      }
+    }
+    rows.push({
+      ...record,
+      recipientName,
+      senderName
+    });
+  }
+  return rows;
+}
+
+function _getFeedbackTimeDistribution(records) {
+  let dateGroupsMap = new Map();
+  let totalCount = 0;
+  for (let i = 0; i < records.length; i++) {
+    let record = records[i].get();
+    if (dateGroupsMap.has(record.createdAt)) {
+      dateGroupsMap.set(
+        record.createdAt,
+        Number(dateGroupsMap.get(record.createdAt)) + Number(record.count));
+    } else {
+      dateGroupsMap.set(record.createdAt, Number(record.count));
+    }
+    totalCount += Number(record.count);
+  }
+  let rows = [];
+  for (let [createdAt, count] of dateGroupsMap) {
+    rows.push({
+      createdAt,
+      count,
+      percent: (Number(count) / totalCount) * 100
+    });
+  }
+  return rows;
+}
+
+function _getSkillsChart(records) {
+  let attriGroupsMap = new Map();
+  let totalCount = 0;
+  for (let i = 0; i < records.length; i++) {
+    let record = records[i].get();
+    if (!record.skill) {
+      continue;
+    }
+    record.skill = record.skill.get();
+    if (attriGroupsMap.has(record.skill.name)) {
+      attriGroupsMap.set(
+        record.skill.name,
+        Number(attriGroupsMap.get(record.skill.name)) + 1);
+    } else {
+      attriGroupsMap.set(record.skill.name, 1);
+    }
+    totalCount += 1;
+  }
+  let rows = [];
+  for (let [skill, count] of attriGroupsMap) {
+    rows.push({
+      skill,
+      count,
+      percent: (Number(count) / totalCount) * 100
+    });
+  }
+  return rows;
+}
+
 export default class AnalyticsController {
   async feedback(req, res, next) {
     try {
       let token = req.params.token;
       const query = jwt.verify(token, process.env.JWT_SECRET);
-      // because include.model seems to be lost during encoding, I recreate it
-      // after decoding
-      if (query.include && query.include[0]) {
-        query.include[0].model = models.Skill;
-        if (query.include[0].include && query.include[0].include[0]) {
-          query.include[0].include[0].model = models.Attribute;
-        }
+      if (query.feedbackAnalyticsType === 'feedback_table') {
+        query.include = [{
+          model: models.Skill,
+          as: 'skill',
+          attributes: ['name'],
+          include: [{
+            model: models.Attribute,
+            as: 'attribute',
+            attributes: ['name'],
+          }]
+        }];
+      } else if (query.feedbackAnalyticsType === 'feedback_time_distribution') {
+        query.attributes = [
+          [models.sequelize.fn('date', models.sequelize.col('createdAt')), 'createdAt'],
+          [models.sequelize.fn('count', models.sequelize.col('id')), 'count']
+        ];
+        query.group = ['createdAt'];
+      } else if (query.feedbackAnalyticsType === 'attributes_chart') {
+        query.include = [{
+          model: models.Skill,
+          as: 'skill',
+          attributes: ['name'],
+          include: [{
+            model: models.Attribute,
+            as: 'attribute',
+            attributes: ['name'],
+          }]
+        }];
+        query.attributes = ['message'];
+      }  else if (query.feedbackAnalyticsType === 'skills_chart') {
+        query.include = [{
+          model: models.Skill,
+          as: 'skill',
+          attributes: ['name']
+        }];
+        query.attributes = ['message'];
       }
-      const fdbckInstances = await models.FeedbackInstance.findAll(query);
-      let resolvedUsersMap = new Map();
-      let feedbackInstances = [];
-      for (let i = 0; i < fdbckInstances.length; i++) {
-        let feedback = fdbckInstances[i];
-        let recipientName, senderName;
-        if (feedback.to) {
-          if (resolvedUsersMap.has(feedback.to)) {
-            recipientName = resolvedUsersMap.get(feedback.to);
-          } else {
-            let user = await slack.resolver.getUserProfileObject(feedback.to);
-            recipientName = user.real_name;
-            resolvedUsersMap.set(feedback.to, user.real_name);
-          }
-        }
-        if (feedback.from) {
-          if (resolvedUsersMap.has(feedback.from)) {
-            senderName = resolvedUsersMap.get(feedback.from);
-          } else {
-            let user = await slack.resolver.getUserProfileObject(feedback.from);
-            senderName = user.real_name;
-            resolvedUsersMap.set(feedback.from, user.real_name);
-          }
-        }
-        feedbackInstances.push({
-          ...(feedback.get()),
-          recipientName,
-          senderName
-        });
+      const records = await models.FeedbackInstance.findAll(query);
+      let rows = [];
+      if (query.feedbackAnalyticsType === 'feedback_table') {
+        rows = await _getFeedbackTable(records);
+      } else if (query.feedbackAnalyticsType === 'feedback_time_distribution') {
+        rows = _getFeedbackTimeDistribution(records);
+      } else if (query.feedbackAnalyticsType === 'attributes_chart') {
+        rows = _getAttributesChart(records);
+      } else if (query.feedbackAnalyticsType === 'skills_chart') {
+        rows = _getSkillsChart(records);
       }
-      return res.status(200).json({ feedbackInstances });
+      return res.status(200).json({ rows });
     } catch(error) {
       next(error);
     }

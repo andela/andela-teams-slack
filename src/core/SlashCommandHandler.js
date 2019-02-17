@@ -9,7 +9,7 @@ export default class SlashCommandHandler {
       if (req.user && req.user.is_sims_facilitator) {
         actions.push({
           name: 'landing_page_menu',
-          text: 'Create Team',
+          text: 'Create Team...',
           style: 'primary',
           type: 'button',
           value: 'create_team'
