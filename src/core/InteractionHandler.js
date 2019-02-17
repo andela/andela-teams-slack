@@ -107,7 +107,7 @@ async function _handleCreatePtProjectDialog(req) {
   await _createAndPostPtProjectLink(req);
 }
 
-async function _handleRecordFeedbackDialog(req) {console.log('>>>>>>>>>>>>>>>>>>>>>>')
+async function _handleRecordFeedbackDialog(req) {
   let submission = req.payload.submission;
   let targetUsers = [];
   let feedbackId = parseInt(req.payload.callback_id.substring(23), 10);
@@ -117,15 +117,13 @@ async function _handleRecordFeedbackDialog(req) {console.log('>>>>>>>>>>>>>>>>>>
     || submission.feedback_target_user.startsWith('G')) { // private channel or multi-DM ID
     targetUsers = await slack.resolver.getChannelMembers(submission.feedback_target_user);
   }
-  console.log(targetUsers.length)
   // remove the current user from the list of target users
   let filteredUsers = 
     targetUsers.filter(userId => userId != req.payload.user.id); // I'm deliberately using != instead of !==
-  console.log(filteredUsers.length)
   let feedback, feedbackObj;
   for (let i = 0; i < filteredUsers.length; i++) {
     // for the first ID we simply update the feedback in the DB
-    if (i === 0) {console.log('updating already-created feedback instance');console.log(filteredUsers[i])
+    if (i === 0) {
       await models.FeedbackInstance.update({
         context: submission.feedback_context,
         skillId: parseInt(submission.feedback_skill, 10) || undefined,
@@ -137,14 +135,16 @@ async function _handleRecordFeedbackDialog(req) {console.log('>>>>>>>>>>>>>>>>>>
       if (filteredUsers.length > 1) { // don't waste the DB access if there's just one user
         feedback = await models.FeedbackInstance.findOne({
           where: { id: feedbackId }
-        });console.log('get updated feedback instance')
-        feedbackObj = feedback.get();console.log(feedbackObj);
+        });
+        feedbackObj = feedback.get();
         delete feedbackObj.id;
-        delete feedbackObj.to;console.log('after deleting id and to');console.log(feedbackObj)
+        delete feedbackObj.to;
+        // delete feedbackObj.createdAt;
+        // delete feedbackObj.updatedAt;
       }
     }
     // for the rest we create new feedback instances
-    else {console.log('creating new feedback for other users');console.log({ ...feedbackObj, to: filteredUsers[i] })
+    else {
       // no need to await the promise
       models.FeedbackInstance.create({ ...feedbackObj, to: filteredUsers[i] });
     }
