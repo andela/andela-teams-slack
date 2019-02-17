@@ -109,6 +109,7 @@ async function _handleCreatePtProjectDialog(req) {
 
 async function _handleRecordFeedbackDialog(req) {
   let submission = req.payload.submission;
+  let sender = await slack.resolver.getUserProfileObject(req.payload.user.id);
   let targetUsers = [];
   let feedbackId = parseInt(req.payload.callback_id.substring(23), 10);
   if (submission.feedback_target_user.startsWith('U')) { // user ID
@@ -120,40 +121,77 @@ async function _handleRecordFeedbackDialog(req) {
   // remove the current user from the list of target users
   let filteredUsers = 
     targetUsers.filter(userId => userId != req.payload.user.id); // I'm deliberately using != instead of !==
-  let feedback, feedbackObj;
+  let feedback = await models.FeedbackInstance.findOne({
+    where: { id: feedbackId },
+    include: [{
+      model: models.Skill,
+      as: 'skill',
+      attributes: ['name'],
+      include: [{
+        model: models.Attribute,
+        as: 'attribute',
+        attributes: ['name'],
+      }]
+    }]
+  });
+  let feedbackObj = feedback.get();
+  delete feedbackObj.id;
+  delete feedbackObj.skill;
+  delete feedbackObj.to;
+  // delete feedbackObj.createdAt;
+  // delete feedbackObj.updatedAt;
   for (let i = 0; i < filteredUsers.length; i++) {
     // for the first ID we simply update the feedback in the DB
     if (i === 0) {
       await models.FeedbackInstance.update({
-        context: submission.feedback_context,
+        context: submission.feedback_context || undefined,
         skillId: parseInt(submission.feedback_skill, 10) || undefined,
         to: filteredUsers[i],
         type: submission.feedback_type || 'negative'
       }, {
         where: { id: feedbackId }
       });
-      if (filteredUsers.length > 1) { // don't waste the DB access if there's just one user
-        feedback = await models.FeedbackInstance.findOne({
-          where: { id: feedbackId }
-        });
-        feedbackObj = feedback.get();
-        delete feedbackObj.id;
-        delete feedbackObj.to;
-        // delete feedbackObj.createdAt;
-        // delete feedbackObj.updatedAt;
-      }
     }
     // for the rest we create new feedback instances
     else {
       // no need to await the promise
       models.FeedbackInstance.create({ ...feedbackObj, to: filteredUsers[i] });
     }
+
+    // send feedback as DM (no need to await the promise)
+    let attachments = [];
+    attachments.push({
+      title: 'Feedback',
+      text: feedbackObj.message
+    });
+    if (feedback.context) {
+      attachments.push({
+        title: 'Context',
+        text: feedbackObj.context
+      });
+    }
+    if (feedback.skill) {
+      attachments.push({
+        title: 'Skill',
+        text: feedbackObj.skill.name
+      });
+      if (feedback.skill.attribute) {
+        attachments.push({
+          title: 'Skill',
+          text: feedbackObj.skill.attribute.name
+        });
+      }
+    }
+    slack.chat.postDM(
+      `Hi, you have a recorded piece of feedback from ${sender.real_name}`,
+      filteredUsers[i],
+      attachments);
   }
+
   slack.chat.postEphemeralOrDM(
     'Feedback recorded!',
     req.payload.channel.id,
     req.payload.user.id);
-  // DM users
   // send email
 }
 
