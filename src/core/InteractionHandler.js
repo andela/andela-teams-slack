@@ -157,6 +157,8 @@ async function _handleFeedbackAnalyticsDialog(req) {
     returnUrl += '/distribution';
   } else if (submission.feedback_analytics_type === 'attributes_chart') {
     returnUrl += '/attributes';
+  } else if (submission.feedback_analytics_type === 'skills_chart') {
+    returnUrl += '/skills';
   }
   const token = jwt.sign(query, process.env.JWT_SECRET);
   returnUrl += `/${token}`;
