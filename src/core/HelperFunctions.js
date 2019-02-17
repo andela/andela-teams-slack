@@ -162,7 +162,7 @@ export default class HelperFunctions {
           type: 'select',
           label: 'Target User',
           name: 'feedback_target_user',
-          data_source: 'users'
+          data_source: 'conversations' // 'users'
         },
         {
           type: 'select',
