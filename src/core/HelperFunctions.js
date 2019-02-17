@@ -97,13 +97,15 @@ export default class HelperFunctions {
           type: 'select',
           label: 'Feedback Recipient',
           name: 'feedback_target_user',
+          optional: true,
           data_source: 'conversations'
         },
         {
           type: 'select',
           label: 'Type',
           name: 'feedback_type',
-          value: 'negative',
+          // value: 'negative',
+          optional: true,
           options: [{
             label: '😊', // \u263A
             value: 'positive'

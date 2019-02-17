@@ -125,39 +125,39 @@ async function _handleRecordFeedbackDialog(req) {
 }
 
 async function _handleFeedbackAnalyticsDialog(req) {
-  let returnUrl = `https://${req.get('host')}/ui/analytics/feedback/`;
+  let returnUrl = `https://${req.get('host')}/ui/analytics/feedback`;
   let submission = req.payload.submission;
-  let targetUsers = [];
-  if (submission.feedback_target_user.startsWith('U')) { // user ID
-    targetUsers.push(submission.feedback_target_user);
-  } else if (submission.feedback_target_user.startsWith('C') // channel ID
-    || submission.feedback_target_user.startsWith('G')) { // private channel or multi-DM ID
-    targetUsers = await slack.resolver.getChannelMembers(submission.feedback_target_user);
+  let to, type;
+  if (submission.feedback_target_user) {
+    to = [];
+    if (submission.feedback_target_user.startsWith('U')) { // user ID
+      to.push(submission.feedback_target_user);
+    } else if (submission.feedback_target_user.startsWith('C') // channel ID
+      || submission.feedback_target_user.startsWith('G')) { // private channel or multi-DM ID
+      to = await slack.resolver.getChannelMembers(submission.feedback_target_user);
+    }
   }
-  let query = {};
-  if (submission.feedback_analytics_type === 'feedback_table') {
-    returnUrl += 'table/';
-    query.where = {
-      to: { $in: targetUsers },
-      type: submission.feedback_type,
+  if (submission.feedback_type) {
+    type = submission.feedback_type;
+  }
+  let query = {
+    where: {
+      to,
+      type,
       createdAt: { 
         $gte: new Date(submission.feedback_start_date),
         $lte: new Date(submission.feedback_end_date)
       }
-    };
-    query.include = [{
-      model: models.Skill,
-      as: 'skill',
-      attributes: ['name'],
-      include: [{
-        model: models.Attribute,
-        as: 'attribute',
-        attributes: ['name'],
-      }]
-    }];
-    const token = jwt.sign(query, process.env.JWT_SECRET);
-    returnUrl += token;
+    },
+    feedbackAnalyticsType: submission.feedback_analytics_type
+  };
+  if (submission.feedback_analytics_type === 'feedback_table') {
+    returnUrl += '/table';
+  } else if (submission.feedback_analytics_type === 'feedback_time_distribution') {
+    returnUrl += '/dist';
   }
+  const token = jwt.sign(query, process.env.JWT_SECRET);
+  returnUrl += `/${token}`;
   await slack.chat.postEphemeralOrDM(
     returnUrl,
     req.payload.channel.id,
