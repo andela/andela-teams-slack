@@ -97,10 +97,10 @@ export default class AnalyticsController {
           }]
         }];
         query.attributes = [
-          'Attributes.name',
+          'skill.attribute.name',
           [models.sequelize.fn('count', models.sequelize.col('id')), 'count']
         ];
-        query.group = ['Attributes.name'];
+        query.group = ['skill.attribute.name'];
       }
       const records = await models.FeedbackInstance.findAll(query);
       records.forEach(r => console.log(r.get()));
