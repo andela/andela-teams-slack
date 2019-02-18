@@ -460,12 +460,13 @@ export default class InteractionHandler {
               payload.channel.id,
               payload.user.id);
           }
-        } else if (payload.callback_id === 'join_team' || payload.callback_id === 'leave_team') {
+        } else if (payload.callback_id === 'join_team' || payload.callback_id === 'leave_team') {console.log()
           var messageText = payload.message.text;
           // check if messageText is a link <...>
           if (messageText.toLowerCase().startsWith('<http') && messageText.endsWith('>')) {
             // trim messageText of < and > to get link
             let messageLink = messageText.substring(1, messageText.length - 1).toLowerCase();
+            console.log(req.user);
             utils.addOrRemoveUser(
               messageLink, req.user,
               payload.user.id,

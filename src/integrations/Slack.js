@@ -166,17 +166,17 @@ class Resolver {
       },
       resolveWithFullResponse: true
     });
-    let data = JSON.parse(response.body);console.log(data);
+    let data = JSON.parse(response.body);
     user = data.profile || user;
-console.log(user.fields)
+
     // see if user has github repo in their profile info
     if (user.fields && user.fields['Xf5LPLTLQ4']) {
-      user.github = user.fields['Xf5LPLTLQ4'].value;
+      user.github = user.fields['Xf5LPLTLQ4'].value;console.log(user.github)
       if (user.github.includes('/')) {
         user.github_user_name = user.github.substring(user.github.lastIndexOf('/') + 1);
       } else {
         user.github_user_name = user.github;
-      }
+      }console.log(user.github_user_name)
     }
 
     // see if user if part of group @simulations-facilitators

@@ -107,7 +107,7 @@ export default class Utility {
     next();
   }
   async rejectUsersWithNoEmailOrGithub(req, res, next) {
-    try {
+    try {console.log(req.user)
       if (req.user && req.user.email && req.user.github_user_name) {
         next();
       } else {
