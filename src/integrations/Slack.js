@@ -172,7 +172,10 @@ class Resolver {
     // see if user has github repo in their profile info
     if (user.fields && user.fields['Xf5LPLTLQ4']) {
       user.github = user.fields['Xf5LPLTLQ4'].value;console.log(user.github)
-      if (user.github.includes('/')) {
+      if (user.github.includes('/')) {console.log(user.github)
+        if (user.github.endsWith('/')) {
+          user.github = user.github.substring(0, user.github.length - 1);
+        }console.log(user.github)
         user.github_user_name = user.github.substring(user.github.lastIndexOf('/') + 1);
       } else {
         user.github_user_name = user.github;
