@@ -170,9 +170,12 @@ class Resolver {
     user = data.profile || user;
 
     // see if user has github repo in their profile info
-    if (user.fields['Xf5LPLTLQ4']) {
+    if (user.fields && user.fields['Xf5LPLTLQ4']) {
       user.github = user.fields['Xf5LPLTLQ4'].value;
       if (user.github.includes('/')) {
+        if (user.github.endsWith('/')) {
+          user.github = user.github.substring(0, user.github.length - 1);
+        }
         user.github_user_name = user.github.substring(user.github.lastIndexOf('/') + 1);
       } else {
         user.github_user_name = user.github;
