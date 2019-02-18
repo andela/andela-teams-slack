@@ -166,11 +166,11 @@ class Resolver {
       },
       resolveWithFullResponse: true
     });
-    let data = JSON.parse(response.body);
+    let data = JSON.parse(response.body);console.log(data);
     user = data.profile || user;
-
+console.log(user.fields)
     // see if user has github repo in their profile info
-    if (user.fields['Xf5LPLTLQ4']) {
+    if (user.fields && user.fields['Xf5LPLTLQ4']) {
       user.github = user.fields['Xf5LPLTLQ4'].value;
       if (user.github.includes('/')) {
         user.github_user_name = user.github.substring(user.github.lastIndexOf('/') + 1);
