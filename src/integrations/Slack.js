@@ -63,8 +63,10 @@ class Chat {
       resolveWithFullResponse: true
     });
     console.log('>>>>>>>>>>>>>>>>>>>')
+    console.log(typeof response.body);
     console.log(response.body);
-    return JSON.parse(response.body);
+    // return JSON.parse(response.body);
+    return response.body;
   }
   async postEphemeralOrDM(message, channelId, userId, attachments) {
     let response = await this.postEphemeral(message, channelId, userId, attachments);
