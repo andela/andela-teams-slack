@@ -31,20 +31,6 @@ class Chat {
     }
   }
   async postEphemeral(message, channelId, userId, attachments) {
-    // post ephemeral message in channel, visible only to user
-    // let url = 'https://slack.com/api/chat.postEphemeral';
-    // url += `?token=${process.env.SLACK_USER_TOKEN}`;
-    // url += `&channel=${channelId}`;
-    // url += `&user=${userId}`;
-    // url += `&text=${message}`;
-    // let response = await request({
-    //   url,
-    //   method: 'POST',
-    //   headers: {
-    //     'Content-Type': 'application/x-www-form-urlencoded'
-    //   },
-    //   resolveWithFullResponse: true
-    // });
     let url = 'https://slack.com/api/chat.postEphemeral';
     let response = await request({
       url,
@@ -57,23 +43,11 @@ class Chat {
         text: message,
         channel: channelId,
         user: userId,
-        attachments: [{
-          title: 'Good',
-          text: 'Just Testing',
-          color: 'good'
-        }, {
-          title: 'Danger',
-          text: 'Still Just Testing',
-          color: 'danger'
-        }]
+        attachments
       },
       json: true,
       resolveWithFullResponse: true
     });
-    console.log('>>>>>>>>>>>>>>>>>>>')
-    console.log(typeof response.body);
-    console.log(response.body);
-    // return JSON.parse(response.body);
     return response.body;
   }
   async postEphemeralOrDM(message, channelId, userId, attachments) {
