@@ -57,7 +57,15 @@ class Chat {
         text: message,
         channel: channelId,
         user: userId,
-        attachments
+        attachments: [{
+          title: 'Good',
+          text: 'Just Testing',
+          color: 'good'
+        }, {
+          title: 'Danger',
+          text: 'Still Just Testing',
+          color: 'danger'
+        }]
       },
       json: true,
       resolveWithFullResponse: true
