@@ -21,21 +21,24 @@ export default class Utility {
       return;
     }
 
+    if (url.endsWith('/')) {
+      url = usrl.substring(0, url.length - 1);
+    }
     if (addUser) {
-      if (url.includes(`github.com/${process.env.GITHUB_ORGANIZATION}/`)) {
+      if (url.includes(`github.com/`)) {
         let repo = url.substring(url.lastIndexOf('/') + 1);
         await github.repo.addUser(user.github_user_name, repo);
-      } else if (url.includes('pivotaltracker.com/projects/')) {
+      } else if (url.includes('pivotaltracker.com/')) {
         let projId = url.substring(url.lastIndexOf('/') + 1);
         await pivotal.project.addUser(user.email, projId);
       }
       await slack.chat.postEphemeralOrDM(`Confirm you have been added to ${url}`, channelId, userId);
       return;
     } else {
-      if (url.includes(`github.com/${process.env.GITHUB_ORGANIZATION}/`)) {
+      if (url.includes(`github.com/`)) {
         let repo = url.substring(url.lastIndexOf('/') + 1);
         await github.repo.removeUser(user.github_user_name, repo);
-      } else if (url.includes('pivotaltracker.com/projects/')) {
+      } else if (url.includes('pivotaltracker.com/')) {
         let projId = url.substring(url.lastIndexOf('/') + 1);
         await pivotal.project.removeUser(user.email, projId);
       }
