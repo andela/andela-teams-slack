@@ -189,7 +189,7 @@ async function _handleRecordFeedbackDialog(req) {
 
     // send feedback as DM (no need to await the promise)
     slack.chat.postDM(
-      `Hi, you have a recorded piece of feedback from <@${req.payload.user.id}>`,
+      `Hi <@${filteredUsers[i]}>, you have a recorded piece of feedback from <@${req.payload.user.id}>`,
       filteredUsers[i],
       attachments);
   }
