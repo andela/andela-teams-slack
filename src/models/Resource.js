@@ -1,7 +1,7 @@
 export default (sequelize, DataTypes) => {
   const Resource = sequelize.define('Resource', {
     id: {
-      // allowNull: false,
+      allowNull: false,
       primaryKey: true,
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4

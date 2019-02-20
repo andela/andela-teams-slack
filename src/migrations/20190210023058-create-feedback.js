@@ -1,7 +1,7 @@
 module.exports = {
   up: (queryInterface, Sequelize) => queryInterface.createTable('FeedbackInstances', {
       id: {
-        // allowNull: false,
+        allowNull: false,
         primaryKey: true,
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4
