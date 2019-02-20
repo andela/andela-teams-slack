@@ -2,9 +2,9 @@ export default (sequelize, DataTypes) => {
   const Feedback = sequelize.define('FeedbackInstance', {
     id: {
       allowNull: false,
-      autoIncrement: true,
       primaryKey: true,
-      type: DataTypes.INTEGER
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4
     },
     context: {
       allowNull: true,
