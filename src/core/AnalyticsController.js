@@ -5,124 +5,124 @@ import Slack from '../integrations/Slack';
 
 const slack = new Slack();
 
-function _getAttributesChart(records) {
+function _getAttributesChart(items) {
   let attriGroupsMap = new Map();
   let totalCount = 0;
-  for (let i = 0; i < records.length; i++) {
-    let record = records[i].get();
-    if (!record.skill) {
+  for (let i = 0; i < items.length; i++) {
+    let item = items[i].get();
+    if (!item.skill) {
       continue;
     }
-    record.skill = record.skill.get();
-    if (!record.skill.attribute) {
+    item.skill = item.skill.get();
+    if (!item.skill.attribute) {
       continue;
     }
-    record.skill.attribute = record.skill.attribute.get();
-    if (attriGroupsMap.has(record.skill.attribute.name)) {
+    item.skill.attribute = item.skill.attribute.get();
+    if (attriGroupsMap.has(item.skill.attribute.name)) {
       attriGroupsMap.set(
-        record.skill.attribute.name,
-        Number(attriGroupsMap.get(record.skill.attribute.name)) + 1);
+        item.skill.attribute.name,
+        Number(attriGroupsMap.get(item.skill.attribute.name)) + 1);
     } else {
-      attriGroupsMap.set(record.skill.attribute.name, 1);
+      attriGroupsMap.set(item.skill.attribute.name, 1);
     }
     totalCount += 1;
   }
-  let rows = [];
+  let records = [];
   for (let [attribute, count] of attriGroupsMap) {
-    rows.push({
+    records.push({
       attribute,
       count,
       percent: (Number(count) / totalCount) * 100
     });
   }
-  return rows;
+  return records;
 }
 
-async function _getFeedbackTable(records) {
+async function _getFeedbackTable(items) {
   let resolvedUsersMap = new Map();
-  let rows = [];
-  for (let i = 0; i < records.length; i++) {
-    let record = records[i].get();
+  let records = [];
+  for (let i = 0; i < items.length; i++) {
+    let item = items[i].get();
     let recipientName, senderName;
-    if (record.to) {
-      if (resolvedUsersMap.has(record.to)) {
-        recipientName = resolvedUsersMap.get(record.to);
+    if (item.to) {
+      if (resolvedUsersMap.has(item.to)) {
+        recipientName = resolvedUsersMap.get(item.to);
       } else {
-        let user = await slack.resolver.getUserProfileObject(record.to);
+        let user = await slack.resolver.getUserProfileObject(item.to);
         recipientName = user.real_name;
-        resolvedUsersMap.set(record.to, user.real_name);
+        resolvedUsersMap.set(item.to, user.real_name);
       }
     }
-    if (record.from) {
-      if (resolvedUsersMap.has(record.from)) {
-        senderName = resolvedUsersMap.get(record.from);
+    if (item.from) {
+      if (resolvedUsersMap.has(item.from)) {
+        senderName = resolvedUsersMap.get(item.from);
       } else {
-        let user = await slack.resolver.getUserProfileObject(record.from);
+        let user = await slack.resolver.getUserProfileObject(item.from);
         senderName = user.real_name;
-        resolvedUsersMap.set(record.from, user.real_name);
+        resolvedUsersMap.set(item.from, user.real_name);
       }
     }
-    rows.push({
-      ...record,
+    records.push({
+      ...item,
       recipientName,
       senderName
     });
   }
-  return rows;
+  return records;
 }
 
-function _getFeedbackTimeDistribution(records) {
+function _getFeedbackTimeDistribution(items) {
   let dateGroupsMap = new Map();
   let totalCount = 0;
-  for (let i = 0; i < records.length; i++) {
-    let record = records[i].get();
-    if (dateGroupsMap.has(record.createdAt)) {
+  for (let i = 0; i < items.length; i++) {
+    let item = items[i].get();
+    if (dateGroupsMap.has(item.createdAt)) {
       dateGroupsMap.set(
-        record.createdAt,
-        Number(dateGroupsMap.get(record.createdAt)) + Number(record.count));
+        item.createdAt,
+        Number(dateGroupsMap.get(item.createdAt)) + Number(item.count));
     } else {
-      dateGroupsMap.set(record.createdAt, Number(record.count));
+      dateGroupsMap.set(item.createdAt, Number(item.count));
     }
-    totalCount += Number(record.count);
+    totalCount += Number(item.count);
   }
-  let rows = [];
+  let records = [];
   for (let [createdAt, count] of dateGroupsMap) {
-    rows.push({
+    records.push({
       createdAt,
       count,
       percent: (Number(count) / totalCount) * 100
     });
   }
-  return rows;
+  return records;
 }
 
-function _getSkillsChart(records) {
+function _getSkillsChart(items) {
   let attriGroupsMap = new Map();
   let totalCount = 0;
-  for (let i = 0; i < records.length; i++) {
-    let record = records[i].get();
-    if (!record.skill) {
+  for (let i = 0; i < items.length; i++) {
+    let item = items[i].get();
+    if (!item.skill) {
       continue;
     }
-    record.skill = record.skill.get();
-    if (attriGroupsMap.has(record.skill.name)) {
+    item.skill = item.skill.get();
+    if (attriGroupsMap.has(item.skill.name)) {
       attriGroupsMap.set(
-        record.skill.name,
-        Number(attriGroupsMap.get(record.skill.name)) + 1);
+        item.skill.name,
+        Number(attriGroupsMap.get(item.skill.name)) + 1);
     } else {
-      attriGroupsMap.set(record.skill.name, 1);
+      attriGroupsMap.set(item.skill.name, 1);
     }
     totalCount += 1;
   }
-  let rows = [];
+  let records = [];
   for (let [skill, count] of attriGroupsMap) {
-    rows.push({
+    records.push({
       skill,
       count,
       percent: (Number(count) / totalCount) * 100
     });
   }
-  return rows;
+  return records;
 }
 
 export default class AnalyticsController {
@@ -167,18 +167,18 @@ export default class AnalyticsController {
         }];
         query.attributes = ['message'];
       }
-      const records = await models.FeedbackInstance.findAll(query);
-      let rows = [];
+      const items = await models.FeedbackInstance.findAll(query);
+      let records = [];
       if (query.feedbackAnalyticsType === 'feedback_table') {
-        rows = await _getFeedbackTable(records);
+        records = await _getFeedbackTable(items);
       } else if (query.feedbackAnalyticsType === 'feedback_time_distribution') {
-        rows = _getFeedbackTimeDistribution(records);
+        records = _getFeedbackTimeDistribution(items);
       } else if (query.feedbackAnalyticsType === 'attributes_chart') {
-        rows = _getAttributesChart(records);
+        records = _getAttributesChart(items);
       } else if (query.feedbackAnalyticsType === 'skills_chart') {
-        rows = _getSkillsChart(records);
+        records = _getSkillsChart(items);
       }
-      return res.status(200).json({ rows });
+      return res.status(200).json({ records });
     } catch(error) {
       next(error);
     }
