@@ -200,7 +200,8 @@ export default class HelperFunctions {
 
   getInitials(word) {
     // b=positon w=matches any word g=repeat the word through all string
-    let matches = word.match(/\b(\w)/g);
+    let removeCase = word.replace(/[^a-zA-Z0-9 ]/g, "");
+    let matches = removeCase.match(/\b(\w)/g);
     return matches.join('').toLowerCase();
   }
 
