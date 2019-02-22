@@ -222,8 +222,8 @@ async function _handleFeedbackAnalyticsDialog(req) {
       to,
       type,
       createdAt: { 
-        $gte: new Date(submission.feedback_start_date),
-        $lte: new Date(submission.feedback_end_date)
+        $gte: new Date(submission.analytics_start_date),
+        $lte: new Date(submission.analytics_end_date)
       }
     },
     feedbackAnalyticsType: submission.feedback_analytics_type
@@ -262,6 +262,12 @@ async function _postAnalyticsPage(req) {
     text: 'Feedback...',
     type: 'button',
     value: 'feedback_analytics'
+  });
+  actions.push({
+    name: 'analytics',
+    text: 'Pivotal Tracker...',
+    type: 'button',
+    value: 'pt_analytics'
   });
 
   await slack.chat.postResponse(
@@ -427,6 +433,8 @@ export default class InteractionHandler {
           }
         } else if (value === 'feedback_analytics') {
           await slack.dialog.open(payload.trigger_id, helpers.getFeedbackAnalyticsDialogJson());
+        } else if (value === 'pt_analytics') {
+          await slack.dialog.open(payload.trigger_id, helpers.getPtAnalyticsDialogJson());
         } 
         return;
       }

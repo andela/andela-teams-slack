@@ -117,14 +117,14 @@ export default class HelperFunctions {
         {
           type: 'select',
           label: 'Back Date',
-          name: 'feedback_start_date',
+          name: 'analytics_start_date',
           hint: 'This should be in the past of the front date',
           data_source: 'external'
         },
         {
           type: 'select',
           label: 'Front Date',
-          name: 'feedback_end_date',
+          name: 'analytics_end_date',
           hint: 'This should be in the future of the back date',
           data_source: 'external'
         },
@@ -189,6 +189,56 @@ export default class HelperFunctions {
           name: 'feedback_context',
           hint: 'Provide backgroud context to the feedback',
           optional: true
+        }
+      ]
+    };
+  }
+
+  getPtAnalyticsDialogJson() {
+    return {
+      callback_id: 'pt_analytics_dialog',
+      title: 'PT Analytics',
+      state: 'pt_analytics_dialog',
+      elements: [
+        {
+          type: 'text',
+          label: 'PT Project URL',
+          name: 'project_url',
+          placeholder: 'https://www.pivotaltracker.com/n/projects/1234567',
+          subtype: 'url'
+        },
+        {
+          type: 'select',
+          label: 'Back Date',
+          name: 'analytics_start_date',
+          hint: 'This should be in the past of the front date',
+          data_source: 'external'
+        },
+        {
+          type: 'select',
+          label: 'Front Date',
+          name: 'analytics_end_date',
+          hint: 'This should be in the future of the back date',
+          data_source: 'external'
+        },
+        {
+          type: 'select',
+          label: 'Analytics Type',
+          name: 'pt_analytics_type',
+          value: 'users_skills_coverage',
+          options: [{
+            label: 'Users\' skills covergae',
+            value: 'users_skills_coverage'
+          }, {
+            label: 'Distribution of feedback instances over time',
+            value: 'feedback_time_distribution'
+          }, {
+            label: 'Attributes chart',
+            value: 'attributes_chart'
+          }, {
+            label: 'Skills chart',
+            value: 'skills_chart'
+          }]
         }
       ]
     };
