@@ -5,6 +5,66 @@ import Slack from '../integrations/Slack';
 
 const slack = new Slack();
 
+export default class FeedbackAnalytics {
+  async get(req, res, next) {
+    try {
+      let token = req.params.token;
+      const query = jwt.verify(token, process.env.JWT_SECRET);
+      if (query.analyticsType === 'feedback_table') {
+        query.include = [{
+          model: models.Skill,
+          as: 'skill',
+          attributes: ['name'],
+          include: [{
+            model: models.Attribute,
+            as: 'attribute',
+            attributes: ['name'],
+          }]
+        }];
+      } else if (query.analyticsType === 'feedback_time_distribution') {
+        query.attributes = [
+          [models.sequelize.fn('date', models.sequelize.col('createdAt')), 'createdAt'],
+          [models.sequelize.fn('count', models.sequelize.col('id')), 'count']
+        ];
+        query.group = ['createdAt'];
+      } else if (query.analyticsType === 'attributes_chart') {
+        query.include = [{
+          model: models.Skill,
+          as: 'skill',
+          attributes: ['name'],
+          include: [{
+            model: models.Attribute,
+            as: 'attribute',
+            attributes: ['name'],
+          }]
+        }];
+        query.attributes = ['message'];
+      }  else if (query.analyticsType === 'skills_chart') {
+        query.include = [{
+          model: models.Skill,
+          as: 'skill',
+          attributes: ['name']
+        }];
+        query.attributes = ['message'];
+      }
+      const items = await models.FeedbackInstance.findAll(query);
+      let records = [];
+      if (query.analyticsType === 'feedback_table') {
+        records = await _getFeedbackTable(items);
+      } else if (query.analyticsType === 'feedback_time_distribution') {
+        records = _getFeedbackTimeDistribution(items);
+      } else if (query.analyticsType === 'attributes_chart') {
+        records = _getAttributesChart(items);
+      } else if (query.analyticsType === 'skills_chart') {
+        records = _getSkillsChart(items);
+      }
+      return res.status(200).json({ records });
+    } catch(error) {
+      next(error);
+    }
+  }
+}
+
 function _getAttributesChart(items) {
   let attriGroupsMap = new Map();
   let totalCount = 0;
@@ -123,64 +183,4 @@ function _getSkillsChart(items) {
     });
   }
   return records;
-}
-
-export default class AnalyticsController {
-  async feedback(req, res, next) {
-    try {
-      let token = req.params.token;
-      const query = jwt.verify(token, process.env.JWT_SECRET);
-      if (query.feedbackAnalyticsType === 'feedback_table') {
-        query.include = [{
-          model: models.Skill,
-          as: 'skill',
-          attributes: ['name'],
-          include: [{
-            model: models.Attribute,
-            as: 'attribute',
-            attributes: ['name'],
-          }]
-        }];
-      } else if (query.feedbackAnalyticsType === 'feedback_time_distribution') {
-        query.attributes = [
-          [models.sequelize.fn('date', models.sequelize.col('createdAt')), 'createdAt'],
-          [models.sequelize.fn('count', models.sequelize.col('id')), 'count']
-        ];
-        query.group = ['createdAt'];
-      } else if (query.feedbackAnalyticsType === 'attributes_chart') {
-        query.include = [{
-          model: models.Skill,
-          as: 'skill',
-          attributes: ['name'],
-          include: [{
-            model: models.Attribute,
-            as: 'attribute',
-            attributes: ['name'],
-          }]
-        }];
-        query.attributes = ['message'];
-      }  else if (query.feedbackAnalyticsType === 'skills_chart') {
-        query.include = [{
-          model: models.Skill,
-          as: 'skill',
-          attributes: ['name']
-        }];
-        query.attributes = ['message'];
-      }
-      const items = await models.FeedbackInstance.findAll(query);
-      let records = [];
-      if (query.feedbackAnalyticsType === 'feedback_table') {
-        records = await _getFeedbackTable(items);
-      } else if (query.feedbackAnalyticsType === 'feedback_time_distribution') {
-        records = _getFeedbackTimeDistribution(items);
-      } else if (query.feedbackAnalyticsType === 'attributes_chart') {
-        records = _getAttributesChart(items);
-      } else if (query.feedbackAnalyticsType === 'skills_chart') {
-        records = _getSkillsChart(items);
-      }
-      return res.status(200).json({ records });
-    } catch(error) {
-      next(error);
-    }
-  }
 }

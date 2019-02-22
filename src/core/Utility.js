@@ -14,7 +14,8 @@ export default class Utility {
       where: { url }
     });
     if (!existingResource) {
-      await slack.chat.postEphemeralOrDM(
+      // no need to await the promise
+      slack.chat.postEphemeralOrDM(
         `The resource ${url} was not created using Andela Teams.`,
         channelId,
         userId);
@@ -22,7 +23,7 @@ export default class Utility {
     }
 
     if (url.endsWith('/')) {
-      url = usrl.substring(0, url.length - 1);
+      url = url.substring(0, url.length - 1);
     }
     if (addUser) {
       if (url.includes(`github.com/`)) {

@@ -117,21 +117,21 @@ export default class HelperFunctions {
         {
           type: 'select',
           label: 'Back Date',
-          name: 'feedback_start_date',
+          name: 'analytics_start_date',
           hint: 'This should be in the past of the front date',
           data_source: 'external'
         },
         {
           type: 'select',
           label: 'Front Date',
-          name: 'feedback_end_date',
+          name: 'analytics_end_date',
           hint: 'This should be in the future of the back date',
           data_source: 'external'
         },
         {
           type: 'select',
           label: 'Analytics Type',
-          name: 'feedback_analytics_type',
+          name: 'analytics_type',
           value: 'feedback_table',
           options: [{
             label: 'Table of feedback instances',
@@ -194,6 +194,56 @@ export default class HelperFunctions {
     };
   }
 
+  getPtAnalyticsDialogJson() {
+    return {
+      callback_id: 'pt_analytics_dialog',
+      title: 'PT Analytics',
+      state: 'pt_analytics_dialog',
+      elements: [
+        {
+          type: 'text',
+          label: 'PT Project URL',
+          name: 'project_url',
+          placeholder: 'https://www.pivotaltracker.com/n/projects/1234567',
+          subtype: 'url'
+        },
+        {
+          type: 'select',
+          label: 'Back Date',
+          name: 'analytics_start_date',
+          hint: 'This should be in the past of the front date',
+          data_source: 'external'
+        },
+        {
+          type: 'select',
+          label: 'Front Date',
+          name: 'analytics_end_date',
+          hint: 'This should be in the future of the back date',
+          data_source: 'external'
+        },
+        {
+          type: 'select',
+          label: 'Analytics Type',
+          name: 'analytics_type',
+          value: 'users_skills_coverage',
+          options: [{
+            label: 'Users\' skills coverage',
+            value: 'users_skills_coverage'
+          }, {
+            label: 'Kanban view',
+            value: 'kanban_view'
+          }, {
+            label: 'Attributes chart',
+            value: 'attributes_chart'
+          }, {
+            label: 'Skills chart',
+            value: 'skills_chart'
+          }]
+        }
+      ]
+    };
+  }
+
   getUrlFriendlyName(word) {
     return word.replace(/\s/g, '-').toLowerCase();
   }
@@ -204,6 +254,15 @@ export default class HelperFunctions {
     let matches = removeCase.match(/\b(\w)/g);
     return matches.join('').toLowerCase();
   }
+
+  getTitleCase(sentence) {
+    let splitStr = sentence.toLowerCase().split(' ');
+    for (let i = 0; i < splitStr.length; i++) {
+        splitStr[i] = splitStr[i].charAt(0).toUpperCase() + splitStr[i].substring(1);     
+    }
+    // Directly return the joined string
+    return splitStr.join(' '); 
+ }
 
   githubConventions(teamName, projectName = 'ah') {
     return [

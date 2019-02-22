@@ -222,20 +222,57 @@ async function _handleFeedbackAnalyticsDialog(req) {
       to,
       type,
       createdAt: { 
-        $gte: new Date(submission.feedback_start_date),
-        $lte: new Date(submission.feedback_end_date)
+        $gte: new Date(submission.analytics_start_date),
+        $lte: new Date(submission.analytics_end_date)
       }
     },
-    feedbackAnalyticsType: submission.feedback_analytics_type
+    analyticsType: submission.analytics_type
   };
-  if (submission.feedback_analytics_type === 'feedback_table') {
+  if (submission.analytics_type === 'feedback_table') {
     returnUrl += '/table';
-  } else if (submission.feedback_analytics_type === 'feedback_time_distribution') {
+  } else if (submission.analytics_type === 'feedback_time_distribution') {
     returnUrl += '/distribution';
-  } else if (submission.feedback_analytics_type === 'attributes_chart') {
+  } else if (submission.analytics_type === 'attributes_chart') {
     returnUrl += '/attributes';
-  } else if (submission.feedback_analytics_type === 'skills_chart') {
+  } else if (submission.analytics_type === 'skills_chart') {
     returnUrl += '/skills';
+  }
+  const token = jwt.sign(query, process.env.JWT_SECRET);
+  returnUrl += `/${token}`;
+  await slack.chat.postEphemeralOrDM(
+    returnUrl,
+    req.payload.channel.id,
+    req.payload.user.id);
+}
+
+async function _handlePtAnalyticsDialog(req) {
+  let returnUrl = `https://${req.get('host')}/ui/analytics/pt`;
+  let submission = req.payload.submission;
+  let projectUrl = submission.project_url;
+  // // ensure the link was created by this app by checking the database******************************
+  // const existingResource = await models.Resource.findOne({
+  //   where: { url: projectUrl }
+  // });
+  // if (!existingResource) {
+  //   // no need to await the promise
+  //   slack.chat.postEphemeralOrDM(
+  //     `The resource ${projectUrl} was not created using Andela Teams.`,
+  //     req.payload.channel.id,
+  //     req.payload.user.id);
+  //   return;
+  // }
+  if (projectUrl.endsWith('/')) {
+    projectUrl = projectUrl.substring(0, projectUrl.length - 1);
+  }
+  let projectId = projectUrl.substring(projectUrl.lastIndexOf('/') + 1);
+  let query = {
+    projectId,
+    analyticsType: submission.analytics_type,
+    endDate: new Date(submission.analytics_end_date),
+    startDate: new Date(submission.analytics_start_date)
+  };
+  if (submission.analytics_type === 'kanban_view') {
+    returnUrl += '/kanban';
   }
   const token = jwt.sign(query, process.env.JWT_SECRET);
   returnUrl += `/${token}`;
@@ -262,6 +299,12 @@ async function _postAnalyticsPage(req) {
     text: 'Feedback...',
     type: 'button',
     value: 'feedback_analytics'
+  });
+  actions.push({
+    name: 'analytics',
+    text: 'Pivotal Tracker...',
+    type: 'button',
+    value: 'pt_analytics'
   });
 
   await slack.chat.postResponse(
@@ -390,6 +433,8 @@ export default class InteractionHandler {
           await _postCreatePtBoardPage(req);
         } else if (payload.callback_id === 'feedback_analytics_dialog') {
           await _handleFeedbackAnalyticsDialog(req);
+        } else if (payload.callback_id === 'pt_analytics_dialog') {
+          await _handlePtAnalyticsDialog(req);
         } else if (payload.callback_id.startsWith('record_feedback_dialog:')) {
           await _handleRecordFeedbackDialog(req);
         }
@@ -427,6 +472,8 @@ export default class InteractionHandler {
           }
         } else if (value === 'feedback_analytics') {
           await slack.dialog.open(payload.trigger_id, helpers.getFeedbackAnalyticsDialogJson());
+        } else if (value === 'pt_analytics') {
+          await slack.dialog.open(payload.trigger_id, helpers.getPtAnalyticsDialogJson());
         } 
         return;
       }
