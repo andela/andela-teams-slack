@@ -3,10 +3,11 @@ import dotenv from 'dotenv';
 import express from 'express';
 import bodyParser from 'body-parser';
 
-import AnalyticsController from './core/AnalyticsController';
+import FeedbackAnalytics from './analytics/FeedbackAnalytics';
 import DataHandler from './core/DataHandler';
 import Eventhandler from './core/EventHandler';
 import InteractionHandler from './core/InteractionHandler';
+import PivotalTrackerAnalytics from './analytics/PivotalTrackerAnalytics';
 import SlashCommandHandler from './core/SlashCommandHandler';
 import Utility from './core/Utility';
 
@@ -18,10 +19,11 @@ const app = new express();
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 
-const analytics = new AnalyticsController();
 const data = new DataHandler();
 const event = new Eventhandler();
+const feedbackAnalytics = new FeedbackAnalytics();
 const interaction = new InteractionHandler();
+const ptAnalytics = new PivotalTrackerAnalytics();
 const slash = new SlashCommandHandler();
 const utils = new Utility();
 
@@ -30,7 +32,10 @@ app.get('/', async (req, res) => {
 });
 
 app.get('/api/analytics/feedback/:token',
-  analytics.feedback);
+  feedbackAnalytics.get);
+
+app.get('/api/analytics/pt/:token',
+  ptAnalytics.get);
 
 app.post('/data/external',
   utils.getUserObjectFromReqBodyPayloadUserId,

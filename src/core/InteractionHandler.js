@@ -249,18 +249,18 @@ async function _handlePtAnalyticsDialog(req) {
   let returnUrl = `https://${req.get('host')}/ui/analytics/pt`;
   let submission = req.payload.submission;
   let projectUrl = submission.project_url;
-  // ensure the link was created by this app by checking the database
-  const existingResource = await models.Resource.findOne({
-    where: { url: projectUrl }
-  });
-  if (!existingResource) {
-    // no need to await the promise
-    slack.chat.postEphemeralOrDM(
-      `The resource ${projectUrl} was not created using Andela Teams.`,
-      req.payload.channel.id,
-      req.payload.user.id);
-    return;
-  }
+  // // ensure the link was created by this app by checking the database******************************
+  // const existingResource = await models.Resource.findOne({
+  //   where: { url: projectUrl }
+  // });
+  // if (!existingResource) {
+  //   // no need to await the promise
+  //   slack.chat.postEphemeralOrDM(
+  //     `The resource ${projectUrl} was not created using Andela Teams.`,
+  //     req.payload.channel.id,
+  //     req.payload.user.id);
+  //   return;
+  // }
   if (projectUrl.endsWith('/')) {
     projectUrl = projectUrl.substring(0, projectUrl.length - 1);
   }
