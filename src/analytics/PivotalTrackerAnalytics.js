@@ -1,11 +1,10 @@
 import jwt from 'jsonwebtoken';
 
-import models from '../models';
+import HelperFunctions from '../core/HelperFunctions';
 import PivotalTracker from '../integrations/PivotalTracker';
-import Slack from '../integrations/Slack';
 
+const helpers = new HelperFunctions();
 const pivotal = new PivotalTracker();
-const slack = new Slack();
 
 export default class PivotalTrackerAnalytics {
   async get(req, res, next) {
@@ -15,8 +14,7 @@ export default class PivotalTrackerAnalytics {
       const items = await pivotal.project.fetchStories(query.projectId, {}); // TODO: start and end dates
       let records = [];
       if (query.analyticsType === 'kanban_view') {
-        records = items;
-        // records = await _getKanbanView(items);
+        records = await _getKanbanView(items);
       }
       return res.status(200).json({ records });
     } catch(error) {
@@ -26,33 +24,24 @@ export default class PivotalTrackerAnalytics {
 }
 
 function _getKanbanView(items) {
-  let attriGroupsMap = new Map();
-  let totalCount = 0;
+  let stateGroupsMap = new Map();
   for (let i = 0; i < items.length; i++) {
-    let item = items[i].get();
-    if (!item.skill) {
-      continue;
-    }
-    item.skill = item.skill.get();
-    if (!item.skill.attribute) {
-      continue;
-    }
-    item.skill.attribute = item.skill.attribute.get();
-    if (attriGroupsMap.has(item.skill.attribute.name)) {
-      attriGroupsMap.set(
-        item.skill.attribute.name,
-        Number(attriGroupsMap.get(item.skill.attribute.name)) + 1);
+    let item = items[i];
+    if (stateGroupsMap.has(item.current_state)) {
+      let stories = Array.from(stateGroupsMap.get(item.current_state));
+      stories.push(item);
+      stateGroupsMap.set(item.current_state, stories);
     } else {
-      attriGroupsMap.set(item.skill.attribute.name, 1);
+      stateGroupsMap.set(item.current_state, [item]);
     }
-    totalCount += 1;
   }
   let records = [];
-  for (let [attribute, count] of attriGroupsMap) {
+  for (let [state, stories] of stateGroupsMap) {
     records.push({
-      attribute,
-      count,
-      percent: (Number(count) / totalCount) * 100
+      title: helpers.getTitleCase(state),
+      count: stories.length,
+      percent: (Number(stories.length) / items.length) * 100,
+      stories
     });
   }
   return records;
