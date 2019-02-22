@@ -131,7 +131,7 @@ export default class HelperFunctions {
         {
           type: 'select',
           label: 'Analytics Type',
-          name: 'feedback_analytics_type',
+          name: 'analytics_type',
           value: 'feedback_table',
           options: [{
             label: 'Table of feedback instances',
@@ -224,14 +224,14 @@ export default class HelperFunctions {
         {
           type: 'select',
           label: 'Analytics Type',
-          name: 'pt_analytics_type',
+          name: 'analytics_type',
           value: 'users_skills_coverage',
           options: [{
-            label: 'Users\' skills covergae',
+            label: 'Users\' skills coverage',
             value: 'users_skills_coverage'
           }, {
-            label: 'Distribution of feedback instances over time',
-            value: 'feedback_time_distribution'
+            label: 'Kanban view',
+            value: 'kanban_view'
           }, {
             label: 'Attributes chart',
             value: 'attributes_chart'
