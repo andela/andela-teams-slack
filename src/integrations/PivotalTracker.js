@@ -1,4 +1,5 @@
 import dotenv from 'dotenv';
+import querystring from 'querystring';
 import request from 'requestretry';
 
 if (process.env.NODE_ENV !== 'production') {
@@ -145,7 +146,7 @@ class Project {
    *
    * @returns { object } a response object showing the result of the operation
    */
-  async fetchStories(projectId, options = { }) {
+  async fetchStories(projectId, options) {
     try {
       const requestOptions = {
         baseUrl: 'https://www.pivotaltracker.com/services/v5',
@@ -157,8 +158,18 @@ class Project {
         }
       };
 
+      let query = '';
+      if (options) {
+        query = querystring.stringify(options);
+        if (query) {
+          query = '?' + query;
+        }
+      }
+
       let result = {};
-      requestOptions.uri = `/projects/${projectId}/stories`;
+      requestOptions.uri = `/projects/${projectId}/stories${query}`;
+      console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
+      console.log(`/projects/${projectId}/stories${query}`)
       result = await request.get(requestOptions);
 
       // console.log(result);
