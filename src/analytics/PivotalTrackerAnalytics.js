@@ -12,8 +12,8 @@ export default class PivotalTrackerAnalytics {
       let token = req.params.token;
       const query = jwt.verify(token, process.env.JWT_SECRET);
       const options = {
-        created_after: query.startDate,
-        created_before: query.endDate
+        updated_after: query.startDate,
+        updated_before: query.endDate
       };
       const items = await pivotal.project.fetchStories(query.projectId, options);
       let records = [];

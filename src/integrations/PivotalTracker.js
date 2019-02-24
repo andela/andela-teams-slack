@@ -168,8 +168,6 @@ class Project {
 
       let result = {};
       requestOptions.uri = `/projects/${projectId}/stories${query}`;
-      console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
-      console.log(`/projects/${projectId}/stories${query}`)
       result = await request.get(requestOptions);
 
       // console.log(result);
