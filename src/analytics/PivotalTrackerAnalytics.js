@@ -62,7 +62,6 @@ async function _getUsersConnections(items, projectId) {
   // function to get cached or fresh user
   let usersCache = new Map();
   let __getUserFromCacheOrPt = async function(userId) {
-    console.log(usersCache.has(userId))
     if (!usersCache.has(userId)) {
       let member = await pivotal.project.getMember(userId, projectId);
       usersCache.set(userId, { id: member.person.id, name: member.person.name, membershipId: member.id });
@@ -92,7 +91,6 @@ async function _getUsersConnections(items, projectId) {
       }
     }
   }
-  console.log(`connections: ${connections}`)
   for (let i = 0; i < userIds.length; i++) {
     let id = userIds[i];
     let user = await __getUserFromCacheOrPt(id);
@@ -112,7 +110,8 @@ async function _getUsersConnections(items, projectId) {
       user.connections.push({
         user: {
             id: pairedUser.id,
-            name: pairedUser.name
+            name: pairedUser.name,
+            membershipId: pairedUser.membershipId
         },
         stories,
         strength: (stories.length / highestNumOfPairStories) * 100
