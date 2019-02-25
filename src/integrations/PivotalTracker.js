@@ -196,14 +196,15 @@ class Project {
     };
 
     var result = {}; // the result to be returned
-
+    console.log(`/projects/${projectId}/memberships/${memberId}`)
+    console.log(process.env.PIVOTAL_TRACKER_TOKEN)
     requestOptions.uri = `/projects/${projectId}/memberships/${memberId}`;
     result = await request.get(requestOptions);
     console.log(`typeof result.body: ${typeof result.body}`)
     console.log(`result.body: ${result.body}`)
     console.log(`result.body.id: ${result.body.id}`)
     console.log(`result.body.person: ${result.body.person}`)
-    return JSON.parse(result.body);
+    return result.body;
   }
   /**
    * @method addUser
