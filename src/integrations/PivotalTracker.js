@@ -184,7 +184,7 @@ class Project {
       };
     }
   }
-  async getMember(memberId, projectId) {
+  async getMember(userId, projectId) {
     const requestOptions = {
       baseUrl: 'https://www.pivotaltracker.com/services/v5',
       // fullResponse: false,
@@ -196,9 +196,11 @@ class Project {
     };
 
     var result = {}; // the result to be returned
-    requestOptions.uri = `/projects/${projectId}/memberships/${memberId}`;
+    requestOptions.uri = `/projects/${projectId}/memberships`;
     result = await request.get(requestOptions);
-    return result.body;
+    const memberships = result.body;
+    const member = memberships.find(m => m.person.id === userId);
+    return member;
   }
   /**
    * @method addUser

@@ -64,7 +64,6 @@ async function _getUsersConnections(items, projectId) {console.log('>>>>>>>>>>>>
   let __getUserFromCacheOrPt = async function(userId) {
     if (!usersCache.has(userId)) {
       let member = await pivotal.project.getMember(userId, projectId);
-      console.log(`typeof member: ${typeof member}`)
       usersCache.set(userId, { id: member.id, name: member.person.name });
     }
     console.log(`usersCache: ${usersCache}`)
@@ -72,7 +71,6 @@ async function _getUsersConnections(items, projectId) {console.log('>>>>>>>>>>>>
   };
   // get all user IDs
   teamStories.forEach(s => {
-    console.log(s)
     s.owner_ids.forEach(id => {
       if (!userIds.includes(id)) {
         userIds.push(id);
