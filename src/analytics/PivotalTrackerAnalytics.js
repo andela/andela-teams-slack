@@ -72,6 +72,7 @@ async function _getUsersConnections(items, projectId) {console.log('>>>>>>>>>>>>
   };
   // get all user IDs
   teamStories.forEach(s => {
+    console.log(s)
     s.owner_ids.forEach(id => {
       if (!userIds.includes(id)) {
         userIds.push(id);
