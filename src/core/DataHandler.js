@@ -70,7 +70,7 @@ export default class DataHandler {
         return;
       }
       next();
-    } catch(error) {
+    } catch(error) {console.log('>>>>>>>>>>>>>>>>>');console.log(error)
       next(error);
     }
   }
