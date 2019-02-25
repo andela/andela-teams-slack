@@ -201,7 +201,9 @@ class Project {
     result = await request.get(requestOptions);
     console.log(`typeof result.body: ${typeof result.body}`)
     console.log(`result.body: ${result.body}`)
-    return result.body;
+    console.log(`result.body.id: ${result.body.id}`)
+    console.log(`result.body.person: ${result.body.person}`)
+    return JSON.parse(result.body);
   }
   /**
    * @method addUser
