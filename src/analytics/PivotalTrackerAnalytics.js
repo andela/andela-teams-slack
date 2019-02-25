@@ -94,7 +94,8 @@ async function _getUsersConnections(items, projectId) {console.log('>>>>>>>>>>>>
       });
     }
   }
-  userIds.forEach(id => {
+  for (let i = 0; i < userIds.length; i++) {
+    let id = userIds[i];
     let user = await __getUserFromCacheOrPt(id);
     console.log(`user: ${user}`)
     let allPairedIds =
@@ -102,7 +103,8 @@ async function _getUsersConnections(items, projectId) {console.log('>>>>>>>>>>>>
       .map(c => c.pairs[0] !== id ? c.pairs[0] : c.pairs[1]);
     console.log(`allPairedIds: ${allPairedIds}`)
     user.connections = []
-    allPairedIds.forEach(pid => {
+    for(let j = 0; j < allPairedIds.length; j++) {
+      let pid = allPairedIds[j];
       let pairedUser = await __getUserFromCacheOrPt(pid);
       console.log(`pairedUser: ${pairedUser}`)
       let pairedConns = connections.filter(c => c.pairs.includes(id) && c.pairs.includes(pid))
@@ -125,8 +127,8 @@ async function _getUsersConnections(items, projectId) {console.log('>>>>>>>>>>>>
         stories,
         strength: (stories.length / highestNumOfPairStories) * 100
       })
-    })
+    }
     records.push(user);
-  });
+  }
   return records;
 }
