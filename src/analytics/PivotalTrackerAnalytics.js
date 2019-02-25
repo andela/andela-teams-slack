@@ -81,7 +81,7 @@ async function _getUsersConnections(items, projectId) {
     for (let j =  (i + 1); j < userIds.length; j++) {
       let pairedStories =
         teamStories.filter(s => s.owner_ids.includes(userIds[i]) && s.owner_ids.includes(userIds[j]))
-        .map(s => ({ id: s.id, name: s.name }));
+        .map(s => ({ id: s.id, name: s.name, url: s.url }));
       highestNumOfPairStories = Math.max(highestNumOfPairStories, pairedStories.length);
       if (pairedStories.length > 0) {
         connections.push({
