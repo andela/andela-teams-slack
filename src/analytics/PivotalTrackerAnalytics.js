@@ -53,20 +53,20 @@ function _getKanbanView(items) {
   return records;
 }
 
-async function _getUsersConnections(items, projectId) {console.log('>>>>>>>>>>>>>>>>>>>>>>>>')
-  let highestNumOfPairStories = 0;console.log(`items.length: ${items.length}`)
+async function _getUsersConnections(items, projectId) {
+  let highestNumOfPairStories = 0;
   let records = [];
   let connections = [];
   let userIds = [];
-  let teamStories = items.filter(i => i.owner_ids.length > 1);console.log(`teamStories.length: ${teamStories.length}`)
+  let teamStories = items.filter(i => i.owner_ids.length > 1);
   // function to get cached or fresh user
   let usersCache = new Map();
   let __getUserFromCacheOrPt = async function(userId) {
+    console.log(usersCache.has(userId))
     if (!usersCache.has(userId)) {
       let member = await pivotal.project.getMember(userId, projectId);
-      usersCache.set(userId, { id: member.id, name: member.person.name });
+      usersCache.set(userId, { id: member.person.id, name: member.person.name, membershipId: member.id });
     }
-    console.log(`usersCache: ${usersCache}`)
     return usersCache.get(userId);
   };
   // get all user IDs
@@ -77,17 +77,13 @@ async function _getUsersConnections(items, projectId) {console.log('>>>>>>>>>>>>
       }
     });
   });
-  console.log(`userIds: ${userIds}`)
   // get all connections
   for (let i = 0; i < userIds.length; i++) {
     for (let j =  (i + 1); j < userIds.length; j++) {
       let pairedStories =
         teamStories.filter(s => s.owner_ids.includes(userIds[i]) && s.owner_ids.includes(userIds[j]))
         .map(s => ({ id: s.id, name: s.name }));
-      console.log(`paired stories for ${userIds[i]} and ${userIds[j]}:`)
-      console.log(pairedStories);
       highestNumOfPairStories = Math.max(highestNumOfPairStories, pairedStories.length);
-      console.log(`highestNumOfPairStories: ${highestNumOfPairStories}`)
       if (pairedStories.length > 0) {
         connections.push({
           pairs: [userIds[i], userIds[j]],
@@ -96,30 +92,22 @@ async function _getUsersConnections(items, projectId) {console.log('>>>>>>>>>>>>
       }
     }
   }
+  console.log(`connections: ${connections}`)
   for (let i = 0; i < userIds.length; i++) {
     let id = userIds[i];
     let user = await __getUserFromCacheOrPt(id);
-    console.log(`user: ${user}`)
     let allPairedIds =
       connections.filter(c => c.pairs.includes(id))
       .map(c => c.pairs[0] !== id ? c.pairs[0] : c.pairs[1]);
-    console.log(`allPairedIds: ${allPairedIds}`)
     user.connections = []
     for(let j = 0; j < allPairedIds.length; j++) {
       let pid = allPairedIds[j];
       let pairedUser = await __getUserFromCacheOrPt(pid);
-      console.log(`pairedUser: ${pairedUser}`)
       let pairedConns = connections.filter(c => c.pairs.includes(id) && c.pairs.includes(pid))
-      console.log(`pairedConns: ${pairedConns}`)
-      let stories = pairedConns.map(c => c.stories);
-      console.log(`stories: ${stories}`)
-      console.log({
-        user: {
-            id: pairedUser.id,
-            name: pairedUser.name
-        },
-        stories,
-        strength: (stories.length / highestNumOfPairStories) * 100
+      // let stories = pairedConns.map(c => c.stories);
+      let stories = [];
+      pairedConns.forEach(c => {
+        stories = stories.concat(c.stories);
       });
       user.connections.push({
         user: {
