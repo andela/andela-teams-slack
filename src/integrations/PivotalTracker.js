@@ -199,6 +199,8 @@ class Project {
 
     requestOptions.uri = `/projects/${projectId}/memberships/${memberId}`;
     result = await request.get(requestOptions);
+    console.log(`typeof result.body: ${typeof result.body}`)
+    console.log(`result.body: ${result.body}`)
     return result.body;
   }
   /**

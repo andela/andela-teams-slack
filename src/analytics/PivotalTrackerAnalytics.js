@@ -64,7 +64,7 @@ async function _getUsersConnections(items, projectId) {console.log('>>>>>>>>>>>>
   let __getUserFromCacheOrPt = async function(userId) {
     if (!usersCache.has(userId)) {
       let member = await pivotal.project.getMember(userId, projectId);
-      console.log(`member: ${member}`)
+      console.log(`typeof member: ${typeof member}`)
       usersCache.set(userId, { id: member.id, name: member.person.name });
     }
     console.log(`usersCache: ${usersCache}`)
