@@ -184,6 +184,23 @@ class Project {
       };
     }
   }
+  async getMember(memberId, projectId) {
+    const requestOptions = {
+      baseUrl: 'https://www.pivotaltracker.com/services/v5',
+      // fullResponse: false,
+      json: true,
+      headers: {
+        'Content-Type': 'application/json',
+        'X-TrackerToken': process.env.PIVOTAL_TRACKER_TOKEN,
+      }
+    };
+
+    var result = {}; // the result to be returned
+
+    requestOptions.uri = `/projects/${projectId}/memberships/${memberId}`;
+    result = await request.get(requestOptions);
+    return result.body;
+  }
   /**
    * @method addUser
    * @desc This method removes a user from a Pivotal Tracker project
