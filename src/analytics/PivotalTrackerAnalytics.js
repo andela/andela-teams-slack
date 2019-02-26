@@ -104,6 +104,17 @@ async function _getUsersCollaborations(items, projectId) {
       pairedConns.forEach(c => {
         stories = stories.concat(c.stories);
       });
+      console.log('>>>>>>>>>>>>>>>>>>>')
+      console.log({
+        user: {
+            id: pairedUser.id,
+            name: pairedUser.name,
+            membershipId: pairedUser.membershipId
+        },
+        //stories,
+        numberOfStories: stories.length,
+        strength: (stories.length / highestNumOfPairStories) * 100
+      })
       user.collaborations.push({
         user: {
             id: pairedUser.id,
