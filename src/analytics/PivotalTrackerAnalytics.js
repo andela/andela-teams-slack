@@ -110,7 +110,8 @@ async function _getUsersCollaborations(items, projectId) {
             name: pairedUser.name,
             membershipId: pairedUser.membershipId
         },
-        stories,
+        //stories,
+        numberOfStories: stories.length,
         strength: (stories.length / highestNumOfPairStories) * 100
       })
     }
