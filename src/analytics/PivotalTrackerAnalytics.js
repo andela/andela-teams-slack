@@ -6,6 +6,8 @@ import PivotalTracker from '../integrations/PivotalTracker';
 const helpers = new HelperFunctions();
 const pivotal = new PivotalTracker();
 
+let usersCache = new Map();
+
 export default class PivotalTrackerAnalytics {
   async get(req, res, next) {
     try {
@@ -21,6 +23,8 @@ export default class PivotalTrackerAnalytics {
         records = await _getKanbanView(items);
       } else if (query.analyticsType === 'users_collaborations') {
         records = await _getUsersCollaborations(items, query.projectId);
+      } else if (query.analyticsType === 'users_skills_hits') {
+        records = await _getUsersSkillsHits(items, query.projectId);
       }
       return res.status(200).json({ records });
     } catch(error) {
@@ -59,16 +63,6 @@ async function _getUsersCollaborations(items, projectId) {
   let collaborations = [];
   let userIds = [];
   let teamStories = items.filter(i => i.owner_ids.length > 1);
-
-  // function to get cached or fresh user
-  let usersCache = new Map();
-  let __getUserFromCacheOrPt = async function(userId) {
-    if (!usersCache.has(userId)) {
-      let member = await pivotal.project.getMember(userId, projectId);
-      usersCache.set(userId, { id: member.person.id, name: member.person.name, membershipId: member.id });
-    }
-    return usersCache.get(userId);
-  };
 
   // get all user IDs
   teamStories.forEach(s => {
@@ -124,3 +118,73 @@ async function _getUsersCollaborations(items, projectId) {
   }
   return records;
 }
+
+async function _getUsersSkillsHits(items, projectId) {
+  let records = [];
+  let hits = [];
+  let userIds = [];
+  let filteredStories =
+    items.filter(
+      i => i.owner_ids.length > 0
+      && i.labels.length > 0
+      && (i.current_state === 'started'
+          || i.current_state === 'finished'
+          || i.current_state === 'delivered'
+          || i.current_state === 'accepted'));
+
+  // get all user IDs
+  filteredStories.forEach(s => {
+    s.owner_ids.forEach(id => {
+      if (!userIds.includes(id)) {
+        userIds.push(id);
+      }
+    });
+  });
+  // get all hits
+  for (let i = 0; i < userIds.length; i++) {
+    filteredStories.filter(s => s.owner_ids.includes(userIds[i]))
+      .forEach(s => {
+        s.labels.forEach(l => {
+          hits.push({
+            userId: userIds[i],
+            name: l.name,
+            state: s.current_state
+          });
+        });
+      });
+  }
+  // create user objects and their skills
+  for (let i = 0; i < userIds.length; i++) {
+    let id = userIds[i];
+    let hitsMap = new Map();
+    let user = await __getUserFromCacheOrPt(id);
+    user.skills = []
+    hits.forEach(h => {
+      if (hitsMap.has(h.name)) {
+        let hit = hitsMap.get(h.name);
+        hit.doneHits = Number(hit.doneHits) + Number(h.state === 'accepted' ? 1 : 0);
+        hit.ongoingHits = Number(hit.ongoingHits) + Number(h.state !== 'accepted' ? 1 : 0);
+        hitsMap.set(h.name, hit);
+      } else {
+        hitsMap.set(h.name, {
+          name: h.name,
+          doneHits: h.state === 'accepted' ? 1 : 0,
+          ongoingHits: h.state !== 'accepted' ? 1 : 0
+        });
+      }
+    });
+    for (let [name, hit] of hitsMap) {
+      user.skills.push(hit);
+    }
+    records.push(user);
+  }
+  return records;
+}
+
+async function __getUserFromCacheOrPt(userId) {
+  if (!usersCache.has(userId)) {
+    let member = await pivotal.project.getMember(userId, projectId);
+    usersCache.set(userId, { id: member.person.id, name: member.person.name, membershipId: member.id });
+  }
+  return usersCache.get(userId);
+};
