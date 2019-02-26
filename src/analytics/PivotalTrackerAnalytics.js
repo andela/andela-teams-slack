@@ -59,6 +59,7 @@ async function _getUsersConnections(items, projectId) {
   let connections = [];
   let userIds = [];
   let teamStories = items.filter(i => i.owner_ids.length > 1);
+
   // function to get cached or fresh user
   let usersCache = new Map();
   let __getUserFromCacheOrPt = async function(userId) {
@@ -68,6 +69,7 @@ async function _getUsersConnections(items, projectId) {
     }
     return usersCache.get(userId);
   };
+
   // get all user IDs
   teamStories.forEach(s => {
     s.owner_ids.forEach(id => {
@@ -91,6 +93,7 @@ async function _getUsersConnections(items, projectId) {
       }
     }
   }
+  // create user objects and their connections
   for (let i = 0; i < userIds.length; i++) {
     let id = userIds[i];
     let user = await __getUserFromCacheOrPt(id);
