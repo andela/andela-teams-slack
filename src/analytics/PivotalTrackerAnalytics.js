@@ -57,7 +57,7 @@ function _getKanbanView(items) {
   return records;
 }
 
-async function _getUsersCollaborations(items, projectId) {
+async function _getUsersCollaborations(items, projectId) {console.log('>>>>>>>>>>>>>>>>>>>>>')
   let highestNumOfPairStories = 0;
   let records = [];
   let collaborations = [];
