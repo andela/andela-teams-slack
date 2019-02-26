@@ -12,7 +12,7 @@ export default class PivotalTrackerAnalytics {
   async get(req, res, next) {
     try {
       let token = req.params.token;
-      const query = jwt.verify(token, process.env.JWT_SECRET);console.log(query)
+      const query = jwt.verify(token, process.env.JWT_SECRET);
       const options = {
         updated_after: query.startDate,
         updated_before: query.endDate
@@ -27,7 +27,7 @@ export default class PivotalTrackerAnalytics {
         records = await _getUsersSkillsHits(items, query.projectId);
       }
       return res.status(200).json({ records });
-    } catch(error) {console.log(error)
+    } catch(error) {
       next(error);
     }
   }
@@ -104,17 +104,6 @@ async function _getUsersCollaborations(items, projectId) {
       pairedConns.forEach(c => {
         stories = stories.concat(c.stories);
       });
-      console.log('>>>>>>>>>>>>>>>>>>>')
-      console.log({
-        user: {
-            id: pairedUser.id,
-            name: pairedUser.name,
-            membershipId: pairedUser.membershipId
-        },
-        //stories,
-        numberOfStories: stories.length,
-        strength: (stories.length / highestNumOfPairStories) * 100
-      })
       user.collaborations.push({
         user: {
             id: pairedUser.id,
