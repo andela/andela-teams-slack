@@ -56,7 +56,7 @@ function _getKanbanView(items) {
 async function _getUsersConnections(items, projectId) {
   let highestNumOfPairStories = 0;
   let records = [];
-  let connections = [];
+  let collaborations = [];
   let userIds = [];
   let teamStories = items.filter(i => i.owner_ids.length > 1);
 
@@ -78,7 +78,7 @@ async function _getUsersConnections(items, projectId) {
       }
     });
   });
-  // get all connections
+  // get all collaborations
   for (let i = 0; i < userIds.length; i++) {
     for (let j =  (i + 1); j < userIds.length; j++) {
       let pairedStories =
@@ -86,31 +86,31 @@ async function _getUsersConnections(items, projectId) {
         .map(s => ({ id: s.id, name: s.name, url: s.url }));
       highestNumOfPairStories = Math.max(highestNumOfPairStories, pairedStories.length);
       if (pairedStories.length > 0) {
-        connections.push({
+        collaborations.push({
           pairs: [userIds[i], userIds[j]],
           stories: pairedStories
         });
       }
     }
   }
-  // create user objects and their connections
+  // create user objects and their collaborations
   for (let i = 0; i < userIds.length; i++) {
     let id = userIds[i];
     let user = await __getUserFromCacheOrPt(id);
     let allPairedIds =
-      connections.filter(c => c.pairs.includes(id))
+      collaborations.filter(c => c.pairs.includes(id))
       .map(c => c.pairs[0] !== id ? c.pairs[0] : c.pairs[1]);
-    user.connections = []
+    user.collaborations = []
     for(let j = 0; j < allPairedIds.length; j++) {
       let pid = allPairedIds[j];
       let pairedUser = await __getUserFromCacheOrPt(pid);
-      let pairedConns = connections.filter(c => c.pairs.includes(id) && c.pairs.includes(pid))
+      let pairedConns = collaborations.filter(c => c.pairs.includes(id) && c.pairs.includes(pid))
       // let stories = pairedConns.map(c => c.stories);
       let stories = [];
       pairedConns.forEach(c => {
         stories = stories.concat(c.stories);
       });
-      user.connections.push({
+      user.collaborations.push({
         user: {
             id: pairedUser.id,
             name: pairedUser.name,
