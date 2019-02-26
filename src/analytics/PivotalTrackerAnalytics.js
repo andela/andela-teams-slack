@@ -19,8 +19,8 @@ export default class PivotalTrackerAnalytics {
       let records = [];
       if (query.analyticsType === 'kanban_view') {
         records = await _getKanbanView(items);
-      } else if (query.analyticsType === 'users_connections') {
-        records = await _getUsersConnections(items, query.projectId);
+      } else if (query.analyticsType === 'users_collaborations') {
+        records = await _getUsersCollaborations(items, query.projectId);
       }
       return res.status(200).json({ records });
     } catch(error) {
@@ -53,7 +53,7 @@ function _getKanbanView(items) {
   return records;
 }
 
-async function _getUsersConnections(items, projectId) {
+async function _getUsersCollaborations(items, projectId) {
   let highestNumOfPairStories = 0;
   let records = [];
   let collaborations = [];

@@ -233,8 +233,8 @@ export default class HelperFunctions {
             label: 'Kanban view',
             value: 'kanban_view'
           }, {
-            label: 'Users\' connections',
-            value: 'users_connections'
+            label: 'Users\' collaborations',
+            value: 'users_collaborations'
           }]
         }
       ]
