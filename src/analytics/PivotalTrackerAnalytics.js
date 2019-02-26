@@ -12,7 +12,7 @@ export default class PivotalTrackerAnalytics {
   async get(req, res, next) {
     try {
       let token = req.params.token;
-      const query = jwt.verify(token, process.env.JWT_SECRET);
+      const query = jwt.verify(token, process.env.JWT_SECRET);console.log(query)
       const options = {
         updated_after: query.startDate,
         updated_before: query.endDate
@@ -27,7 +27,7 @@ export default class PivotalTrackerAnalytics {
         records = await _getUsersSkillsHits(items, query.projectId);
       }
       return res.status(200).json({ records });
-    } catch(error) {
+    } catch(error) {console.log(error)
       next(error);
     }
   }
