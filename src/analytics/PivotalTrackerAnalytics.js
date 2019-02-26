@@ -55,7 +55,7 @@ function _getKanbanView(items) {
   return records;
 }
 
-async function _getUsersCollaborations(items, projectId) {console.log('>>>>>>>>>>>>>>>>>>>>>')
+async function _getUsersCollaborations(items, projectId) {
   let highestNumOfPairStories = 0;
   let records = [];
   let collaborations = [];
@@ -64,7 +64,7 @@ async function _getUsersCollaborations(items, projectId) {console.log('>>>>>>>>>
 
   // caching function
   let usersCache = new Map();
-  async function __getUserFromCacheOrPt(userId, projectId) {
+  async function __getUserFromCacheOrPt(userId) {
     if (!usersCache.has(userId)) {
       let member = await pivotal.project.getMember(userId, projectId);
       usersCache.set(userId, { name: member.person.name, email: member.person.email });
@@ -98,14 +98,14 @@ async function _getUsersCollaborations(items, projectId) {console.log('>>>>>>>>>
   // create user objects and their collaborations
   for (let i = 0; i < userIds.length; i++) {
     let id = userIds[i];
-    let user = await __getUserFromCacheOrPt(id, projectId);
+    let user = await __getUserFromCacheOrPt(id);
     let allPairedIds =
       collaborations.filter(c => c.pairs.includes(id))
       .map(c => c.pairs[0] !== id ? c.pairs[0] : c.pairs[1]);
     user.collaborations = []
     for(let j = 0; j < allPairedIds.length; j++) {
       let pid = allPairedIds[j];
-      let pairedUser = await __getUserFromCacheOrPt(pid, projectId);
+      let pairedUser = await __getUserFromCacheOrPt(pid);
       let pairedConns = collaborations.filter(c => c.pairs.includes(id) && c.pairs.includes(pid))
       // let stories = pairedConns.map(c => c.stories);
       let stories = [];
@@ -123,7 +123,7 @@ async function _getUsersCollaborations(items, projectId) {console.log('>>>>>>>>>
       })
     }
     records.push(user);
-  }console.log(records);console.log('<<<<<<<<<<<<<<<<<<<<')
+  }
   return records;
 }
 
@@ -142,7 +142,7 @@ async function _getUsersSkillsHits(items, projectId) {
 
   // caching function
   let usersCache = new Map();
-  async function __getUserFromCacheOrPt(userId, projectId) {
+  async function __getUserFromCacheOrPt(userId) {
     if (!usersCache.has(userId)) {
       let member = await pivotal.project.getMember(userId, projectId);
       usersCache.set(userId, { name: member.person.name, email: member.person.email });
@@ -175,7 +175,7 @@ async function _getUsersSkillsHits(items, projectId) {
   for (let i = 0; i < userIds.length; i++) {
     let id = userIds[i];
     let hitsMap = new Map();
-    let user = await __getUserFromCacheOrPt(id, projectId);
+    let user = await __getUserFromCacheOrPt(id);
     user.skills = []
     hits.forEach(h => {
       if (hitsMap.has(h.name)) {
