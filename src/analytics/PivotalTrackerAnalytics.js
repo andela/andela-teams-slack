@@ -115,7 +115,7 @@ async function _getUsersCollaborations(items, projectId) {console.log('>>>>>>>>>
       })
     }
     records.push(user);
-  }
+  }console.log(records);console.log('<<<<<<<<<<<<<<<<<<<<')
   return records;
 }
 
