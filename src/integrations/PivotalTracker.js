@@ -1,4 +1,5 @@
 import dotenv from 'dotenv';
+import querystring from 'querystring';
 import request from 'requestretry';
 
 if (process.env.NODE_ENV !== 'production') {
@@ -145,7 +146,7 @@ class Project {
    *
    * @returns { object } a response object showing the result of the operation
    */
-  async fetchStories(projectId, options = { }) {
+  async fetchStories(projectId, options) {
     try {
       const requestOptions = {
         baseUrl: 'https://www.pivotaltracker.com/services/v5',
@@ -157,8 +158,16 @@ class Project {
         }
       };
 
+      let query = '';
+      if (options) {
+        query = querystring.stringify(options);
+        if (query) {
+          query = '?' + query;
+        }
+      }
+
       let result = {};
-      requestOptions.uri = `/projects/${projectId}/stories`;
+      requestOptions.uri = `/projects/${projectId}/stories${query}`;
       result = await request.get(requestOptions);
 
       // console.log(result);
@@ -174,6 +183,24 @@ class Project {
         error: error.message
       };
     }
+  }
+  async getMember(userId, projectId) {
+    const requestOptions = {
+      baseUrl: 'https://www.pivotaltracker.com/services/v5',
+      // fullResponse: false,
+      json: true,
+      headers: {
+        'Content-Type': 'application/json',
+        'X-TrackerToken': process.env.PIVOTAL_TRACKER_TOKEN,
+      }
+    };
+
+    var result = {}; // the result to be returned
+    requestOptions.uri = `/projects/${projectId}/memberships`;
+    result = await request.get(requestOptions);
+    const memberships = result.body;
+    const member = memberships.find(m => m.person.id === userId);
+    return member;
   }
   /**
    * @method addUser
