@@ -90,14 +90,14 @@ async function _getUsersCollaborations(items, projectId) {
   // create user objects and their collaborations
   for (let i = 0; i < userIds.length; i++) {
     let id = userIds[i];
-    let user = await __getUserFromCacheOrPt(id);
+    let user = await __getUserFromCacheOrPt(id, projectId);
     let allPairedIds =
       collaborations.filter(c => c.pairs.includes(id))
       .map(c => c.pairs[0] !== id ? c.pairs[0] : c.pairs[1]);
     user.collaborations = []
     for(let j = 0; j < allPairedIds.length; j++) {
       let pid = allPairedIds[j];
-      let pairedUser = await __getUserFromCacheOrPt(pid);
+      let pairedUser = await __getUserFromCacheOrPt(pid, projectId);
       let pairedConns = collaborations.filter(c => c.pairs.includes(id) && c.pairs.includes(pid))
       // let stories = pairedConns.map(c => c.stories);
       let stories = [];
@@ -157,7 +157,7 @@ async function _getUsersSkillsHits(items, projectId) {
   for (let i = 0; i < userIds.length; i++) {
     let id = userIds[i];
     let hitsMap = new Map();
-    let user = await __getUserFromCacheOrPt(id);
+    let user = await __getUserFromCacheOrPt(id, projectId);
     user.skills = []
     hits.forEach(h => {
       if (hitsMap.has(h.name)) {
@@ -181,7 +181,7 @@ async function _getUsersSkillsHits(items, projectId) {
   return records;
 }
 
-async function __getUserFromCacheOrPt(userId) {
+async function __getUserFromCacheOrPt(userId, projectId) {
   if (!usersCache.has(userId)) {
     let member = await pivotal.project.getMember(userId, projectId);
     usersCache.set(userId, { id: member.person.id, name: member.person.name, membershipId: member.id });
