@@ -6,8 +6,6 @@ import PivotalTracker from '../integrations/PivotalTracker';
 const helpers = new HelperFunctions();
 const pivotal = new PivotalTracker();
 
-let usersCache = new Map();
-
 export default class PivotalTrackerAnalytics {
   async get(req, res, next) {
     try {
@@ -63,6 +61,16 @@ async function _getUsersCollaborations(items, projectId) {console.log('>>>>>>>>>
   let collaborations = [];
   let userIds = [];
   let teamStories = items.filter(i => i.owner_ids.length > 1);
+
+  // caching function
+  let usersCache = new Map();
+  async function __getUserFromCacheOrPt(userId, projectId) {
+    if (!usersCache.has(userId)) {
+      let member = await pivotal.project.getMember(userId, projectId);
+      usersCache.set(userId, { name: member.person.name, email: member.person.email });
+    }
+    return usersCache.get(userId);
+  };
 
   // get all user IDs
   teamStories.forEach(s => {
@@ -132,6 +140,16 @@ async function _getUsersSkillsHits(items, projectId) {
           || i.current_state === 'delivered'
           || i.current_state === 'accepted'));
 
+  // caching function
+  let usersCache = new Map();
+  async function __getUserFromCacheOrPt(userId, projectId) {
+    if (!usersCache.has(userId)) {
+      let member = await pivotal.project.getMember(userId, projectId);
+      usersCache.set(userId, { name: member.person.name, email: member.person.email });
+    }
+    return usersCache.get(userId);
+  };
+
   // get all user IDs
   filteredStories.forEach(s => {
     s.owner_ids.forEach(id => {
@@ -180,11 +198,3 @@ async function _getUsersSkillsHits(items, projectId) {
   }
   return records;
 }
-
-async function __getUserFromCacheOrPt(userId, projectId) {
-  if (!usersCache.has(userId)) {
-    let member = await pivotal.project.getMember(userId, projectId);
-    usersCache.set(userId, { name: member.person.name, email: member.person.email });
-  }
-  return usersCache.get(userId);
-};
