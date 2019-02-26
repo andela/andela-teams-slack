@@ -106,9 +106,8 @@ async function _getUsersCollaborations(items, projectId) {
       });
       user.collaborations.push({
         user: {
-            id: pairedUser.id,
             name: pairedUser.name,
-            membershipId: pairedUser.membershipId
+            email: pairedUser.email
         },
         //stories,
         numberOfStories: stories.length,
@@ -185,7 +184,7 @@ async function _getUsersSkillsHits(items, projectId) {
 async function __getUserFromCacheOrPt(userId, projectId) {
   if (!usersCache.has(userId)) {
     let member = await pivotal.project.getMember(userId, projectId);
-    usersCache.set(userId, { id: member.person.id, name: member.person.name, membershipId: member.id });
+    usersCache.set(userId, { name: member.person.name, email: member.person.email });
   }
   return usersCache.get(userId);
 };
