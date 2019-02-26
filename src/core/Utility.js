@@ -28,10 +28,12 @@ export default class Utility {
     if (addUser) {
       if (url.includes(`github.com/`)) {
         let repo = url.substring(url.lastIndexOf('/') + 1);
-        await github.repo.addUser(user.github_user_name, repo);
+        let permission = user.is_sims_facilitator ? 'admin' : 'push';
+        await github.repo.addUser(user.github_user_name, repo, { permission });
       } else if (url.includes('pivotaltracker.com/')) {
         let projId = url.substring(url.lastIndexOf('/') + 1);
-        await pivotal.project.addUser(user.email, projId);
+        let role = user.is_sims_facilitator ? 'owner' : 'member';
+        await pivotal.project.addUser(user.email, projId, { role });
       }
       await slack.chat.postEphemeralOrDM(`Confirm you have been added to ${url}`, channelId, userId);
       return;

@@ -397,8 +397,10 @@ async function _handlePtAnalyticsDialog(req) {
   };
   if (submission.analytics_type === 'kanban_view') {
     returnUrl += '/kanban';
-  } else if (submission.analytics_type === 'users_connections') {
-    returnUrl += '/connections';
+  } else if (submission.analytics_type === 'users_collaborations') {
+    returnUrl += '/collaborations';
+  } else if (submission.analytics_type === 'users_skills_hits') {
+    returnUrl += '/users-skills-hits';
   }
   const token = jwt.sign(query, process.env.JWT_SECRET);
   returnUrl += `/${token}`;
