@@ -19,10 +19,12 @@ export default class PivotalTrackerAnalytics {
       let records = [];
       if (query.analyticsType === 'kanban_view') {
         records = await _getKanbanView(items);
+      } else if (query.analyticsType === 'skills_vs_users') {
+        records = await _getSkillsVsUsers(items, query.projectId);
       } else if (query.analyticsType === 'users_collaborations') {
         records = await _getUsersCollaborations(items, query.projectId);
-      } else if (query.analyticsType === 'users_skills_hits') {
-        records = await _getUsersSkillsHits(items, query.projectId);
+      } else if (query.analyticsType === 'users_vs_skills') {
+        records = await _getUsersVsSkills(items, query.projectId);
       }
       return res.status(200).json({ records });
     } catch(error) {
@@ -127,7 +129,70 @@ async function _getUsersCollaborations(items, projectId) {
   return records;
 }
 
-async function _getUsersSkillsHits(items, projectId) {
+async function _getSkillsVsUsers(items, projectId) {
+  let records = [];
+  let hits = [];
+  let filteredStories =
+    items.filter(
+      i => i.owner_ids.length > 0
+      && i.labels.length > 0
+      && (i.current_state === 'started'
+          || i.current_state === 'finished'
+          || i.current_state === 'delivered'
+          || i.current_state === 'accepted'));
+
+  // caching function
+  let usersCache = new Map();
+  async function __getUserFromCacheOrPt(userId) {
+    if (!usersCache.has(userId)) {
+      let member = await pivotal.project.getMember(userId, projectId);
+      usersCache.set(userId, { name: member.person.name, email: member.person.email });
+    }
+    return usersCache.get(userId);
+  };
+
+  // get all labels
+  let labels = await pivotal.project.getLabels(projectId);
+  // get all hits
+  filteredStories.forEach(s => {
+    s.labels.forEach(l => {
+      s.owner_ids.forEach(id => {
+        hits.push({
+          userId: id,
+          name: l.name,
+          state: s.current_state
+        });
+      });
+    });
+  });
+  // create skills and their users
+  for (let i = 0; i < labels.length; i++) {
+    let label = labels[i];
+    let hitsMap = new Map();
+    label.users = []
+    hits.forEach(h => {
+      if (hitsMap.has(h.userId)) {
+        let hit = hitsMap.get(h.userId);
+        hit.doneHits = Number(hit.doneHits) + Number(h.state === 'accepted' ? 1 : 0);
+        hit.ongoingHits = Number(hit.ongoingHits) + Number(h.state !== 'accepted' ? 1 : 0);
+        hitsMap.set(h.userId, hit);
+      } else {
+        hitsMap.set(h.userId, {
+          doneHits: h.state === 'accepted' ? 1 : 0,
+          ongoingHits: h.state !== 'accepted' ? 1 : 0
+        });
+      }
+    });
+    for (let [userId, hit] of hitsMap) {
+      let user = await __getUserFromCacheOrPt(userId);
+      label.users.push({ ...user, ...hit });
+    }
+    records.push(label);
+  }
+  return records;
+}
+
+async function _getUsersVsSkills(items, projectId) {
   let records = [];
   let hits = [];
   let userIds = [];

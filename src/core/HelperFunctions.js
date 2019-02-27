@@ -225,10 +225,13 @@ export default class HelperFunctions {
           type: 'select',
           label: 'Analytics Type',
           name: 'analytics_type',
-          value: 'users_skills_hits',
+          value: 'users_vs_skills',
           options: [{
             label: 'Users and the skills they have touched',
-            value: 'users_skills_hits'
+            value: 'users_vs_skills'
+          }, {
+            label: 'Skills and the users that touched them',
+            value: 'skills_vs_users'
           }, {
             label: 'Kanban view',
             value: 'kanban_view'
