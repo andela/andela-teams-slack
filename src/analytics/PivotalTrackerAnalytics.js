@@ -187,7 +187,7 @@ async function _getSkillsVsUsers(items, projectId) {
       let user = await __getUserFromCacheOrPt(userId);
       label.users.push({ ...user, ...hit });
     }
-    records.push(label);
+    records.push({ name: label.name, users: label.users });
   }
   return records;
 }
