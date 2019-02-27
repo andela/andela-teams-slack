@@ -170,7 +170,7 @@ async function _getSkillsVsUsers(items, projectId) {
     let label = labels[i];
     let hitsMap = new Map();
     label.users = []
-    hits.forEach(h => {
+    hits.filter(h => h.name === label.name).forEach(h => {
       if (hitsMap.has(h.userId)) {
         let hit = hitsMap.get(h.userId);
         hit.doneHits = Number(hit.doneHits) + Number(h.state === 'accepted' ? 1 : 0);
@@ -242,7 +242,7 @@ async function _getUsersVsSkills(items, projectId) {
     let hitsMap = new Map();
     let user = await __getUserFromCacheOrPt(id);
     user.skills = []
-    hits.forEach(h => {
+    hits.filter(h => h.userId === id).forEach(h => {
       if (hitsMap.has(h.name)) {
         let hit = hitsMap.get(h.name);
         hit.doneHits = Number(hit.doneHits) + Number(h.state === 'accepted' ? 1 : 0);
