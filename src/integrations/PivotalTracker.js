@@ -184,6 +184,22 @@ class Project {
       };
     }
   }
+  async getLabels(projectId) {
+    const requestOptions = {
+      baseUrl: 'https://www.pivotaltracker.com/services/v5',
+      // fullResponse: false,
+      json: true,
+      headers: {
+        'Content-Type': 'application/json',
+        'X-TrackerToken': process.env.PIVOTAL_TRACKER_TOKEN,
+      }
+    };
+
+    var result = {}; // the result to be returned
+    requestOptions.uri = `/projects/${projectId}/labels`;
+    result = await request.get(requestOptions);
+    return result.body;
+  }
   async getMember(userId, projectId) {
     const requestOptions = {
       baseUrl: 'https://www.pivotaltracker.com/services/v5',
