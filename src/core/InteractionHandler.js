@@ -13,6 +13,130 @@ const pivotal = new PivotalTracker();
 const slack = new Slack();
 const utils = new Utility();
 
+export default class InteractionHandler {
+  async dialogCancellation(req, res, next) {
+    try {
+      let payload = req.payload;
+      if (payload.type === 'dialog_cancellation') {
+        if (payload.callback_id.startsWith('record_feedback_dialog:')) {
+          await _handleRecordFeedbackDialogCancellation(req);
+        }
+        return;
+      }
+      next();
+    } catch(error) {
+      next(error);
+    }
+  }
+  async dialogSubmission(req, res, next) {
+    try {
+      let payload = req.payload;
+      if (payload.type === 'dialog_submission') {
+        if (payload.callback_id === 'create_github_repo_dialog') {
+          await _handleCreateGithubRepoDialog(req);
+        } else if (payload.callback_id === 'create_pt_project_dialog') {
+          await _handleCreatePtProjectDialog(req);
+        } else if (payload.callback_id === 'create_team_dialog') {
+          await _postCreateGithubReposPage(req);
+          await _postCreatePtBoardPage(req);
+        } else if (payload.callback_id === 'feedback_analytics_dialog') {
+          await _handleFeedbackAnalyticsDialog(req);
+        } else if (payload.callback_id === 'pt_analytics_dialog') {
+          await _handlePtAnalyticsDialog(req);
+        } else if (payload.callback_id.startsWith('record_feedback_dialog:')) {
+          await _handleRecordFeedbackDialog(req);
+        }
+        return;
+      }
+      next();
+    } catch(error) {
+      next(error);
+    }
+  }
+  async interactiveMessage(req, res, next) {
+    try {
+      let payload = req.payload;
+      if (payload.type === 'interactive_message') {
+        const value = payload.actions[0].value;
+        if (value === 'analytics') {
+          await _postAnalyticsPage(req);
+        } else if (value === 'create_team') {
+          await slack.dialog.open(payload.trigger_id, helpers.getCreateTeamDialogJson());
+        } else if (value.startsWith('create_github_repo:')) {
+          let repoName = value.substring(19);
+          if (repoName === '?') {
+            await slack.dialog.open(payload.trigger_id, helpers.getCreateGithubRepoDialogJson());
+          } else {
+            req.repoName = repoName;
+            await _createAndPostGithubRepoLink(req);
+          }
+        } else if (value.startsWith('create_pt_project:')) {
+          let projectName = value.substring(18);
+          if (projectName === '?') {
+            await slack.dialog.open(payload.trigger_id, helpers.getCreatePtProjectDialogJson());
+          } else {
+            req.projectName = projectName;
+            await _createAndPostPtProjectLink(req);
+          }
+        } else if (value === 'feedback_analytics') {
+          await slack.dialog.open(payload.trigger_id, helpers.getFeedbackAnalyticsDialogJson());
+        } else if (value === 'pt_analytics') {
+          await slack.dialog.open(payload.trigger_id, helpers.getPtAnalyticsDialogJson());
+        } 
+        return;
+      }
+      next();
+    } catch(error) {
+      next(error);
+    }
+  }
+  async messageAction(req, res, next) {
+    try {
+      let payload = req.payload;
+      if (payload.type === 'message_action') {
+        if (payload.callback_id === 'record_feedback') {
+          if (req.user && req.user.is_sims_facilitator) {
+            const feedback = await models.FeedbackInstance.create({
+              from: payload.user.id,
+              message: payload.message.text
+            });
+            let response =
+              await slack.dialog.open(payload.trigger_id, helpers.getRecordFeedbackDialogJson(feedback.id));
+            if (!response.ok) {
+              await slack.chat.postEphemeralOrDM(
+                'This action cannot be performed at the moment. Try again later.',
+                payload.channel.id,
+                payload.user.id);
+              await feedback.destroy();
+            }
+          } else {
+            await slack.chat.postEphemeralOrDM(
+              'This action can only be performed by Learning Facilitators',
+              payload.channel.id,
+              payload.user.id);
+          }
+        } else if (payload.callback_id === 'join_team' || payload.callback_id === 'leave_team') {
+          var messageText = payload.message.text;
+          // check if messageText is a link <...>
+          if (messageText.toLowerCase().startsWith('<http') && messageText.endsWith('>')) {
+            // trim messageText of < and > to get link
+            let messageLink = messageText.substring(1, messageText.length - 1).toLowerCase();
+            utils.addOrRemoveUser(
+              messageLink, req.user,
+              payload.user.id,
+              payload.channel.id,
+              payload.callback_id === 'join_team');
+          }
+        }
+        return;
+      }
+      next();
+    } catch(error) {
+      next(error);
+    }
+  }
+}
+
 async function _createAndPostGithubRepoLink(req) {
   let result = await github.repo.create(req.repoName, {
     description: req.repoDescription || '',
@@ -222,20 +346,67 @@ async function _handleFeedbackAnalyticsDialog(req) {
       to,
       type,
       createdAt: { 
-        $gte: new Date(submission.feedback_start_date),
-        $lte: new Date(submission.feedback_end_date)
+        $gte: new Date(submission.analytics_start_date),
+        $lte: new Date(submission.analytics_end_date)
       }
     },
-    feedbackAnalyticsType: submission.feedback_analytics_type
+    analyticsType: submission.analytics_type
   };
-  if (submission.feedback_analytics_type === 'feedback_table') {
+  if (submission.analytics_type === 'feedback_table') {
     returnUrl += '/table';
-  } else if (submission.feedback_analytics_type === 'feedback_time_distribution') {
+  } else if (submission.analytics_type === 'feedback_time_distribution') {
     returnUrl += '/distribution';
-  } else if (submission.feedback_analytics_type === 'attributes_chart') {
+  } else if (submission.analytics_type === 'attributes_chart') {
     returnUrl += '/attributes';
-  } else if (submission.feedback_analytics_type === 'skills_chart') {
+  } else if (submission.analytics_type === 'skills_chart') {
     returnUrl += '/skills';
+  }
+  const token = jwt.sign(query, process.env.JWT_SECRET);
+  returnUrl += `/${token}`;
+  await slack.chat.postEphemeralOrDM(
+    returnUrl,
+    req.payload.channel.id,
+    req.payload.user.id);
+}
+
+async function _handlePtAnalyticsDialog(req) {
+  let returnUrl = `https://${req.get('host')}/ui/analytics/pt`;
+  let submission = req.payload.submission;
+  let projectUrl = submission.project_url;
+  // // ensure the link was created by this app by checking the database******************************
+  // const existingResource = await models.Resource.findOne({
+  //   where: { url: projectUrl }
+  // });
+  // if (!existingResource) {
+  //   // no need to await the promise
+  //   slack.chat.postEphemeralOrDM(
+  //     `The resource ${projectUrl} was not created using Andela Teams.`,
+  //     req.payload.channel.id,
+  //     req.payload.user.id);
+  //   return;
+  // }
+  if (projectUrl.endsWith('/')) {
+    projectUrl = projectUrl.substring(0, projectUrl.length - 1);
+  }
+  let projectId = projectUrl.substring(projectUrl.lastIndexOf('/') + 1);
+  let query = {
+    projectId,
+    analyticsType: submission.analytics_type,
+    endDate: new Date(submission.analytics_end_date),
+    startDate: new Date(submission.analytics_start_date)
+  };
+  if (submission.analytics_type === 'kanban_view') {
+    returnUrl += '/kanban';
+  } else if (submission.analytics_type === 'skills_vs_users') {
+    returnUrl += '/skills-vs-users';
+  } else if (submission.analytics_type === 'stories_vs_users') {
+    returnUrl += '/stories-vs-users';
+  } else if (submission.analytics_type === 'users_collaborations') {
+    returnUrl += '/collaborations';
+  } else if (submission.analytics_type === 'users_vs_skills') {
+    returnUrl += '/users-vs-skills';
+  } else if (submission.analytics_type === 'users_vs_stories') {
+    returnUrl += '/users-vs-stories';
   }
   const token = jwt.sign(query, process.env.JWT_SECRET);
   returnUrl += `/${token}`;
@@ -262,6 +433,12 @@ async function _postAnalyticsPage(req) {
     text: 'Feedback...',
     type: 'button',
     value: 'feedback_analytics'
+  });
+  actions.push({
+    name: 'analytics',
+    text: 'Pivotal Tracker...',
+    type: 'button',
+    value: 'pt_analytics'
   });
 
   await slack.chat.postResponse(
@@ -360,124 +537,4 @@ async function _postCreatePtBoardPage(req) {
       fallback: 'Could not perform operation.',
       actions: actions
     }]);
-}
-
-export default class InteractionHandler {
-  async dialogCancellation(req, res, next) {
-    try {
-      let payload = req.payload;
-      if (payload.type === 'dialog_cancellation') {
-        if (payload.callback_id.startsWith('record_feedback_dialog:')) {
-          await _handleRecordFeedbackDialogCancellation(req);
-        }
-        return;
-      }
-      next();
-    } catch(error) {
-      next(error);
-    }
-  }
-  async dialogSubmission(req, res, next) {
-    try {
-      let payload = req.payload;
-      if (payload.type === 'dialog_submission') {
-        if (payload.callback_id === 'create_github_repo_dialog') {
-          await _handleCreateGithubRepoDialog(req);
-        } else if (payload.callback_id === 'create_pt_project_dialog') {
-          await _handleCreatePtProjectDialog(req);
-        } else if (payload.callback_id === 'create_team_dialog') {
-          await _postCreateGithubReposPage(req);
-          await _postCreatePtBoardPage(req);
-        } else if (payload.callback_id === 'feedback_analytics_dialog') {
-          await _handleFeedbackAnalyticsDialog(req);
-        } else if (payload.callback_id.startsWith('record_feedback_dialog:')) {
-          await _handleRecordFeedbackDialog(req);
-        }
-        return;
-      }
-      next();
-    } catch(error) {
-      next(error);
-    }
-  }
-  async interactiveMessage(req, res, next) {
-    try {
-      let payload = req.payload;
-      if (payload.type === 'interactive_message') {
-        const value = payload.actions[0].value;
-        if (value === 'analytics') {
-          await _postAnalyticsPage(req);
-        } else if (value === 'create_team') {
-          await slack.dialog.open(payload.trigger_id, helpers.getCreateTeamDialogJson());
-        } else if (value.startsWith('create_github_repo:')) {
-          let repoName = value.substring(19);
-          if (repoName === '?') {
-            await slack.dialog.open(payload.trigger_id, helpers.getCreateGithubRepoDialogJson());
-          } else {
-            req.repoName = repoName;
-            await _createAndPostGithubRepoLink(req);
-          }
-        } else if (value.startsWith('create_pt_project:')) {
-          let projectName = value.substring(18);
-          if (projectName === '?') {
-            await slack.dialog.open(payload.trigger_id, helpers.getCreatePtProjectDialogJson());
-          } else {
-            req.projectName = projectName;
-            await _createAndPostPtProjectLink(req);
-          }
-        } else if (value === 'feedback_analytics') {
-          await slack.dialog.open(payload.trigger_id, helpers.getFeedbackAnalyticsDialogJson());
-        } 
-        return;
-      }
-      next();
-    } catch(error) {
-      next(error);
-    }
-  }
-  async messageAction(req, res, next) {
-    try {
-      let payload = req.payload;
-      if (payload.type === 'message_action') {
-        if (payload.callback_id === 'record_feedback') {
-          if (req.user && req.user.is_sims_facilitator) {
-            const feedback = await models.FeedbackInstance.create({
-              from: payload.user.id,
-              message: payload.message.text
-            });
-            let response =
-              await slack.dialog.open(payload.trigger_id, helpers.getRecordFeedbackDialogJson(feedback.id));
-            if (!response.ok) {
-              await slack.chat.postEphemeralOrDM(
-                'This action cannot be performed at the moment. Try again later.',
-                payload.channel.id,
-                payload.user.id);
-              await feedback.destroy();
-            }
-          } else {
-            await slack.chat.postEphemeralOrDM(
-              'This action can only be performed by Learning Facilitators',
-              payload.channel.id,
-              payload.user.id);
-          }
-        } else if (payload.callback_id === 'join_team' || payload.callback_id === 'leave_team') {
-          var messageText = payload.message.text;
-          // check if messageText is a link <...>
-          if (messageText.toLowerCase().startsWith('<http') && messageText.endsWith('>')) {
-            // trim messageText of < and > to get link
-            let messageLink = messageText.substring(1, messageText.length - 1).toLowerCase();
-            utils.addOrRemoveUser(
-              messageLink, req.user,
-              payload.user.id,
-              payload.channel.id,
-              payload.callback_id === 'join_team');
-          }
-        }
-        return;
-      }
-      next();
-    } catch(error) {
-      next(error);
-    }
-  }
 }
