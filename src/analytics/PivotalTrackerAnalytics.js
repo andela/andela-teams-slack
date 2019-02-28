@@ -21,6 +21,8 @@ export default class PivotalTrackerAnalytics {
         records = await _getKanbanView(items);
       } else if (query.analyticsType === 'skills_vs_users') {
         records = await _getSkillsVsUsers(items, query.projectId);
+      } else if (query.analyticsType === 'stories_vs_users') {
+        records = await _getStoriesVsUsers(items, query.projectId);
       } else if (query.analyticsType === 'users_collaborations') {
         records = await _getUsersCollaborations(items, query.projectId);
       } else if (query.analyticsType === 'users_vs_skills') {
@@ -188,6 +190,42 @@ async function _getSkillsVsUsers(items, projectId) {
       label.users.push({ ...user, ...hit });
     }
     records.push({ name: label.name, users: label.users });
+  }
+  return records;
+}
+
+async function _getStoriesVsUsers(items, projectId) {
+  let records = [];
+  let filteredStories =
+    items.filter(
+      i => i.owner_ids.length > 0
+      && (i.current_state === 'started'
+          || i.current_state === 'finished'
+          || i.current_state === 'delivered'
+          || i.current_state === 'accepted'));
+
+  // caching function
+  let usersCache = new Map();
+  async function __getUserFromCacheOrPt(userId) {
+    if (!usersCache.has(userId)) {
+      let member = await pivotal.project.getMember(userId, projectId);
+      usersCache.set(userId, { name: member.person.name, email: member.person.email });
+    }
+    return usersCache.get(userId);
+  };
+
+  // create stories and their users
+  for (let i = 0; i < filteredStories.length; i++) {
+    let story = filteredStories[i];
+    let users = [];
+    for (let j = 0; j < story.owner_ids.length; j++) {
+      let user = await __getUserFromCacheOrPt(story.owner_ids[j]);
+      users.push(user);
+    }
+    records.push({
+      name: story.name,
+      users
+    });
   }
   return records;
 }
