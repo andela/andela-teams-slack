@@ -223,7 +223,9 @@ async function _getStoriesVsUsers(items, projectId) {
       users.push(user);
     }
     records.push({
+      id: story.id,
       name: story.name,
+      url: story.url,
       users
     });
   }
