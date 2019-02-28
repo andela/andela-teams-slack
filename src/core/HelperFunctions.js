@@ -232,6 +232,9 @@ export default class HelperFunctions {
           }, {
             label: 'Skills and the users that touched them',
             value: 'skills_vs_users'
+          },{
+            label: 'Users and the stories they have touched',
+            value: 'users_vs_stories'
           }, {
             label: 'Stories and the users that touched them',
             value: 'stories_vs_users'

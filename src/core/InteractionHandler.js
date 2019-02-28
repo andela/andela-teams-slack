@@ -405,6 +405,8 @@ async function _handlePtAnalyticsDialog(req) {
     returnUrl += '/collaborations';
   } else if (submission.analytics_type === 'users_vs_skills') {
     returnUrl += '/users-vs-skills';
+  } else if (submission.analytics_type === 'users_vs_stories') {
+    returnUrl += '/users-vs-stories';
   }
   const token = jwt.sign(query, process.env.JWT_SECRET);
   returnUrl += `/${token}`;

@@ -27,6 +27,8 @@ export default class PivotalTrackerAnalytics {
         records = await _getUsersCollaborations(items, query.projectId);
       } else if (query.analyticsType === 'users_vs_skills') {
         records = await _getUsersVsSkills(items, query.projectId);
+      } else if (query.analyticsType === 'users_vs_stories') {
+        records = await _getUsersVstories(items, query.projectId);
       }
       return res.status(200).json({ records });
     } catch(error) {
@@ -299,6 +301,64 @@ async function _getUsersVsSkills(items, projectId) {
     for (let [name, hit] of hitsMap) {
       user.skills.push(hit);
     }
+    records.push(user);
+  }
+  return records;
+}
+
+async function _getUsersVstories(items, projectId) {
+  let records = [];
+  let hits = [];
+  let userIds = [];
+  let filteredStories =
+    items.filter(
+      i => i.owner_ids.length > 0
+      && i.labels.length > 0
+      && (i.current_state === 'started'
+          || i.current_state === 'finished'
+          || i.current_state === 'delivered'
+          || i.current_state === 'accepted'));
+
+  // caching function
+  let usersCache = new Map();
+  async function __getUserFromCacheOrPt(userId) {
+    if (!usersCache.has(userId)) {
+      let member = await pivotal.project.getMember(userId, projectId);
+      usersCache.set(userId, { name: member.person.name, email: member.person.email });
+    }
+    return usersCache.get(userId);
+  };
+
+  // get all user IDs
+  filteredStories.forEach(s => {
+    s.owner_ids.forEach(id => {
+      if (!userIds.includes(id)) {
+        userIds.push(id);
+      }
+    });
+  });
+  // get all hits
+  for (let i = 0; i < userIds.length; i++) {
+    filteredStories.filter(s => s.owner_ids.includes(userIds[i]))
+      .forEach(s => {
+        hits.push({
+          userId: userIds[i],
+          story: s
+        });
+      });
+  }
+  // create user objects and their stories
+  for (let i = 0; i < userIds.length; i++) {
+    let id = userIds[i];
+    let user = await __getUserFromCacheOrPt(id);
+    user.stories = []
+    hits.filter(h => h.userId === id).forEach(h => {
+      user.stories.push({
+        id: h.story.id,
+        name: h.story.name,
+        url: h.story.url
+      });
+    });
     records.push(user);
   }
   return records;
