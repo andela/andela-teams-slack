@@ -399,6 +399,8 @@ async function _handlePtAnalyticsDialog(req) {
     returnUrl += '/kanban';
   } else if (submission.analytics_type === 'skills_vs_users') {
     returnUrl += '/skills-vs-users';
+  } else if (submission.analytics_type === 'stories_vs_users') {
+    returnUrl += '/stories-vs-users';
   } else if (submission.analytics_type === 'users_collaborations') {
     returnUrl += '/collaborations';
   } else if (submission.analytics_type === 'users_vs_skills') {
