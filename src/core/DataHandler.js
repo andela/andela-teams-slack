@@ -1,6 +1,28 @@
 import moment from 'moment';
 import models from '../models';
 
+export default class DataHandler {
+  async dialogSuggestions(req, res, next) {
+    try {
+      let payload = req.payload;
+      if (payload.type === 'dialog_suggestion') {
+        if (payload.callback_id === 'feedback_analytics_dialog'
+        || payload.callback_id === 'pt_analytics_dialog') {
+          const data = _getDates();
+          res.status(200).json(data);
+        } else if (payload.callback_id.startsWith('record_feedback_dialog:')) {
+          const data = await _getAttributesAndSkills();
+          res.status(200).json(data);
+        }
+        return;
+      }
+      next();
+    } catch(error) {
+      next(error);
+    }
+  }
+}
+
 async function _getAttributesAndSkills() {
   const allAttributes = await models.Attribute.findAll({
     include: [
@@ -52,26 +74,4 @@ function _getDates() {
     option_groups.push(group);
   }
   return { option_groups };
-}
-
-export default class DataHandler {
-  async dialogSuggestions(req, res, next) {
-    try {
-      let payload = req.payload;
-      if (payload.type === 'dialog_suggestion') {
-        if (payload.callback_id === 'feedback_analytics_dialog'
-        || payload.callback_id === 'pt_analytics_dialog') {
-          const data = _getDates();
-          res.status(200).json(data);
-        } else if (payload.callback_id.startsWith('record_feedback_dialog:')) {
-          const data = await _getAttributesAndSkills();
-          res.status(200).json(data);
-        }
-        return;
-      }
-      next();
-    } catch(error) {
-      next(error);
-    }
-  }
 }
