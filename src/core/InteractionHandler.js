@@ -99,7 +99,7 @@ export default class InteractionHandler {
             const feedback = await models.FeedbackInstance.create({
               from: payload.user.id,
               message: payload.message.text
-            });
+            });console.log(feedback.get())
             let response =
               await slack.dialog.open(payload.trigger_id, helpers.getRecordFeedbackDialogJson(feedback.id));
             if (!response.ok) {
