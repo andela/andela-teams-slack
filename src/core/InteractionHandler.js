@@ -234,7 +234,7 @@ async function _handleCreatePtProjectDialog(req) {
 async function _handleRecordFeedbackDialog(req) {
   let submission = req.payload.submission;
   let targetUsers = [];
-  let feedbackId = parseInt(req.payload.callback_id.substring(23), 10);
+  let feedbackId = req.payload.callback_id.substring(23);
   if (submission.feedback_target_user.startsWith('U')) { // user ID
     targetUsers.push(submission.feedback_target_user);
   } else if (submission.feedback_target_user.startsWith('C') // channel ID
@@ -417,7 +417,7 @@ async function _handlePtAnalyticsDialog(req) {
 }
 
 async function _handleRecordFeedbackDialogCancellation(req) {
-  let feedbackId = parseInt(req.payload.callback_id.substring(23), 10);
+  let feedbackId = req.payload.callback_id.substring(23);
   const feedback = await models.FeedbackInstance.findOne({
     where: { id: feedbackId }
   });
