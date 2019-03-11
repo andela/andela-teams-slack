@@ -10,7 +10,6 @@ if (process.env.NODE_ENV !== 'production') {
 
 const client = redis.createClient(process.env.REDIS_URL);
 const getAsync = promisify(client.get).bind(client);
-const flushAll = promisify(client.flushall).bind(client);
 
 /**
 * @class Project
@@ -206,7 +205,7 @@ class Project {
     result = await request.get(requestOptions);
     return result.body;
   }
-  async getMember(userId, projectId) {await flushAll();
+  async getMember(userId, projectId) {
     let member = await getAsync(`${projectId}/${userId}`);
     if (member) {console.log('From Cache')
       return JSON.parse(member);
@@ -227,7 +226,7 @@ class Project {
       const memberships = result.body;
       member = memberships.find(m => m.person.id === userId);
       // keys should expire after 24 hours
-      client.set(`${projectId}/${userId}`, JSON.stringify(member), 'EX', 60 * 60 * 24, redis.print);
+      client.set(`${projectId}/${userId}`, JSON.stringify(member), 'EX', 60 * 60 * 24);
       return member;
     }
   }
