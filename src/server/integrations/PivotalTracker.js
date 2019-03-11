@@ -207,9 +207,9 @@ class Project {
   }
   async getMember(userId, projectId) {
     let member = await getAsync(`${projectId}/${userId}`);
-    if (member) {console.log('From Cache')
+    if (member) {
       return JSON.parse(member);
-    } else {console.log('From PT')
+    } else {
       const requestOptions = {
         baseUrl: 'https://www.pivotaltracker.com/services/v5',
         // fullResponse: false,
