@@ -206,6 +206,9 @@ class Project {
     return result.body;
   }
   async getMember(userId, projectId) {
+    console.log('>>>>>');
+    console.log(client.keys('*'));
+    console.log('<<<<<<')
     let member = await getAsync(`${projectId}/${userId}`);
     if (member) {
       console.log('got cached member:'); console.log(JSON.parse(member))
@@ -227,7 +230,7 @@ class Project {
       const memberships = result.body;
       member = memberships.find(m => m.person.id === userId);
       client.set(`${projectId}/${userId}`, JSON.stringify(member), redis.print);
-      console.log('from PT:'); console.log(member)
+      console.log('from PT:');
       return member;
     }
   }
