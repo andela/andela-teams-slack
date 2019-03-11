@@ -206,6 +206,7 @@ class Project {
     return result.body;
   }
   async getMember(userId, projectId) {
+    console.log(client.exists(`${projectId}/${userId}`))
     if (client.exists(`${projectId}/${userId}`)) {
       const member = await getAsync(`${projectId}/${userId}`);
       console.log('got cached member:'); console.log(JSON.parse(member))
