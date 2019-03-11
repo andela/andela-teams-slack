@@ -206,9 +206,8 @@ class Project {
     return result.body;
   }
   async getMember(userId, projectId) {
-    console.log(client.exists(`${projectId}/${userId}`))
-    if (client.exists(`${projectId}/${userId}`)) {
-      const member = await getAsync(`${projectId}/${userId}`);
+    let member = await getAsync(`${projectId}/${userId}`);
+    if (member) {
       console.log('got cached member:'); console.log(JSON.parse(member))
       return JSON.parse(member);
     } else {
@@ -226,7 +225,7 @@ class Project {
       requestOptions.uri = `/projects/${projectId}/memberships`;
       result = await request.get(requestOptions);
       const memberships = result.body;
-      const member = memberships.find(m => m.person.id === userId);
+      member = memberships.find(m => m.person.id === userId);
       client.set(`${projectId}/${userId}`, JSON.stringify(member), redis.print);
       console.log('from PT:'); console.log(member)
       return member;
