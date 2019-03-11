@@ -227,7 +227,7 @@ class Project {
       const memberships = result.body;
       member = memberships.find(m => m.person.id === userId);
       // keys should expire after 24 hours
-      client.set(`${projectId}/${userId}`, 'Ex', 60 * 60 * 24, JSON.stringify(member), redis.print);
+      client.set(`${projectId}/${userId}`, JSON.stringify(member), 'EX', 60 * 60 * 24, redis.print);
       return member;
     }
   }
