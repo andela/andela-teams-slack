@@ -10,6 +10,7 @@ if (process.env.NODE_ENV !== 'production') {
 
 const client = redis.createClient(process.env.REDIS_URL);
 const getAsync = promisify(client.get).bind(client);
+const flushAll = promisify(client.flushall).bind(client);
 
 /**
 * @class Project
@@ -205,15 +206,11 @@ class Project {
     result = await request.get(requestOptions);
     return result.body;
   }
-  async getMember(userId, projectId) {
-    console.log('>>>>>');
-    console.log(client.keys('*'));
-    console.log('<<<<<<')
+  async getMember(userId, projectId) {await flushAll();
     let member = await getAsync(`${projectId}/${userId}`);
-    if (member) {
-      console.log('got cached member:'); console.log(JSON.parse(member))
+    if (member) {console.log('From Cache')
       return JSON.parse(member);
-    } else {
+    } else {console.log('From PT')
       const requestOptions = {
         baseUrl: 'https://www.pivotaltracker.com/services/v5',
         // fullResponse: false,
@@ -229,8 +226,8 @@ class Project {
       result = await request.get(requestOptions);
       const memberships = result.body;
       member = memberships.find(m => m.person.id === userId);
-      client.set(`${projectId}/${userId}`, JSON.stringify(member), redis.print);
-      console.log('from PT:');
+      // keys should expire after 24 hours
+      client.set(`${projectId}/${userId}`, 'Ex', 60 * 60 * 24, JSON.stringify(member), redis.print);
       return member;
     }
   }
