@@ -142,9 +142,9 @@ class Resolver {
   async getUserInfoObject(userId) {
     var user = await getAsync(`slack/${userId}`);
 
-    if (user) {console.log('From CACHE')
+    if (user) {
       return JSON.parse(user);
-    } else {console.log('From SLaCK')
+    } else {
       // make a request to resolve the user
       let url = 'https://slack.com/api/users.info';
       url += '?user=' + userId;
