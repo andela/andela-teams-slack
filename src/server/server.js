@@ -27,7 +27,7 @@ const ptAnalytics = new PivotalTrackerAnalytics();
 const slash = new SlashCommandHandler();
 const utils = new Utility();
 
-import models from '../models';
+import models from './models';
 
 app.get('/', async (req, res) => {
   await models.FeedbackInstance.update({
