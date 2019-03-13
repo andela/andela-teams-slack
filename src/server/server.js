@@ -27,7 +27,16 @@ const ptAnalytics = new PivotalTrackerAnalytics();
 const slash = new SlashCommandHandler();
 const utils = new Utility();
 
+import models from '../models';
+
 app.get('/', async (req, res) => {
+  await models.FeedbackInstance.update({
+    skillId: 407,
+    to: 'UFYFW27FZ',
+    type: 'negative'
+  }, {
+    where: { id: '54cdeac5-a394-496e-b9e1-cd2d9cd06f78' }
+  });
   res.status(200).send("Hello World!<br /><br />Welcome to Andela Teams for Slack.");
 });
 

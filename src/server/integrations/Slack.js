@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
 import request from 'request-promise-native';
 import SlackBot from 'slackbots';
+import { promisify } from 'util';
 
 if (process.env.NODE_ENV !== 'production') {
   dotenv.config();
@@ -155,6 +156,10 @@ class Resolver {
     return user;
   }
   async getUserProfileObject(userId) {
+    // unfortunately we can't redis-cache the result here
+    // because we need people to be able to update their Github and email on Slack
+    // and have it reflect immediately
+
     var user;
     
     // make a request to resolve the user

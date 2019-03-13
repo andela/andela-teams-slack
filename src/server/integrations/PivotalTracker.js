@@ -1,8 +1,8 @@
 import dotenv from 'dotenv';
-import {promisify} from 'util';
 import redis from 'redis';
 import querystring from 'querystring';
 import request from 'requestretry';
+import { promisify } from 'util';
 
 if (process.env.NODE_ENV !== 'production') {
   dotenv.config();
