@@ -43,6 +43,7 @@ app.get('/', async (req, res) => {
 });
 
 app.get('/test/bugsnag', async (req, res) => {
+  res.status(200).send("Test to see that Bugsnap is set up properly.");
   throw new Error('Test to see that Bugsnap is set up properly');
 });
 
