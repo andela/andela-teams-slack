@@ -42,10 +42,11 @@ app.get('/', async (req, res) => {
   res.status(200).send("Hello World!<br /><br />Welcome to Andela Teams for Slack.");
 });
 
-app.get('/test/bugsnag', async (req, res) => {
-  res.status(200).send("Test to see that Bugsnap is set up properly.");
-  throw new Error('Test to see that Bugsnap is set up properly');
-});
+// app.get('/test/bugsnag', async (req, res) => {
+//   res.status(200).send("Test to see that Bugsnap is set up properly.");
+//   // bugsnagClient.notify(new Error('Test to see that Bugsnap is set up properly'));
+//   throw new Error('Test to see that Bugsnap is set up properly');
+// });
 
 app.get('/api/analytics/feedback/:token',
   feedbackAnalytics.get);
