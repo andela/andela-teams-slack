@@ -1,2 +1,3 @@
-# andela-teams-slack
-A Slack integration that automates some of the stuff Learning Facilitators do at Andela.
+# feedback-bot
+
+A Slack integration for giving and collating feedback at Andela.

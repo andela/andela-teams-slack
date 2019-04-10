@@ -6,8 +6,7 @@ export default class DataHandler {
     try {
       let payload = req.payload;
       if (payload.type === 'dialog_suggestion') {
-        if (payload.callback_id === 'feedback_analytics_dialog'
-        || payload.callback_id === 'pt_analytics_dialog') {
+        if (payload.callback_id === 'feedback_analytics_dialog') {
           const data = _getDates();
           res.status(200).json(data);
         } else if (payload.callback_id.startsWith('record_feedback_dialog:')) {
