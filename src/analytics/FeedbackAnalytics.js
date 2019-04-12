@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken';
+import moment from 'moment';
 
 import models from '../models';
 import Slack from '../integrations/Slack';
@@ -52,7 +53,7 @@ export default class FeedbackAnalytics {
       if (query.analyticsType === 'feedback_table') {
         records = await _getFeedbackTable(items);
       } else if (query.analyticsType === 'feedback_time_distribution') {
-        records = _getFeedbackTimeDistribution(items);
+        records = _getFeedbackTimeDistribution(items, query.where.createdAt.$gte, query.where.createdAt.$lte);
       } else if (query.analyticsType === 'attributes_chart') {
         records = _getAttributesChart(items);
       } else if (query.analyticsType === 'skills_chart') {
@@ -131,8 +132,19 @@ async function _getFeedbackTable(items) {
   return records;
 }
 
-function _getFeedbackTimeDistribution(items) {
+function _getFeedbackTimeDistribution(items, start, end) {
   let dateGroupsMap = new Map();
+  // fill map with empty dates
+  console.log("start: ", start);
+  console.log("end: ", end);
+  const startDate = moment(new Date(start)).startOf('day');
+  console.log("startDate: ", startDate);
+  const endDate = moment(new Date(end)).startOf('day');
+  console.log("endDate: ", endDate);
+  while(startDate.add(1, 'days').diff(endDate) < 0) {
+    console.log(startDate.toDate());
+    dateGroupsMap.set(startDate.clone().toDate(), 0);
+  }
   let totalCount = 0;
   for (let i = 0; i < items.length; i++) {
     let item = items[i].get();
