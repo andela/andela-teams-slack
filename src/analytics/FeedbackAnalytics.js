@@ -154,9 +154,9 @@ function _getFeedbackTimeDistribution(items, start, end) {
     totalCount += Number(item.count);
   }
   let records = [];
-  for (let [createdAt, count] of dateGroupsMap) {
+  for (let [date, count] of dateGroupsMap) {
     records.push({
-      createdAt,
+      date,
       count,
       percent: (Number(count) / totalCount) * 100
     });
