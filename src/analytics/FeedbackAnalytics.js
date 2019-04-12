@@ -138,10 +138,10 @@ function _getFeedbackTimeDistribution(items, start, end) {
   const startDate = moment(new Date(start)).subtract(1, 'days').startOf('day');
   const endDate = moment(new Date(end)).startOf('day');
   while(startDate.add(1, 'days').diff(endDate) < 1) {
-    //dateGroupsMap.set(startDate.clone().toDate(), 0);
     dateGroupsMap.set(startDate.clone().format('YYYY-MM-DD'), 0);
   }
   let totalCount = 0;
+  // now go through the actual items
   for (let i = 0; i < items.length; i++) {
     let item = items[i].get();
     if (dateGroupsMap.has(item.createdAt)) {
