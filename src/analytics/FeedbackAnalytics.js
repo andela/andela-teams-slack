@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken';
+import moment from 'moment';
 
 import models from '../models';
 import Slack from '../integrations/Slack';
@@ -52,7 +53,7 @@ export default class FeedbackAnalytics {
       if (query.analyticsType === 'feedback_table') {
         records = await _getFeedbackTable(items);
       } else if (query.analyticsType === 'feedback_time_distribution') {
-        records = _getFeedbackTimeDistribution(items);
+        records = _getFeedbackTimeDistribution(items, query.where.createdAt.$gte, query.where.createdAt.$lte);
       } else if (query.analyticsType === 'attributes_chart') {
         records = _getAttributesChart(items);
       } else if (query.analyticsType === 'skills_chart') {
@@ -131,9 +132,16 @@ async function _getFeedbackTable(items) {
   return records;
 }
 
-function _getFeedbackTimeDistribution(items) {
+function _getFeedbackTimeDistribution(items, start, end) {
   let dateGroupsMap = new Map();
+  // fill map with empty dates
+  const startDate = moment(new Date(start)).subtract(1, 'days').startOf('day');
+  const endDate = moment(new Date(end)).startOf('day');
+  while(startDate.add(1, 'days').diff(endDate) < 1) {
+    dateGroupsMap.set(startDate.clone().format('YYYY-MM-DD'), 0);
+  }
   let totalCount = 0;
+  // now go through the actual items
   for (let i = 0; i < items.length; i++) {
     let item = items[i].get();
     if (dateGroupsMap.has(item.createdAt)) {
@@ -146,9 +154,9 @@ function _getFeedbackTimeDistribution(items) {
     totalCount += Number(item.count);
   }
   let records = [];
-  for (let [createdAt, count] of dateGroupsMap) {
+  for (let [date, count] of dateGroupsMap) {
     records.push({
-      createdAt,
+      date,
       count,
       percent: (Number(count) / totalCount) * 100
     });
