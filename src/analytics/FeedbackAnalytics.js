@@ -135,16 +135,11 @@ async function _getFeedbackTable(items) {
 function _getFeedbackTimeDistribution(items, start, end) {
   let dateGroupsMap = new Map();
   // fill map with empty dates
-  console.log("start: ", start);
-  console.log("end: ", end);
   const startDate = moment(new Date(start)).subtract(1, 'days').startOf('day');
-  console.log("startDate: ", startDate);
   const endDate = moment(new Date(end)).startOf('day');
-  console.log("endDate: ", endDate);
   while(startDate.add(1, 'days').diff(endDate) < 1) {
-    console.log(startDate.toDate());
     //dateGroupsMap.set(startDate.clone().toDate(), 0);
-    dateGroupsMap.set(startDate.clone().format('YYYY-M-D'), 0);
+    dateGroupsMap.set(startDate.clone().format('YYYY-MM-DD'), 0);
   }
   let totalCount = 0;
   for (let i = 0; i < items.length; i++) {
