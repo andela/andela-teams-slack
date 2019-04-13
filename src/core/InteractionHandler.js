@@ -197,9 +197,16 @@ async function _handleRecordFeedbackDialog(req) {
 }
 
 async function _handleFeedbackAnalyticsDialog(req) {
-  //let returnUrl = `https://${req.get('host')}/ui/analytics/feedback`;
   let returnUrl = `https://andela-teams.herokuapp.com`;
   let submission = req.payload.submission;
+  // check for date correctness
+  if (submission.analytics_end_date <= submission.analytics_start_date) {
+    await slack.chat.postEphemeralOrDM(
+      'The \'To\' date should be ahead of the \'From\' date',
+      req.payload.channel.id,
+      req.payload.user.id);
+    return;
+  }
   let to, type;
   if (submission.feedback_target_user) {
     to = [];
