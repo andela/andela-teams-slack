@@ -200,6 +200,8 @@ async function _handleFeedbackAnalyticsDialog(req) {
   let returnUrl = `https://andela-teams.herokuapp.com`;
   let submission = req.payload.submission;
   // check for date correctness
+  console.log(submission.analytics_start_date)
+  console.log(submission.analytics_end_date)
   if (submission.analytics_end_date <= submission.analytics_start_date) {
     await slack.chat.postEphemeralOrDM(
       'The \'To\' date should be ahead of the \'From\' date',
