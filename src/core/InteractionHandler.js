@@ -225,8 +225,8 @@ async function _handleFeedbackAnalyticsDialog(req) {
       to,
       type,
       createdAt: { 
-        $gte: new Date(submission.analytics_start_date),
-        $lte: new Date(submission.analytics_end_date)
+        $gte: new Date(submission.analytics_start_date + 'T00:00:00Z'),
+        $lte: new Date(submission.analytics_end_date + 'T23:59:59Z')
       }
     },
     analyticsType: submission.analytics_type
