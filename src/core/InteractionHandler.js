@@ -202,7 +202,7 @@ async function _handleFeedbackAnalyticsDialog(req) {
   // check for date correctness
   if (submission.analytics_end_date <= submission.analytics_start_date) {
     await slack.chat.postEphemeralOrDM(
-      'The \'To\' date should be ahead of the \'From\' date',
+      'The \'To\' date must be ahead of the \'From\' date',
       req.payload.channel.id,
       req.payload.user.id);
     return;
