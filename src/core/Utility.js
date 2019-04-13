@@ -1,54 +1,8 @@
-import Github from '../integrations/Github';
-import models from '../models';
-import PivotalTracker from '../integrations/PivotalTracker';
 import Slack from '../integrations/Slack';
 
-const github = new Github();
-const pivotal = new PivotalTracker();
 const slack = new Slack();
 
 export default class Utility {
-  async addOrRemoveUser(url, user, userId, channelId, addUser = false) {
-    // ensure the link was created by this app by checking the database
-    const existingResource = await models.Resource.findOne({
-      where: { url }
-    });
-    if (!existingResource) {
-      // no need to await the promise
-      slack.chat.postEphemeralOrDM(
-        `The resource ${url} was not created using Andela Teams.`,
-        channelId,
-        userId);
-      return;
-    }
-
-    if (url.endsWith('/')) {
-      url = url.substring(0, url.length - 1);
-    }
-    if (addUser) {
-      if (url.includes(`github.com/`)) {
-        let repo = url.substring(url.lastIndexOf('/') + 1);
-        let permission = user.is_sims_facilitator ? 'admin' : 'push';
-        await github.repo.addUser(user.github_user_name, repo, { permission });
-      } else if (url.includes('pivotaltracker.com/')) {
-        let projId = url.substring(url.lastIndexOf('/') + 1);
-        let role = user.is_sims_facilitator ? 'owner' : 'member';
-        await pivotal.project.addUser(user.email, projId, { role });
-      }
-      await slack.chat.postEphemeralOrDM(`Confirm you have been added to ${url}`, channelId, userId);
-      return;
-    } else {
-      if (url.includes(`github.com/`)) {
-        let repo = url.substring(url.lastIndexOf('/') + 1);
-        await github.repo.removeUser(user.github_user_name, repo);
-      } else if (url.includes('pivotaltracker.com/')) {
-        let projId = url.substring(url.lastIndexOf('/') + 1);
-        await pivotal.project.removeUser(user.email, projId);
-      }
-      await slack.chat.postEphemeralOrDM(`Confirm you have been removed from ${url}`, channelId, userId);
-      return;
-    }
-  }
   async getUserObjectFromReqBodyEventUser(req, res, next) {
     try {
       var user = await slack.resolver.getUserProfileObject(req.body.event.user);
@@ -82,11 +36,7 @@ export default class Utility {
     try {
       if (err) {
         let channelId, userId;
-        if (req.body.event
-          && req.body.event.reaction === 'add_me') {
-          channelId = req.body.event.item.channel;
-          userId = req.body.event.user;
-        } else if (req.payload) {
+        if (req.payload) {
           channelId = req.payload.channel.id;
           userId = req.payload.user.id;
         } else if (req.body.channel_id && req.body.user_id) {
@@ -109,7 +59,7 @@ export default class Utility {
     next();
   }
   async postWelcomeMessage(req, res, next) {
-    res.status(200).send(':wave: Welcome to Andela Teams :welcome_:');
+    res.status(200).send(':wave: Welcome to Feedback Bot :welcome_:');
     next();
   }
   async rejectUsersWithNoEmailOrGithub(req, res, next) {
@@ -118,11 +68,7 @@ export default class Utility {
         next();
       } else {
         let channelId, userId;
-        if (req.body.event
-          && req.body.event.reaction === 'add_me') {
-          channelId = req.body.event.item.channel;
-          userId = req.body.event.user;
-        } else if (req.payload) {
+        if (req.payload) {
           channelId = req.payload.channel.id;
           userId = req.payload.user.id;
         } else if (req.body.channel_id && req.body.user_id) {

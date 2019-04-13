@@ -8,6 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Visual representation of analytics on feedback.
 
+## [2.0.0] - 2019-04-10
+### Deprecated
+- The ability to create Github repos or Pivotal Tracker projects has been moved to another app.
+- The ability to add users to (or remove users from) Github repos or Pivotal Tracker projects has been moved to another app.
+- The ability to see analytics on Pivotal Tracker has been moved to another app.
+
+## [1.0.1] - 2019-04-07
+### Changed
+- `:add_me:` reaction no longer supported.
+
 ## [1.0.0] - 2019-02-18
 ### Added
 - Add feedback type to the __Record Feedback__ dialog.
