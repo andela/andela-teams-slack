@@ -197,7 +197,7 @@ async function _handleRecordFeedbackDialog(req) {
 }
 
 async function _handleFeedbackAnalyticsDialog(req) {
-  let returnUrl = `https://andela-teams.herokuapp.com`;
+  let returnUrl = `https://feedback-stats.herokuapp.com`;
   let submission = req.payload.submission;
   // check for date correctness
   if (submission.analytics_end_date <= submission.analytics_start_date) {
@@ -225,8 +225,8 @@ async function _handleFeedbackAnalyticsDialog(req) {
       to,
       type,
       createdAt: { 
-        $gte: new Date(submission.analytics_start_date),
-        $lte: new Date(submission.analytics_end_date)
+        $gte: new Date(submission.analytics_start_date + 'T00:00:00Z'),
+        $lte: new Date(submission.analytics_end_date + 'T23:59:59Z')
       }
     },
     analyticsType: submission.analytics_type
