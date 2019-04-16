@@ -96,7 +96,7 @@ function _getAttributesChart(items) {
       percent: (Number(count) / totalCount) * 100
     });
   }
-  return records;
+  return records.sort((a, b) => b.count - a.count);
 }
 
 async function _getFeedbackTable(items) {
@@ -190,5 +190,5 @@ function _getSkillsChart(items) {
       percent: (Number(count) / totalCount) * 100
     });
   }
-  return records;
+  return records.sort((a, b) => b.count - a.count);
 }
