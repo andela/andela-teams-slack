@@ -197,7 +197,7 @@ async function _handleRecordFeedbackDialog(req) {
 }
 
 async function _handleFeedbackAnalyticsDialog(req) {
-  let returnUrl = `https://andela-teams.herokuapp.com`;
+  let returnUrl = `https://feedback-stats.herokuapp.com`;
   let submission = req.payload.submission;
   // check for date correctness
   if (submission.analytics_end_date <= submission.analytics_start_date) {
